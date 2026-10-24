@@ -1,0 +1,21 @@
+# UB-HMS web server rules (Apache on XAMPP).
+
+Options -Indexes
+DirectoryIndex index.php
+
+# Never serve internal files
+<FilesMatch "\.(sql|md|log|bak|sh|ps1|bat|ini|json|lock|example|gitignore|gitkeep)$">
+    Require all denied
+</FilesMatch>
+RedirectMatch 404 /\.git
+
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "DENY"
+    Header always set Referrer-Policy "same-origin"
+</IfModule>
+
+# Branded error pages
+ErrorDocument 403 /ub-hms/error.php?code=403
+ErrorDocument 404 /ub-hms/error.php?code=404
+ErrorDocument 500 /ub-hms/error.php?code=500

@@ -1,0 +1,17 @@
+# Local configuration and runtime files
+config/config.local.php
+storage/logs/*
+!storage/logs/.gitkeep
+storage/backups/*
+!storage/backups/.gitkeep
+storage/tmp/*
+!storage/tmp/.gitkeep
+
+# Editor and OS files
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store
+
+# Test artefacts
+tests/output/
