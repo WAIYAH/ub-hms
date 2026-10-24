@@ -9,6 +9,11 @@
     confirms that internal files are refused, branded error pages appear and the application runs.
     Results are saved to tests\output\apache-results.txt.
 
+.PARAMETER Perf
+    After the checks, measure response times with Apache's ab tool for the main pages (one user, then
+    ten users at the same time) and save them to tests\output\perf-results.txt. Run tests\perf_seed.php
+    on the database first so that the tables hold a realistic volume.
+
 .EXAMPLE
     $env:UBHMS_DB_PORT = '3306'; powershell -ExecutionPolicy Bypass -File tests\apache_check.ps1
 #>
@@ -17,7 +22,8 @@ param(
     [string]$XamppDir = 'C:\xampp',
     [int]   $Port     = 8090,
     [string]$DbPort   = $(if ($env:UBHMS_DB_PORT) { $env:UBHMS_DB_PORT } else { '3306' }),
-    [string]$DbName   = $(if ($env:UBHMS_DB_NAME) { $env:UBHMS_DB_NAME } else { 'uhai_bora_hms' })
+    [string]$DbName   = $(if ($env:UBHMS_DB_NAME) { $env:UBHMS_DB_NAME } else { 'uhai_bora_hms' }),
+    [switch]$Perf
 )
 
 $ErrorActionPreference = 'Stop'
@@ -136,6 +142,84 @@ try {
     Record (($code -eq '303') -and ($dash -match 'Welcome')) 'APA-022' 'A demonstration doctor can sign in and open the dashboard through Apache'
     $denied = & curl.exe -s -o NUL -w '%{http_code}' -b $jar "http://127.0.0.1:$Port/ub-hms/admin/users.php"
     Record ($denied -eq '403') 'APA-023' 'Role-based access works through Apache: a doctor is refused the user accounts page (403)'
+
+    if ($Perf) {
+        $ab = Join-Path $XamppDir 'apache\bin\ab.exe'
+        if (-not (Test-Path $ab)) { throw "ab.exe not found at $ab" }
+        $perfFile = Join-Path $out 'perf-results.txt'
+        $cpu = (Get-CimInstance Win32_Processor | Select-Object -First 1)
+        $ramGb = [math]::Round((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1GB, 1)
+        $dbVersion = ''
+        try { $dbVersion = (& "$XamppDir\mysql\bin\mysql.exe" -h 127.0.0.1 -P $DbPort -u root -N -e 'SELECT VERSION()') } catch { }
+        $header = @(
+            "UB-HMS response times measured through Apache ($(Get-Date -Format 'yyyy-MM-dd HH:mm'))",
+            "Computer: $($cpu.Name.Trim()), $($cpu.NumberOfCores) cores, $ramGb GB RAM; database $dbVersion on port $DbPort, database $DbName",
+            "Each row: mean and 95th-percentile time to serve one page, for one user and for ten users working at the same time (each with their own session, no pause between requests); errors = responses that were not 2xx.",
+            ''
+        )
+        Set-Content -Path $perfFile -Value $header -Encoding ascii
+
+        function Sign-In($username) {
+            $jarU = Join-Path $work "jar_$username.txt"
+            if (Test-Path $jarU) { Remove-Item $jarU }
+            $pg = (& curl.exe -s -c $jarU -b $jarU "http://127.0.0.1:$Port/ub-hms/login.php") -join "`n"
+            $tok = [regex]::Match($pg, 'name="_csrf" value="([^"]+)"').Groups[1].Value
+            & curl.exe -s -o NUL -c $jarU -b $jarU --data-urlencode "_csrf=$tok" --data-urlencode "username=$username" --data-urlencode 'password=UbHms#Demo2026' "http://127.0.0.1:$Port/ub-hms/login.php"
+            $line = Get-Content $jarU | Where-Object { $_ -match 'UBHMSSESSID' } | Select-Object -Last 1
+            if (-not $line) { throw "Could not sign in as $username" }
+            return (($line -split "`t")[-1]).Trim()
+        }
+        # Ten people work at the same time, each with their own session (one shared session would make
+        # PHP queue the requests behind its session lock, which real users do not experience).
+        function Measure-Page($label, $username, $path, $requests) {
+            $cookies = 1..10 | ForEach-Object { Sign-In $username }
+            $cells = @()
+            foreach ($users in 1, 10) {
+                $each = [math]::Max(4, [int][math]::Ceiling($requests / $users))
+                $jobs = @()
+                for ($i = 0; $i -lt $users; $i++) {
+                    $tsv = Join-Path $work ("ab_{0}_{1}.tsv" -f $users, $i)
+                    $txt = Join-Path $work ("ab_{0}_{1}.txt" -f $users, $i)
+                    $jobs += [pscustomobject]@{
+                        tsv = $tsv; txt = $txt
+                        proc = Start-Process -FilePath $ab -ArgumentList '-n', $each, '-c', 1, '-g', $tsv, '-C', "UBHMSSESSID=$($cookies[$i])", "http://127.0.0.1:$Port$path" -NoNewWindow -PassThru -RedirectStandardOutput $txt
+                    }
+                }
+                $jobs.proc | Wait-Process
+                $times = @(); $bad = 0
+                foreach ($j in $jobs) {
+                    $times += Import-Csv -Path $j.tsv -Delimiter "`t" | ForEach-Object { [double]$_.ttime }
+                    $m = [regex]::Match((Get-Content $j.txt -Raw), 'Non-2xx responses:\s+(\d+)')
+                    if ($m.Success) { $bad += [int]$m.Groups[1].Value }
+                }
+                $sorted = $times | Sort-Object
+                $mean = ($times | Measure-Object -Average).Average
+                $p95 = $sorted[[math]::Min($sorted.Count - 1, [int][math]::Floor($sorted.Count * 0.95))]
+                $cells += ('{0,6:N0} ms mean {1,6:N0} ms 95th  errors {2}/{3}' -f $mean, $p95, $bad, $sorted.Count)
+            }
+            $line = '{0,-46} 1 user: {1}   10 users: {2}' -f $label, $cells[0], $cells[1]
+            Write-Output $line
+            Add-Content -Path $perfFile -Value $line
+        }
+        $b = "/ub-hms"
+        Measure-Page 'PERF-01 Dashboard (receptionist)'              'reception1' "$b/index.php" 100
+        Measure-Page 'PERF-02 Patient search by surname (2,000 hits)' 'reception1' "$b/patients/index.php?q=Mutua" 60
+        Measure-Page 'PERF-03 Patient search by outpatient number'   'reception1' "$b/patients/index.php?q=OP25-12345" 100
+        Measure-Page 'PERF-04 Patient record with history'           'reception1' "$b/patients/view.php?id=5000" 100
+        Measure-Page 'PERF-05 Appointment diary (one day)'           'reception1' "$b/appointments/index.php" 100
+        Measure-Page 'PERF-06 Visit queue'                           'reception1' "$b/visits/queue.php" 100
+        Measure-Page 'PERF-07 Laboratory worklist'                   'lab1'       "$b/lab/index.php" 100
+        Measure-Page 'PERF-08 Doctor: my test results'               'doctor1'    "$b/lab/results.php" 100
+        Measure-Page 'PERF-09 Medicine stock list'                   'pharmacist1' "$b/pharmacy/stock.php" 100
+        Measure-Page 'PERF-10 Invoice search (30,000 invoices)'      'cashier1'   "$b/billing/index.php?q=INV-2025-0123&status=&open=0" 100
+        Measure-Page 'PERF-11 Attendance report, 14 days'            'manager1'   "$b/reports/attendance.php" 40
+        Measure-Page 'PERF-12 Revenue report, 14 days'               'manager1'   "$b/reports/revenue.php" 40
+        Measure-Page 'PERF-13 Revenue report, 20 months'             'manager1'   "$b/reports/revenue.php?from=2025-01-01&to=2026-10-31" 20
+        Measure-Page 'PERF-14 Stock report'                          'manager1'   "$b/reports/stock.php" 40
+        Measure-Page 'PERF-15 Laboratory report, 20 months'          'manager1'   "$b/reports/lab.php?from=2025-01-01&to=2026-10-31" 20
+        Measure-Page 'PERF-16 Audit trail (100,000 entries)'         'manager1'   "$b/admin/audit.php" 60
+        Write-Output "Saved to $perfFile"
+    }
 }
 finally {
     if ($proc -and -not $proc.HasExited) { Stop-Process -Id $proc.Id -Force }
