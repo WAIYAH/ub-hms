@@ -171,8 +171,8 @@ sec_sprint1() {
   check E2E-035 "Signing out ends the session" '[[ "$r" == 303* && "$(code rec patients/index.php)" == 303 ]]'
 
   # lockout over HTTP
-  for i in 1 2 3 4 5; do login lock manager1 "Wrong#Password$i" >/dev/null; done
-  r=$(login lock manager1 "$DEMO_PW")
+  for i in 1 2 3 4 5; do login lock reception2 "Wrong#Password$i" >/dev/null; done
+  r=$(login lock reception2 "$DEMO_PW")
   check E2E-036 "An account locked by five wrong passwords refuses the right password" 'body | grep -q "locked"'
 }
 
@@ -408,6 +408,81 @@ sec_sprint3() {
   h=$(get admin admin/audit.php)
   check E2E-114 "The audit trail records test results, dispensing and stock receipts" '[[ "$h" == *"dispense"* && "$h" == *"result"* && "$h" == *"receive"* ]]'
   check E2E-115 "The audit trail does not contain the lab result text" '[[ "$h" != *"Malaria parasites"* ]]'
+}
+
+# =====================================================================
+# SPRINT 4: billing, payments and reports
+# =====================================================================
+sec_sprint4() {
+  echo; echo "== Sprint 4: invoices, payments and reports"
+  local r h vid pid iid mgr
+
+  login mgr manager1 "$DEMO_PW" >/dev/null
+  # a fresh patient with a consultation (500), a malaria test (300) and an injection (150)
+  e2e_new_visit Neema Kerubo 32000004 ""; vid=$NEW_VID; pid=$NEW_PID
+  h=$(get doc "visits/consult.php?visit=$vid")
+  local testid; testid=$(echo "$h" | grep -o 'name="test_ids\[\]" value="[0-9]*"> Malaria' | grep -o 'value="[0-9]*"' | grep -o '[0-9]*')
+  form doc "visits/consult.php?visit=$vid" "visits/consult.php?visit=$vid" --data-urlencode "visit=$vid" --data-urlencode "action=add_lab" --data-urlencode "test_ids[]=$testid" >/dev/null
+  local svc; svc=$(echo "$h" | grep -o '<option value="[0-9]*">Injection administration' | grep -o '[0-9]*' | head -1)
+  form doc "visits/consult.php?visit=$vid" "visits/consult.php?visit=$vid" --data-urlencode "visit=$vid" --data-urlencode "action=service" --data-urlencode "service_id=$svc" --data-urlencode "quantity=1" >/dev/null
+
+  h=$(get cash "billing/index.php")
+  check E2E-120 "The cashier sees the new invoice in the list of unpaid invoices" '[[ "$h" == *"Neema Kerubo"* && "$h" == *"INV-"* ]]'
+  h=$(get cash "billing/invoice.php?visit=$vid")
+  iid=$(echo "$h" | grep -o 'name="invoice_id" value="[0-9]*"' | grep -o '[0-9]*')
+  check E2E-121 "The invoice was created automatically and lists each service with its price" '[[ "$h" == *"General consultation"* && "$h" == *"Malaria test"* && "$h" == *"Injection administration"* && "$h" == *"KSh 500.00"* ]]'
+  check E2E-122 "The invoice total is KSh 950.00 with the same balance due" '[[ "$h" == *"KSh 950.00"* && "$h" == *"Balance due"* ]]'
+  check E2E-123 "There is no way to edit a charge on the invoice (no price or quantity fields)" '[[ "$h" != *"name=\"unit_price\""* && "$h" != *"name=\"quantity\""* ]]'
+
+  r=$(post cash billing/pay.php --data-urlencode "invoice_id=$iid" --data-urlencode "method=Cash" --data-urlencode "amount=100")
+  check E2E-124 "A payment without a CSRF token is refused" '[[ "$r" == 419* ]]'
+  r=$(form cash "billing/invoice.php?id=$iid" billing/pay.php --data-urlencode "invoice_id=$iid" --data-urlencode "method=Cash" --data-urlencode "amount=2000")
+  check E2E-125 "Paying more than the balance is refused" 'get cash "billing/invoice.php?id=$iid" | grep -q "more than the balance"'
+  r=$(form cash "billing/invoice.php?id=$iid" billing/pay.php --data-urlencode "invoice_id=$iid" --data-urlencode "method=M-Pesa" --data-urlencode "amount=200" --data-urlencode "reference=BAD")
+  check E2E-126 "An M-Pesa payment needs a valid confirmation code" 'get cash "billing/invoice.php?id=$iid" | grep -q "10-character M-Pesa confirmation code"'
+  r=$(form cash "billing/invoice.php?id=$iid" billing/pay.php --data-urlencode "invoice_id=$iid" --data-urlencode "method=M-Pesa" --data-urlencode "amount=400" --data-urlencode "reference=QJK4H2M9XP")
+  check E2E-127 "A part-payment by M-Pesa is recorded and a receipt is shown" '[[ "$r" == 303* && "$r" == *receipt.php* ]]'
+  h=$(get cash "billing/invoice.php?id=$iid")
+  check E2E-128 "The invoice is now Partially paid with a balance of KSh 550.00" '[[ "$h" == *"Partially paid"* && "$h" == *"KSh 550.00"* && "$h" == *"QJK4H2M9XP"* ]]'
+  r=$(form cash "billing/invoice.php?id=$iid" billing/pay.php --data-urlencode "invoice_id=$iid" --data-urlencode "method=M-Pesa" --data-urlencode "amount=50" --data-urlencode "reference=QJK4H2M9XP")
+  check E2E-129 "The same M-Pesa code cannot be used twice" 'get cash "billing/invoice.php?id=$iid" | grep -q "already been used"'
+  r=$(form cash "billing/invoice.php?id=$iid" billing/pay.php --data-urlencode "invoice_id=$iid" --data-urlencode "method=Insurance" --data-urlencode "amount=550" --data-urlencode "reference=AAR/2026/0099")
+  h=$(get cash "billing/invoice.php?id=$iid")
+  check E2E-130 "The balance is cleared by an insurance payment and the invoice is Paid" '[[ "$h" == *"badge-paid"* && "$h" == *"This invoice is fully paid"* ]]'
+  r=$(form cash "billing/invoice.php?id=$iid" billing/pay.php --data-urlencode "invoice_id=$iid" --data-urlencode "method=Cash" --data-urlencode "amount=1")
+  check E2E-131 "A paid invoice accepts no further payment" 'get cash "billing/invoice.php?id=$iid" | grep -q "more than the balance" || ! get cash "billing/invoice.php?id=$iid" | grep -q "Take a payment"'
+  local payid; payid=$(get cash "billing/invoice.php?id=$iid" | grep -o 'receipt.php?id=[0-9]*' | head -1 | grep -o '[0-9]*$')
+  h=$(get cash "billing/receipt.php?id=$payid")
+  check E2E-132 "The receipt shows the receipt number, method, amount and who received it" '[[ "$h" == *"RCT-"* && "$h" == *"M-Pesa"* && "$h" == *"KSh 400.00"* && "$h" == *"Lucy Muthoni"* ]]'
+  h=$(get cash "billing/index.php")
+  check E2E-133 "The cashier's summary shows today's collections by method" '[[ "$h" == *"My collections today"* && "$h" == *"KSh 400.00"* && "$h" == *"KSh 550.00"* && "$h" == *"KSh 950.00"* ]]'
+
+  # access control
+  check E2E-134 "A manager can view invoices but there is no payment form" 'h=$(get mgr "billing/invoice.php?id=$iid"); [[ "$h" == *"Invoice INV-"* && "$h" != *"Take a payment"* ]]'
+  r=$(form mgr index.php billing/pay.php --data-urlencode "invoice_id=$iid" --data-urlencode "method=Cash" --data-urlencode "amount=1")
+  check E2E-135 "A manager cannot post a payment (403)" '[[ "$(code mgr billing/pay.php)" == 403 || "$r" == 403* ]]'
+  check E2E-136 "A doctor and a nurse cannot open invoices (403)" '[[ "$(code doc billing/index.php)" == 403 && "$(code nurse billing/index.php)" == 403 ]]'
+  check E2E-137 "A receptionist cannot open reports (403)" '[[ "$(code rec reports/revenue.php)" == 403 ]]'
+  check E2E-138 "A cashier cannot open reports (403)" '[[ "$(code cash reports/revenue.php)" == 403 ]]'
+
+  # reports
+  local today; today=$(date +%F)
+  h=$(get mgr "reports/revenue.php?from=$today&to=$today")
+  check E2E-139 "The revenue report shows billed, collected and the split by method" '[[ "$h" == *"Collected by payment method"* && "$h" == *"M-Pesa"* && "$h" == *"Insurance"* && "$h" == *"KSh 950.00"* ]]'
+  h=$(get mgr "reports/attendance.php?from=$today&to=$today")
+  check E2E-140 "The attendance report shows visits and new patients for the day" '[[ "$h" == *"Total visits"* && "$h" == *"New patients"* ]]'
+  h=$(get mgr "reports/lab.php?from=$today&to=$today")
+  check E2E-141 "The laboratory report lists the malaria test and the requesting doctor" '[[ "$h" == *"Malaria test"* && "$h" == *"Dr. Samuel Kamau"* ]]'
+  h=$(get mgr "reports/stock.php?from=$today&to=$today")
+  check E2E-142 "The stock report shows Paracetamol received and dispensed today" '[[ "$h" == *"Paracetamol"* && "$h" == *"Value of usable stock"* ]]'
+  r=$(curl -s -D - -o "$J/rev.csv" -b "$J/mgr" "$B/reports/revenue.php?from=$today&to=$today&format=csv")
+  check E2E-143 "The revenue report downloads as a CSV file" '[[ "$r" == *"text/csv"* && "$r" == *"attachment"* ]] && head -c 200 "$J/rev.csv" | grep -q "Billed"'
+  check E2E-144 "The CSV contains the collected total" 'grep -q "Collected by M-Pesa" "$J/rev.csv"'
+  h=$(get admin admin/audit.php)
+  check E2E-145 "The audit trail records payments and report exports" '[[ "$h" == *"payment"* && "$h" == *"export"* ]]'
+  check E2E-146 "The audit trail does not repeat the M-Pesa code" '[[ "$h" != *"QJK4H2M9XP"* ]]'
+  h=$(get mgr index.php)
+  check E2E-147 "The manager's dashboard shows revenue and stock alerts" '[[ "$h" == *"Collected today"* && "$h" == *"Unpaid balances"* ]]'
 }
 
 # Later sprints add their own sec_* functions above this line.
