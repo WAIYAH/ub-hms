@@ -1,0 +1,1 @@
+{"name":"ubhms-doc-build","private":true,"version":"1.0.0","description":"Tools that draw the diagrams used in the project documents","dependencies":{"@hpcc-js/wasm":"^2.20.0","sharp":"^0.33.5"}}

@@ -1,0 +1,29 @@
+digraph ctx {
+  graph [fontname="Arial", fontsize=13, bgcolor="white", pad="0.15"];
+  node  [fontname="Arial", fontsize=13, color="black", fontcolor="black"];
+  edge  [fontname="Arial", fontsize=11, color="black", fontcolor="black", arrowsize=0.8];
+
+  rankdir=LR; nodesep=0.3; ranksep=1.9;
+  node [shape=box, style="bold", penwidth=1.6, margin="0.18,0.1"];
+  REC [label="Receptionist /\nRecords clerk"]; NUR [label="Nurse"]; DOC [label="Doctor /\nClinical officer"]; LAB [label="Laboratory\ntechnologist"];
+  PHA [label="Pharmacist"]; CAS [label="Cashier /\nBilling clerk"]; MGR [label="Hospital\nmanager"]; ADM [label="System\nadministrator"];
+  P0 [shape=circle, penwidth=2.2, width=2.7, label="0\nUhai Bora Hospital\nManagement System\n(UB-HMS)"];
+  REC -> P0 [label="patient details,\nbookings, check-in"];
+  P0 -> REC [label="outpatient number,\ndiary, queues"];
+  NUR -> P0 [label="vital signs,\nprocedures done"];
+  P0 -> NUR [label="triage queue,\nallergy alerts"];
+  DOC -> P0 [label="consultation, test\nrequests, prescriptions"];
+  P0 -> DOC [label="patient history,\ntest results, stock"];
+  LAB -> P0 [label="test results"];
+  P0 -> LAB [label="test worklist"];
+  P0 -> PHA [label="prescriptions,\nstock alerts"];
+  PHA -> P0 [label="dispensing, stock\nreceived, medicine list", constraint=false];
+  P0 -> CAS [label="invoices,\nreceipts"];
+  CAS -> P0 [label="payments", constraint=false];
+  P0 -> MGR [label="management reports,\naudit trail"];
+  MGR -> P0 [label="report requests", constraint=false];
+  P0 -> ADM [label="audit trail,\nsystem health"];
+  ADM -> P0 [label="accounts, prices,\nbackup", constraint=false];
+  {rank=same; REC; NUR; DOC; LAB;}
+  {rank=same; PHA; CAS; MGR; ADM;}
+}

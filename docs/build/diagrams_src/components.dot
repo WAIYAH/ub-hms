@@ -1,0 +1,18 @@
+digraph comp {
+  graph [fontname="Arial", fontsize=13, bgcolor="white", pad="0.15"];
+  node  [fontname="Arial", fontsize=13, color="black", fontcolor="black"];
+  edge  [fontname="Arial", fontsize=11, color="black", fontcolor="black", arrowsize=0.8];
+
+  rankdir=TB; nodesep=0.25; ranksep=0.55; compound=true;
+  node [shape=box, style="rounded", margin="0.1,0.07", fontsize=12];
+  subgraph cluster_pages { label=<<B>Pages: what the browser asks for</B>>; style="rounded";
+    pg1 [label="login, logout,\npassword, index"]; pg2 [label="patients/\nappointments/\nvisits/"]; pg3 [label="lab/\npharmacy/"]; pg4 [label="billing/\nreports/"]; pg5 [label="admin/"]; {rank=same; pg1; pg2; pg3; pg4; pg5;} }
+  subgraph cluster_rules { label=<<B>includes/: business rules, one file per module</B>>; style="rounded";
+    r1 [label="patients.php\nappointments.php"]; r2 [label="clinical.php\norders.php"]; r3 [label="laboratory.php\npharmacy.php"]; r4 [label="billing.php\nreports.php"]; r5 [label="users.php, health.php\ndashboard.php"]; {rank=same; r1; r2; r3; r4; r5;} }
+  subgraph cluster_core { label=<<B>includes/: shared code</B>>; style="rounded";
+    c1 [label="bootstrap.php\nheaders, session,\nerror handling"]; c2 [label="auth.php, csrf.php,\naudit.php\nsecurity layer"]; c3 [label="helpers.php,\nlayout.php\nforms and page frame"]; c4 [label="db.php\nPDO helpers,\ntransactions"]; {rank=same; c1; c2; c3; c4;} }
+  subgraph cluster_db { label=<<B>MariaDB</B>>; style="rounded"; db [shape=cylinder, label="uhai_bora_hms\n22 tables"]; }
+  subgraph cluster_ops { label=<<B>Operations</B>>; style="rounded,dashed"; o1 [label="database/\ninstall.php\nschema.sql"]; o2 [label="scripts/\nbackup.ps1\nrestore.ps1"]; o3 [label="tests/\nrun_tests.php\ne2e.sh"]; {rank=same; o1; o2; o3;} }
+  pg3 -> r3 [ltail=cluster_pages, lhead=cluster_rules]; r3 -> c3 [ltail=cluster_rules, lhead=cluster_core]; c4 -> db [dir=both, ltail=cluster_core];
+  o2 -> db [style=dashed]; o1 -> db [style=dashed]; o3 -> db [style=dashed];
+}

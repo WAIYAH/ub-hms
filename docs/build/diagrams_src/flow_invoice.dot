@@ -1,0 +1,35 @@
+digraph invoice {
+  graph [fontname="Arial", fontsize=13, bgcolor="white", pad="0.15"];
+  node  [fontname="Arial", fontsize=13, color="black", fontcolor="black"];
+  edge  [fontname="Arial", fontsize=11, color="black", fontcolor="black", arrowsize=0.8];
+  rankdir=TB; nodesep=0.3; ranksep=0.24;
+  node [fontsize=12, margin="0.1,0.05"];
+  edge [fontsize=11];
+  s [shape=box, style="rounded,bold", penwidth=1.5, label="Start: a service is recorded (consultation, test, medicine given or procedure)"];
+  t [shape=box, label="Begin a transaction; lock the\nvisit's invoice"];
+  l [shape=box, label="List everything the visit\nshould be charged for, from\nthe clinical, laboratory and\npharmacy records"];
+  d0 [shape=diamond, margin="0.0,0.0", label="Invoice exists, or\nsomething to charge?"];
+  z [shape=box, style="rounded,bold", penwidth=1.5, label="End (no invoice yet)"];
+  cr [shape=box, label="Create the invoice if new:\nnumber INV-yyyy-nnnnnn and an\naudit entry"];
+  ch [shape=box, label="For each charge: add it if\nnew; if a payment has already\nbeen taken update the quantity\nonly, otherwise update\ndescription, quantity and\nprice"];
+  rm [shape=box, label="Delete lines whose source no\nlonger exists (a cancelled\ntest)"];
+  tot [shape=box, label="Recalculate the total"];
+  d5 [shape=diamond, margin="0.0,0.0", label="Total below the\namount already paid?"];
+  rb [shape=box, label="Roll back and refuse"];
+  stt [shape=box, label="Set the status: Unpaid,\nPartially paid or Paid; commit"];
+  f [shape=box, style="rounded,bold", penwidth=1.5, label="End"];
+  {rank=same; d0; z;}
+  {rank=same; d5; rb;}
+  s -> t;
+  t -> l;
+  l -> d0;
+  d0 -> z [label="no"];
+  d0 -> cr [label="yes"];
+  cr -> ch;
+  ch -> rm;
+  rm -> tot;
+  tot -> d5;
+  d5 -> rb [label="yes"];
+  d5 -> stt [label="no"];
+  stt -> f;
+}

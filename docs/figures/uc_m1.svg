@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="540" height="668" viewBox="0 0 540 668" font-family="Arial">
+<defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="black"/></marker></defs>
+<rect x="0" y="0" width="540" height="668" fill="white"/>
+<rect x="118" y="36" width="304" height="624" fill="none" stroke="black" stroke-width="1.6"/>
+<text x="270.0" y="22" font-size="13" font-weight="bold" text-anchor="middle">UB-HMS: Module 1: patient registration and appointments</text>
+<circle cx="52" cy="336.85714285714283" r="8" fill="white" stroke="black" stroke-width="1.5"/><line x1="52" y1="344.85714285714283" x2="52" y2="366.85714285714283" stroke="black" stroke-width="1.5"/><line x1="38" y1="353.85714285714283" x2="66" y2="353.85714285714283" stroke="black" stroke-width="1.5"/><line x1="52" y1="366.85714285714283" x2="41" y2="384.85714285714283" stroke="black" stroke-width="1.5"/><line x1="52" y1="366.85714285714283" x2="63" y2="384.85714285714283" stroke="black" stroke-width="1.5"/><text x="52" y="400.85714285714283" font-size="11" text-anchor="middle" font-family="Arial">Receptionist</text>
+<circle cx="488" cy="359.0" r="8" fill="white" stroke="black" stroke-width="1.5"/><line x1="488" y1="367.0" x2="488" y2="389.0" stroke="black" stroke-width="1.5"/><line x1="474" y1="376.0" x2="502" y2="376.0" stroke="black" stroke-width="1.5"/><line x1="488" y1="389.0" x2="477" y2="407.0" stroke="black" stroke-width="1.5"/><line x1="488" y1="389.0" x2="499" y2="407.0" stroke="black" stroke-width="1.5"/><text x="488" y="423.0" font-size="11" text-anchor="middle" font-family="Arial">Doctor</text>
+<circle cx="488" cy="464.0" r="8" fill="white" stroke="black" stroke-width="1.5"/><line x1="488" y1="472.0" x2="488" y2="494.0" stroke="black" stroke-width="1.5"/><line x1="474" y1="481.0" x2="502" y2="481.0" stroke="black" stroke-width="1.5"/><line x1="488" y1="494.0" x2="477" y2="512.0" stroke="black" stroke-width="1.5"/><line x1="488" y1="494.0" x2="499" y2="512.0" stroke="black" stroke-width="1.5"/><text x="488" y="528.0" font-size="11" text-anchor="middle" font-family="Arial">Nurse</text>
+<line x1="58" y1="356.85714285714283" x2="142.0" y2="100" stroke="black" stroke-width="1"/>
+<line x1="58" y1="356.85714285714283" x2="142.0" y2="224" stroke="black" stroke-width="1"/>
+<line x1="482" y1="484.0" x2="398.0" y2="224" stroke="black" stroke-width="1"/>
+<line x1="482" y1="379.0" x2="398.0" y2="224" stroke="black" stroke-width="1"/>
+<line x1="58" y1="356.85714285714283" x2="142.0" y2="286" stroke="black" stroke-width="1"/>
+<line x1="58" y1="356.85714285714283" x2="142.0" y2="348" stroke="black" stroke-width="1"/>
+<line x1="58" y1="356.85714285714283" x2="142.0" y2="410" stroke="black" stroke-width="1"/>
+<line x1="58" y1="356.85714285714283" x2="142.0" y2="534" stroke="black" stroke-width="1"/>
+<line x1="482" y1="379.0" x2="398.0" y2="534" stroke="black" stroke-width="1"/>
+<line x1="482" y1="484.0" x2="398.0" y2="534" stroke="black" stroke-width="1"/>
+<line x1="58" y1="356.85714285714283" x2="142.0" y2="596" stroke="black" stroke-width="1"/>
+<line x1="310.0" y1="123" x2="310.0" y2="138" stroke="black" stroke-width="1.1" stroke-dasharray="5,3" marker-end="url(#arr)"/>
+<text x="316.0" y="135.0" font-size="10" font-style="italic">&#171;include&#187;</text>
+<line x1="310.0" y1="433" x2="310.0" y2="448" stroke="black" stroke-width="1.1" stroke-dasharray="5,3" marker-end="url(#arr)"/>
+<text x="316.0" y="445.0" font-size="10" font-style="italic">&#171;include&#187;</text>
+<ellipse cx="270.0" cy="100" rx="128" ry="23" fill="white" stroke="black" stroke-width="1.3" stroke-dasharray="0"/>
+<text x="270.0" y="104.0" font-size="12" text-anchor="middle">UC-09 Register patient</text>
+<ellipse cx="270.0" cy="162" rx="128" ry="23" fill="white" stroke="black" stroke-width="1.3"/>
+<text x="270.0" y="166.0" font-size="12" text-anchor="middle">Check for duplicate patients</text>
+<ellipse cx="270.0" cy="224" rx="128" ry="23" fill="white" stroke="black" stroke-width="1.3" stroke-dasharray="0"/>
+<text x="270.0" y="228.0" font-size="12" text-anchor="middle">UC-10 Search patients</text>
+<ellipse cx="270.0" cy="286" rx="128" ry="23" fill="white" stroke="black" stroke-width="1.3" stroke-dasharray="0"/>
+<text x="270.0" y="290.0" font-size="12" text-anchor="middle">UC-11 Correct patient details</text>
+<ellipse cx="270.0" cy="348" rx="128" ry="23" fill="white" stroke="black" stroke-width="1.3" stroke-dasharray="0"/>
+<text x="270.0" y="345.5" font-size="12" text-anchor="middle">UC-12 Import patients from a</text>
+<text x="270.0" y="358.5" font-size="12" text-anchor="middle">CSV file</text>
+<ellipse cx="270.0" cy="410" rx="128" ry="23" fill="white" stroke="black" stroke-width="1.3" stroke-dasharray="0"/>
+<text x="270.0" y="414.0" font-size="12" text-anchor="middle">UC-13 Book appointment</text>
+<ellipse cx="270.0" cy="472" rx="128" ry="23" fill="white" stroke="black" stroke-width="1.3"/>
+<text x="270.0" y="476.0" font-size="12" text-anchor="middle">Check that the slot is free</text>
+<ellipse cx="270.0" cy="534" rx="128" ry="23" fill="white" stroke="black" stroke-width="1.3" stroke-dasharray="0"/>
+<text x="270.0" y="531.5" font-size="12" text-anchor="middle">UC-14 View the appointment</text>
+<text x="270.0" y="544.5" font-size="12" text-anchor="middle">diary</text>
+<ellipse cx="270.0" cy="596" rx="128" ry="23" fill="white" stroke="black" stroke-width="1.3" stroke-dasharray="0"/>
+<text x="270.0" y="593.5" font-size="12" text-anchor="middle">UC-15 Cancel or mark an</text>
+<text x="270.0" y="606.5" font-size="12" text-anchor="middle">appointment missed</text>
+</svg>

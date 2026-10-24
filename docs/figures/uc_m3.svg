@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="540" height="544" viewBox="0 0 540 544" font-family="Arial">
+<defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="black"/></marker></defs>
+<rect x="0" y="0" width="540" height="544" fill="white"/>
+<rect x="118" y="36" width="304" height="500" fill="none" stroke="black" stroke-width="1.6"/>
+<text x="270.0" y="22" font-size="13" font-weight="bold" text-anchor="middle">UB-HMS: Module 3: laboratory management</text>
+<circle cx="52" cy="183.33333333333334" r="8" fill="white" stroke="black" stroke-width="1.5"/><line x1="52" y1="191.33333333333334" x2="52" y2="213.33333333333334" stroke="black" stroke-width="1.5"/><line x1="38" y1="200.33333333333334" x2="66" y2="200.33333333333334" stroke="black" stroke-width="1.5"/><line x1="52" y1="213.33333333333334" x2="41" y2="231.33333333333334" stroke="black" stroke-width="1.5"/><line x1="52" y1="213.33333333333334" x2="63" y2="231.33333333333334" stroke="black" stroke-width="1.5"/><text x="52" y="247.33333333333334" font-size="11" text-anchor="middle" font-family="Arial">Doctor</text>
+<circle cx="488" cy="390.0" r="8" fill="white" stroke="black" stroke-width="1.5"/><line x1="488" y1="398.0" x2="488" y2="420.0" stroke="black" stroke-width="1.5"/><line x1="474" y1="407.0" x2="502" y2="407.0" stroke="black" stroke-width="1.5"/><line x1="488" y1="420.0" x2="477" y2="438.0" stroke="black" stroke-width="1.5"/><line x1="488" y1="420.0" x2="499" y2="438.0" stroke="black" stroke-width="1.5"/><text x="488" y="454.0" font-size="11" text-anchor="middle" font-family="Arial">Laboratory</text><text x="488" y="467.0" font-size="11" text-anchor="middle" font-family="Arial">technologist</text>
+<line x1="58" y1="203.33333333333334" x2="142.0" y2="100" stroke="black" stroke-width="1"/>
+<line x1="58" y1="203.33333333333334" x2="142.0" y2="224" stroke="black" stroke-width="1"/>
+<line x1="58" y1="203.33333333333334" x2="142.0" y2="286" stroke="black" stroke-width="1"/>
+<line x1="482" y1="410.0" x2="398.0" y2="348" stroke="black" stroke-width="1"/>
+<line x1="482" y1="410.0" x2="398.0" y2="410" stroke="black" stroke-width="1"/>
+<line x1="482" y1="410.0" x2="398.0" y2="472" stroke="black" stroke-width="1"/>
+<line x1="310.0" y1="123" x2="310.0" y2="138" stroke="black" stroke-width="1.1" stroke-dasharray="5,3" marker-end="url(#arr)"/>
+<text x="316.0" y="135.0" font-size="10" font-style="italic">&#171;include&#187;</text>
+<ellipse cx="270.0" cy="100" rx="128" ry="23" fill="white" stroke="black" stroke-width="1.3" stroke-dasharray="0"/>
+<text x="270.0" y="104.0" font-size="12" text-anchor="middle">UC-23 Request laboratory tests</text>
+<ellipse cx="270.0" cy="162" rx="128" ry="23" fill="white" stroke="black" stroke-width="1.3"/>
+<text x="270.0" y="159.5" font-size="12" text-anchor="middle">Add the test price to the</text>
+<text x="270.0" y="172.5" font-size="12" text-anchor="middle">invoice</text>
+<ellipse cx="270.0" cy="224" rx="128" ry="23" fill="white" stroke="black" stroke-width="1.3" stroke-dasharray="0"/>
+<text x="270.0" y="228.0" font-size="12" text-anchor="middle">UC-24 Cancel a test request</text>
+<ellipse cx="270.0" cy="286" rx="128" ry="23" fill="white" stroke="black" stroke-width="1.3" stroke-dasharray="0"/>
+<text x="270.0" y="290.0" font-size="12" text-anchor="middle">UC-25 View my test results</text>
+<ellipse cx="270.0" cy="348" rx="128" ry="23" fill="white" stroke="black" stroke-width="1.3" stroke-dasharray="0"/>
+<text x="270.0" y="345.5" font-size="12" text-anchor="middle">UC-26 View the laboratory</text>
+<text x="270.0" y="358.5" font-size="12" text-anchor="middle">worklist</text>
+<ellipse cx="270.0" cy="410" rx="128" ry="23" fill="white" stroke="black" stroke-width="1.3" stroke-dasharray="0"/>
+<text x="270.0" y="414.0" font-size="12" text-anchor="middle">UC-27 Start a test</text>
+<ellipse cx="270.0" cy="472" rx="128" ry="23" fill="white" stroke="black" stroke-width="1.3" stroke-dasharray="0"/>
+<text x="270.0" y="469.5" font-size="12" text-anchor="middle">UC-28 Enter or correct a</text>
+<text x="270.0" y="482.5" font-size="12" text-anchor="middle">result</text>
+</svg>

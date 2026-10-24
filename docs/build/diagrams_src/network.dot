@@ -1,0 +1,17 @@
+digraph net {
+  graph [fontname="Arial", fontsize=13, bgcolor="white", pad="0.15"];
+  node  [fontname="Arial", fontsize=13, color="black", fontcolor="black"];
+  edge  [fontname="Arial", fontsize=11, color="black", fontcolor="black", arrowsize=0.8];
+
+  rankdir=TB; nodesep=0.28; ranksep=0.75;
+  node [shape=box, margin="0.14,0.08", fontsize=12];
+  UPS [shape=ellipse, label="UPS\n(backup power)"]; SRV [label="Server computer\nXAMPP: Apache, PHP 8,\nMariaDB; UB-HMS and\nits database", style="bold", penwidth=1.8]; BK [shape=cylinder, label="External hard disk\n(copy of backups)"];
+  SW [shape=box, style="bold", penwidth=1.8, label="Network switch (wired hospital LAN)"];
+  W1 [label="Reception\nPC"]; W2 [label="Triage\nPC"]; W3 [label="Doctors'\nPCs"]; W4 [label="Laboratory\nPC"]; W5 [label="Pharmacy\nPC"]; W6 [label="Cashier\nPC"]; W7 [label="Manager's\nPC"]; W8 [label="Administrator's\nPC"];
+  P1 [shape=note, label="Office\nprinter"]; P2 [shape=note, label="Office\nprinter"]; P3 [shape=note, label="Receipt\nprinter"];
+  {rank=same; UPS; SRV; BK;} {rank=same; W1; W2; W3; W4; W5; W6; W7; W8;} {rank=same; P1; P2; P3;}
+  UPS -> SRV [dir=none, style=dashed, label=" power"]; SRV -> BK [dir=none, style=dashed, label=" copy"];
+  SRV -> SW [dir=none, penwidth=1.8];
+  SW -> W1 [dir=none]; SW -> W2 [dir=none]; SW -> W3 [dir=none]; SW -> W4 [dir=none]; SW -> W5 [dir=none]; SW -> W6 [dir=none]; SW -> W7 [dir=none]; SW -> W8 [dir=none];
+  W1 -> P1 [dir=none, style=dotted]; W5 -> P2 [dir=none, style=dotted]; W6 -> P3 [dir=none, style=dotted];
+}

@@ -1,0 +1,34 @@
+digraph lab {
+  graph [fontname="Arial", fontsize=13, bgcolor="white", pad="0.15"];
+  node  [fontname="Arial", fontsize=13, color="black", fontcolor="black"];
+  edge  [fontname="Arial", fontsize=11, color="black", fontcolor="black", arrowsize=0.8];
+  rankdir=TB; nodesep=0.3; ranksep=0.24;
+  node [fontsize=12, margin="0.1,0.05"];
+  edge [fontsize=11];
+  s [shape=box, style="rounded,bold", penwidth=1.5, label="Start"];
+  i [shape=parallelogram, label="Doctor chooses one or more\ntests"];
+  d1 [shape=diamond, margin="0.0,0.0", label="Visit open and\nconsultation\nrecorded?"];
+  e0 [shape=parallelogram, label="Refuse with the reason"];
+  d2 [shape=diamond, margin="0.0,0.0", label="Same test still\npending for this\nvisit?"];
+  e1 [shape=parallelogram, label="Roll back everything; name\nthe test"];
+  w [shape=box, label="In one transaction save each\nrequest with the doctor's id\nand add the test price to the\ninvoice"];
+  l1 [shape=parallelogram, label="Technologist starts the\ntest and enters the result\nand range flag"];
+  d3 [shape=diamond, margin="0.0,0.0", label="Request cancelled by\nthe doctor?"];
+  e2 [shape=parallelogram, label="Refuse; no result can be\nentered"];
+  r [shape=box, label="Save the result, who entered\nit and when; mark Completed;\nshow it to the requesting\ndoctor"];
+  f [shape=box, style="rounded,bold", penwidth=1.5, label="End"];
+  {rank=same; d1; e0;}
+  {rank=same; d2; e1;}
+  {rank=same; d3; e2;}
+  s -> i;
+  i -> d1;
+  d1 -> e0 [label="no"];
+  d1 -> d2 [label="yes"];
+  d2 -> e1 [label="yes"];
+  d2 -> w [label="no"];
+  w -> l1;
+  l1 -> d3;
+  d3 -> e2 [label="yes"];
+  d3 -> r [label="no"];
+  r -> f;
+}

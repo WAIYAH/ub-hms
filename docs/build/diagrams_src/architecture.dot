@@ -1,0 +1,21 @@
+digraph arch {
+  graph [fontname="Arial", fontsize=13, bgcolor="white", pad="0.15"];
+  node  [fontname="Arial", fontsize=13, color="black", fontcolor="black"];
+  edge  [fontname="Arial", fontsize=11, color="black", fontcolor="black", arrowsize=0.8];
+
+  rankdir=TB; nodesep=0.3; ranksep=0.7; compound=true;
+  node [shape=box, style="rounded", margin="0.15,0.09", fontsize=12];
+  subgraph cluster_c { label=<<B>Presentation tier</B> (staff computers)>; style="rounded"; penwidth=1.4;
+    B1 [label="Web browser\nChrome, Edge or Firefox"]; B2 [label="HTML5 pages and\nCSS3 stylesheet"]; B3 [label="JavaScript\n(small extras)"]; {rank=same; B1; B2; B3;} }
+  subgraph cluster_a { label=<<B>Application tier</B> (Apache web server with PHP 8)>; style="rounded"; penwidth=1.4;
+    A1 [label="Pages\none folder per\ndepartment"]; A2 [label="Security layer\nsession, CSRF,\npermissions, headers"]; A3 [label="Business rules\none file per module"]; A4 [label="Data access\nPDO prepared\nstatements"]; {rank=same; A1; A2; A3; A4;} }
+  subgraph cluster_d { label=<<B>Data tier</B> (MariaDB in XAMPP)>; style="rounded"; penwidth=1.4;
+    D1 [shape=cylinder, label="uhai_bora_hms\n22 tables"]; D2 [shape=cylinder, label="Audit trail\n(append-only)"]; {rank=same; D1; D2;} }
+  subgraph cluster_s { label=<<B>Server files</B>>; style="rounded,dashed";
+    F1 [shape=note, label="Application logs\nstorage/logs"]; F2 [shape=note, label="Nightly backups\nstorage/backups"]; {rank=same; F1; F2;} }
+  B1 -> A1 [dir=both, label="  HTTP over the hospital LAN\n  (HTTPS recommended)", ltail=cluster_c, lhead=cluster_a];
+  B2 -> B1 [dir=none, style=dotted]; B3 -> B1 [dir=none, style=dotted];
+  A1 -> A2 -> A3 -> A4;
+  A4 -> D1 [dir=both, label="  SQL"]; A2 -> D2 [label="  audit records"];
+  A2 -> F1 [style=dashed, label="  errors"]; D1 -> F2 [style=dashed, label="  backup.ps1"];
+}

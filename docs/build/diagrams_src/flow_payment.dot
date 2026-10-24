@@ -1,0 +1,28 @@
+digraph payment {
+  graph [fontname="Arial", fontsize=13, bgcolor="white", pad="0.15"];
+  node  [fontname="Arial", fontsize=13, color="black", fontcolor="black"];
+  edge  [fontname="Arial", fontsize=11, color="black", fontcolor="black", arrowsize=0.8];
+  rankdir=TB; nodesep=0.3; ranksep=0.24;
+  node [fontsize=12, margin="0.1,0.05"];
+  edge [fontsize=11];
+  s [shape=box, style="rounded,bold", penwidth=1.5, label="Start"];
+  i [shape=parallelogram, label="Cashier enters the method,\namount and reference"];
+  t [shape=box, label="Begin a transaction; lock the\ninvoice"];
+  d1 [shape=diamond, margin="0.0,0.0", label="Method, amount (not\nabove the balance)\nand reference all\nvalid?"];
+  e [shape=parallelogram, label="Roll back; show the reason\nbeside the field"];
+  w [shape=box, label="Save the payment"];
+  u [shape=box, label="Add it to the amount paid and\nset the status: Partially paid\nor Paid"];
+  a [shape=box, label="Write the audit entry (amount\nand method only); commit"];
+  r [shape=parallelogram, label="Show the receipt RCT-yyyy-\nnnnnnn"];
+  f [shape=box, style="rounded,bold", penwidth=1.5, label="End"];
+  {rank=same; d1; e;}
+  s -> i;
+  i -> t;
+  t -> d1;
+  d1 -> e [label="no"];
+  d1 -> w [label="yes"];
+  w -> u;
+  u -> a;
+  a -> r;
+  r -> f;
+}

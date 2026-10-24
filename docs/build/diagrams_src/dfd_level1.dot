@@ -1,0 +1,49 @@
+digraph l1 {
+  graph [fontname="Arial", fontsize=13, bgcolor="white", pad="0.15"];
+  node  [fontname="Arial", fontsize=13, color="black", fontcolor="black"];
+  edge  [fontname="Arial", fontsize=11, color="black", fontcolor="black", arrowsize=0.8];
+
+  rankdir=LR; nodesep=0.12; ranksep=0.85; splines=true; newrank=true;
+  node [shape=box, style="bold", penwidth=1.6, margin="0.18,0.1", fontsize=12];
+  edge [fontsize=10];
+  REC [label="Receptionist"]; NUR [label="Nurse"]; DOC [label="Doctor"]; LAB [label="Laboratory\ntechnologist"];
+  PHA [label="Pharmacist"]; CAS [label="Cashier"]; MGR [label="Hospital\nmanager"]; ADM [label="System\nadministrator"]; ALL [label="Any staff\nmember"];
+  node [shape=ellipse, penwidth=1.4, margin="0.12,0.07", fontsize=12];
+  P1 [label="1.0\nRegister patients and\nbook appointments"]; P2 [label="2.0\nRecord clinical\nconsultation"]; P3 [label="3.0\nManage laboratory\ntests"];
+  P4 [label="4.0\nManage pharmacy\nand stock"]; P5 [label="5.0\nBill and report"]; P6 [label="6.0\nManage users\nand security"];
+  D1 [shape=none, margin=0, label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5"><TR><TD SIDES="TB" BORDER="1"><B>D1</B>&nbsp;&nbsp;Patients</TD></TR></TABLE>>];
+  D2 [shape=none, margin=0, label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5"><TR><TD SIDES="TB" BORDER="1"><B>D2</B>&nbsp;&nbsp;Appointments</TD></TR></TABLE>>];
+  D3 [shape=none, margin=0, label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5"><TR><TD SIDES="TB" BORDER="1"><B>D3</B>&nbsp;&nbsp;Visits and clinical records</TD></TR></TABLE>>];
+  D4 [shape=none, margin=0, label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5"><TR><TD SIDES="TB" BORDER="1"><B>D4</B>&nbsp;&nbsp;Laboratory requests and results</TD></TR></TABLE>>];
+  D5 [shape=none, margin=0, label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5"><TR><TD SIDES="TB" BORDER="1"><B>D5</B>&nbsp;&nbsp;Prescriptions</TD></TR></TABLE>>];
+  D6 [shape=none, margin=0, label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5"><TR><TD SIDES="TB" BORDER="1"><B>D6</B>&nbsp;&nbsp;Medicines and stock</TD></TR></TABLE>>];
+  D7 [shape=none, margin=0, label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5"><TR><TD SIDES="TB" BORDER="1"><B>D7</B>&nbsp;&nbsp;Invoices and payments</TD></TR></TABLE>>];
+  D8 [shape=none, margin=0, label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5"><TR><TD SIDES="TB" BORDER="1"><B>D8</B>&nbsp;&nbsp;Users and roles</TD></TR></TABLE>>];
+  D9 [shape=none, margin=0, label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5"><TR><TD SIDES="TB" BORDER="1"><B>D9</B>&nbsp;&nbsp;Audit trail</TD></TR></TABLE>>];
+  {rank=same; REC; NUR; DOC; LAB; PHA; CAS; MGR; ADM; ALL;}
+  {rank=same; P1; P2; P3; P4; P5; P6;}
+  {rank=same; D1; D2; D3; D4; D5; D6; D7; D8; D9;}
+  REC -> NUR -> DOC -> LAB -> PHA -> CAS -> MGR -> ADM -> ALL [style=invis];
+  P1 -> P2 -> P3 -> P4 -> P5 -> P6 [style=invis];
+  D1 -> D2 -> D3 -> D4 -> D5 -> D6 -> D7 -> D8 -> D9 [style=invis];
+  REC -> P1 [dir=both, label="details, bookings /\nOP number, diary"];
+  REC -> P2 [label="check-in"];
+  NUR -> P2 [dir=both, label="vital signs /\ntriage queue"];
+  DOC -> P2 [dir=both, label="consultation, orders /\nhistory, allergies"];
+  P3 -> DOC [label="results to the\nrequesting doctor", constraint=false];
+  LAB -> P3 [dir=both, label="results /\nworklist"];
+  PHA -> P4 [dir=both, label="dispensing, stock /\nqueue, alerts"];
+  CAS -> P5 [dir=both, label="payments /\ninvoices, receipts"];
+  P5 -> MGR [label="reports", constraint=false];
+  ALL -> P6 [dir=both, label="sign-in /\nmenu by role"];
+  ADM -> P6 [dir=both, label="accounts, prices /\naudit, health"]; P6 -> MGR [label="audit trail", constraint=false];
+  P2 -> P3 [label="test requests"]; P2 -> P4 [label="prescriptions"];
+  P1 -> D1 [dir=both, label="patients"]; P1 -> D2 [dir=both, label="bookings"];
+  P2 -> D1 [dir=back, label="details,\nallergies"]; P2 -> D2 [dir=both, label="attended"]; P2 -> D3 [dir=both, label="visits, triage,\nconsultations"];
+  P3 -> D4 [dir=both, label="requests,\nresults"];
+  P4 -> D5 [dir=both, label="prescriptions,\nitems given"]; P4 -> D6 [dir=both, label="stock in,\nstock out"];
+  D3 -> P5 [label="consultation,\nservices"]; D4 -> P5 [label="tests done"]; D5 -> P5 [label="medicines given"];
+  D1 -> P5 [label="report data"]; D2 -> P5 [label="attendance"];
+  P5 -> D7 [dir=both, label="invoices,\npayments"];
+  P6 -> D8 [dir=both, label="accounts,\nroles"]; P6 -> D9 [dir=both, label="audit records,\naudit trail"];
+}

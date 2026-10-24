@@ -1,0 +1,42 @@
+digraph signin {
+  graph [fontname="Arial", fontsize=13, bgcolor="white", pad="0.15"];
+  node  [fontname="Arial", fontsize=13, color="black", fontcolor="black"];
+  edge  [fontname="Arial", fontsize=11, color="black", fontcolor="black", arrowsize=0.8];
+  rankdir=TB; nodesep=0.3; ranksep=0.24;
+  node [fontsize=12, margin="0.1,0.05"];
+  edge [fontsize=11];
+  s [shape=box, style="rounded,bold", penwidth=1.5, label="Start"];
+  i [shape=parallelogram, label="User enters username and\npassword; the browser\nsends the CSRF token"];
+  c [shape=diamond, margin="0.0,0.0", label="CSRF token valid?"];
+  x0 [shape=parallelogram, label="Refuse (419)"];
+  ip [shape=diamond, margin="0.0,0.0", label="20 or more failures\nfrom this computer in\n15 minutes?"];
+  xb [shape=parallelogram, label="Show 'too many attempts'"];
+  lk [shape=box, label="Find the account and check the\npassword against its hash (a\ndummy hash if the name is\nunknown)"];
+  d1 [shape=diamond, margin="0.0,0.0", label="Account locked?"];
+  xl [shape=parallelogram, label="Show 'temporarily locked',\neven for the right\npassword"];
+  d2 [shape=diamond, margin="0.0,0.0", label="Account exists and\npassword correct?"];
+  fa [shape=box, label="Count the failure; lock for 15\nminutes at the fifth; audit\nentry; one message for all\nfailures"];
+  d3 [shape=diamond, margin="0.0,0.0", label="Account active?"];
+  xi [shape=parallelogram, label="Show 'deactivated'"];
+  ok [shape=box, label="Reset the failure count,\nrecord the sign-in, issue a\nnew session id and CSRF token,\naudit entry"];
+  dh [shape=parallelogram, label="Open the dashboard with\nthe menu for the user's\nrole (or the change-\npassword page the first\ntime)"];
+  {rank=same; c; x0;}
+  {rank=same; ip; xb;}
+  {rank=same; d1; xl;}
+  {rank=same; d3; xi;}
+  {rank=same; d2; fa;}
+  s -> i;
+  i -> c;
+  c -> x0 [label="no"];
+  c -> ip [label="yes"];
+  ip -> xb [label="yes"];
+  ip -> lk [label="no"];
+  lk -> d1;
+  d1 -> xl [label="yes"];
+  d1 -> d2 [label="no"];
+  d2 -> fa [label="no", constraint=false];
+  d2 -> d3 [label="yes"];
+  d3 -> xi [label="no"];
+  d3 -> ok [label="yes"];
+  ok -> dh;
+}

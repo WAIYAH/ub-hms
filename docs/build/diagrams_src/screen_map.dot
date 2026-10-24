@@ -1,0 +1,18 @@
+digraph nav {
+  graph [fontname="Arial", fontsize=13, bgcolor="white", pad="0.15"];
+  node  [fontname="Arial", fontsize=13, color="black", fontcolor="black"];
+  edge  [fontname="Arial", fontsize=11, color="black", fontcolor="black", arrowsize=0.8];
+
+  rankdir=LR; nodesep=0.1; ranksep=0.3; compound=true;
+  node [shape=box, style="rounded", margin="0.08,0.05", fontsize=11];
+  edge [fontsize=10];
+  START [label="Sign in", style="rounded,bold"]; PW [label="Change\npassword\n(first time)"]; DASH [label="Dashboard\n(menu shows only what\nthe role may do)", style="rounded,bold"];
+  START -> PW; START -> DASH; PW -> DASH;
+  subgraph cluster_1 { label="Patients and appointments"; style="rounded"; a1 [label="Search\npatients"]; a2 [label="Patient\nrecord"]; a3 [label="Register\npatient"]; a4 [label="Import\npatients"]; a5 [label="Appointment\ndiary"]; a6 [label="Book\nappointment"]; a1 -> a2; a3 -> a4 [style=invis]; a2 -> a3 [style=invis]; a4 -> a5 [style=invis]; a5 -> a6; }
+  subgraph cluster_2 { label="Clinic"; style="rounded"; b1 [label="Check-in"]; b2 [label="Triage\nqueue"]; b3 [label="Triage\nform"]; b4 [label="Consultation\nqueue"]; b5 [label="Consultation (tests,\nprescriptions)"]; b1 -> b2; b2 -> b3; b3 -> b4 [style=invis]; b4 -> b5; }
+  subgraph cluster_3 { label="Laboratory"; style="rounded"; c1 [label="Laboratory\nworklist"]; c2 [label="Enter\nresult"]; c3 [label="My test\nresults"]; c1 -> c2; c2 -> c3 [style=dashed]; }
+  subgraph cluster_4 { label="Pharmacy"; style="rounded"; d1 [label="Prescription\nqueue"]; d2 [label="Dispense"]; d3 [label="Medicine\nstock"]; d4 [label="Batches"]; d5 [label="Receive\nstock"]; d6 [label="Medicine\nlist"]; d1 -> d2; d2 -> d3 [style=invis]; d3 -> d4; d4 -> d5 [style=invis]; d5 -> d6 [style=invis]; }
+  subgraph cluster_5 { label="Billing and reports"; style="rounded"; e1 [label="Invoices"]; e2 [label="Invoice and\npayment"]; e3 [label="Receipt"]; e4 [label="Reports"]; e1 -> e2 -> e3; e3 -> e4 [style=invis]; }
+  subgraph cluster_6 { label="Administration"; style="rounded"; f1 [label="User\naccounts"]; f2 [label="Price\nlist"]; f3 [label="Audit\ntrail"]; f4 [label="System\nhealth"]; f1 -> f2 -> f3 -> f4 [style=invis]; }
+  DASH -> a1 [lhead=cluster_1]; DASH -> b1 [lhead=cluster_2]; DASH -> c1 [lhead=cluster_3]; DASH -> d1 [lhead=cluster_4]; DASH -> e1 [lhead=cluster_5]; DASH -> f1 [lhead=cluster_6];
+}

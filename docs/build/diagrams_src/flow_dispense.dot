@@ -1,0 +1,36 @@
+digraph dispense {
+  graph [fontname="Arial", fontsize=13, bgcolor="white", pad="0.15"];
+  node  [fontname="Arial", fontsize=13, color="black", fontcolor="black"];
+  edge  [fontname="Arial", fontsize=11, color="black", fontcolor="black", arrowsize=0.8];
+  rankdir=TB; nodesep=0.3; ranksep=0.24;
+  node [fontsize=12, margin="0.1,0.05"];
+  edge [fontsize=11];
+  s [shape=box, style="rounded,bold", penwidth=1.5, label="Start"];
+  i [shape=parallelogram, label="Pharmacist opens a\nprescription and enters\nthe quantity to give for\neach line"];
+  t [shape=box, label="Begin a transaction; lock the\nprescription lines"];
+  n [shape=box, label="Take the next line that has a\nquantity"];
+  d1 [shape=diamond, margin="0.0,0.0", label="More than is still to\ngive?"];
+  x [shape=box, label="Roll back everything; show the\nline that failed and why"];
+  b [shape=box, label="List the medicine's unexpired\nbatches, earliest expiry\nfirst, and lock them"];
+  d2 [shape=diamond, margin="0.0,0.0", label="Enough unexpired\nstock?"];
+  p [shape=box, label="Take from each batch in turn:\nreduce the batch (never below\n0), write a negative ledger\nentry, add to the quantity\ngiven"];
+  d3 [shape=diamond, margin="0.0,0.0", label="More lines?"];
+  st [shape=box, label="Set the prescription status\n(Dispensed or Partially\ndispensed); add the medicines\nto the invoice; audit entry;\ncommit"];
+  m [shape=parallelogram, label="Show what was given and\nfrom which batch"];
+  f [shape=box, style="rounded,bold", penwidth=1.5, label="End"];
+  {rank=same; d1; x;}
+  s -> i;
+  i -> t;
+  t -> n;
+  n -> d1;
+  d1 -> x [label="yes"];
+  d1 -> b [label="no"];
+  b -> d2;
+  d2 -> x [label="no", constraint=false];
+  d2 -> p [label="yes"];
+  p -> d3;
+  d3 -> n [label="yes", constraint=false];
+  d3 -> st [label="no"];
+  st -> m;
+  m -> f;
+}

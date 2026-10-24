@@ -1,0 +1,36 @@
+digraph register {
+  graph [fontname="Arial", fontsize=13, bgcolor="white", pad="0.15"];
+  node  [fontname="Arial", fontsize=13, color="black", fontcolor="black"];
+  edge  [fontname="Arial", fontsize=11, color="black", fontcolor="black", arrowsize=0.8];
+  rankdir=TB; nodesep=0.3; ranksep=0.24;
+  node [fontsize=12, margin="0.1,0.05"];
+  edge [fontsize=11];
+  s [shape=box, style="rounded,bold", penwidth=1.5, label="Start"];
+  i [shape=parallelogram, label="Receive the patient's\ndetails from the form"];
+  v [shape=box, label="Validate every field: names,\nsex, date of birth, phone\nnumber and ID number"];
+  d1 [shape=diamond, margin="0.0,0.0", label="Any errors?"];
+  e1 [shape=parallelogram, label="Show the messages beside\nthe fields"];
+  k [shape=box, label="Look for the same ID number,\nand for the same name and date\nof birth"];
+  d2 [shape=diamond, margin="0.0,0.0", label="ID number already\nused?"];
+  e2 [shape=parallelogram, label="Refuse and show the\nexisting OP number"];
+  d3 [shape=diamond, margin="0.0,0.0", label="Similar patient\nfound, not yet\nconfirmed?"];
+  e3 [shape=parallelogram, label="Show similar records and\nask staff to confirm"];
+  w [shape=box, label="In one transaction: add 1 to\nthis year's counter, build\nOPyy-nnnnn, save the record\nand write the audit entry"];
+  o [shape=parallelogram, label="Show the new record and\nits OP number"];
+  f [shape=box, style="rounded,bold", penwidth=1.5, label="End"];
+  {rank=same; d1; e1;}
+  {rank=same; d2; e2;}
+  {rank=same; d3; e3;}
+  s -> i;
+  i -> v;
+  v -> d1;
+  d1 -> e1 [label="yes"];
+  d1 -> k [label="no"];
+  k -> d2;
+  d2 -> e2 [label="yes"];
+  d2 -> d3 [label="no"];
+  d3 -> e3 [label="yes"];
+  d3 -> w [label="no"];
+  w -> o;
+  o -> f;
+}

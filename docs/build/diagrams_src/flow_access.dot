@@ -1,0 +1,46 @@
+digraph access {
+  graph [fontname="Arial", fontsize=13, bgcolor="white", pad="0.15"];
+  node  [fontname="Arial", fontsize=13, color="black", fontcolor="black"];
+  edge  [fontname="Arial", fontsize=11, color="black", fontcolor="black", arrowsize=0.8];
+  rankdir=TB; nodesep=0.3; ranksep=0.24;
+  node [fontsize=12, margin="0.1,0.05"];
+  edge [fontsize=11];
+  s [shape=box, style="rounded,bold", penwidth=1.5, label="Start: any page is requested"];
+  d0 [shape=diamond, margin="0.0,0.0", label="Signed in?"];
+  x0 [shape=parallelogram, label="Send to the sign-in page"];
+  d1 [shape=diamond, margin="0.0,0.0", label="Idle over 30 minutes,\nor signed in over 8\nhours?"];
+  x1 [shape=box, label="End the session; audit entry;\nask for sign-in"];
+  d2 [shape=diamond, margin="0.0,0.0", label="Account still active?"];
+  x2 [shape=box, label="End the session at once"];
+  d3 [shape=diamond, margin="0.0,0.0", label="Must change password?"];
+  x3 [shape=parallelogram, label="Send to the change-\npassword page"];
+  d4 [shape=diamond, margin="0.0,0.0", label="Role holds the page's\npermission?"];
+  x4 [shape=parallelogram, label="Refuse (403); write an\naudit entry"];
+  d5 [shape=diamond, margin="0.0,0.0", label="Page changes data?"];
+  d6 [shape=diamond, margin="0.0,0.0", label="POST with a valid\nCSRF token?"];
+  x6 [shape=parallelogram, label="Refuse (419); write an\naudit entry"];
+  ok [shape=box, label="Run the page, apply the\nbusiness rules, write the\naudit entry"];
+  f [shape=box, style="rounded,bold", penwidth=1.5, label="End"];
+  {rank=same; d0; x0;}
+  {rank=same; d1; x1;}
+  {rank=same; d2; x2;}
+  {rank=same; d3; x3;}
+  {rank=same; d4; x4;}
+  {rank=same; d6; x6;}
+  s -> d0;
+  d0 -> x0 [label="no"];
+  d0 -> d1 [label="yes"];
+  d1 -> x1 [label="yes"];
+  d1 -> d2 [label="no"];
+  d2 -> x2 [label="no"];
+  d2 -> d3 [label="yes"];
+  d3 -> x3 [label="yes"];
+  d3 -> d4 [label="no"];
+  d4 -> x4 [label="no"];
+  d4 -> d5 [label="yes"];
+  d5 -> d6 [label="yes"];
+  d5 -> ok [label="no"];
+  d6 -> x6 [label="no"];
+  d6 -> ok [label="yes"];
+  ok -> f;
+}

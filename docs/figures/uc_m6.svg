@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="540" height="606" viewBox="0 0 540 606" font-family="Arial">
+<defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="black"/></marker></defs>
+<rect x="0" y="0" width="540" height="606" fill="white"/>
+<rect x="118" y="36" width="304" height="562" fill="none" stroke="black" stroke-width="1.6"/>
+<text x="270.0" y="22" font-size="13" font-weight="bold" text-anchor="middle">UB-HMS: Module 6: user management and security</text>
+<circle cx="52" cy="142.0" r="8" fill="white" stroke="black" stroke-width="1.5"/><line x1="52" y1="150.0" x2="52" y2="172.0" stroke="black" stroke-width="1.5"/><line x1="38" y1="159.0" x2="66" y2="159.0" stroke="black" stroke-width="1.5"/><line x1="52" y1="172.0" x2="41" y2="190.0" stroke="black" stroke-width="1.5"/><line x1="52" y1="172.0" x2="63" y2="190.0" stroke="black" stroke-width="1.5"/><text x="52" y="206.0" font-size="11" text-anchor="middle" font-family="Arial">Any staff</text><text x="52" y="219.0" font-size="11" text-anchor="middle" font-family="Arial">member</text>
+<circle cx="52" cy="390.0" r="8" fill="white" stroke="black" stroke-width="1.5"/><line x1="52" y1="398.0" x2="52" y2="420.0" stroke="black" stroke-width="1.5"/><line x1="38" y1="407.0" x2="66" y2="407.0" stroke="black" stroke-width="1.5"/><line x1="52" y1="420.0" x2="41" y2="438.0" stroke="black" stroke-width="1.5"/><line x1="52" y1="420.0" x2="63" y2="438.0" stroke="black" stroke-width="1.5"/><text x="52" y="454.0" font-size="11" text-anchor="middle" font-family="Arial">System</text><text x="52" y="467.0" font-size="11" text-anchor="middle" font-family="Arial">administrator</text>
+<circle cx="488" cy="390.0" r="8" fill="white" stroke="black" stroke-width="1.5"/><line x1="488" y1="398.0" x2="488" y2="420.0" stroke="black" stroke-width="1.5"/><line x1="474" y1="407.0" x2="502" y2="407.0" stroke="black" stroke-width="1.5"/><line x1="488" y1="420.0" x2="477" y2="438.0" stroke="black" stroke-width="1.5"/><line x1="488" y1="420.0" x2="499" y2="438.0" stroke="black" stroke-width="1.5"/><text x="488" y="454.0" font-size="11" text-anchor="middle" font-family="Arial">Hospital</text><text x="488" y="467.0" font-size="11" text-anchor="middle" font-family="Arial">manager</text>
+<line x1="58" y1="162.0" x2="142.0" y2="100" stroke="black" stroke-width="1"/>
+<line x1="58" y1="162.0" x2="142.0" y2="162" stroke="black" stroke-width="1"/>
+<line x1="58" y1="162.0" x2="142.0" y2="224" stroke="black" stroke-width="1"/>
+<line x1="58" y1="410.0" x2="142.0" y2="286" stroke="black" stroke-width="1"/>
+<line x1="58" y1="410.0" x2="142.0" y2="348" stroke="black" stroke-width="1"/>
+<line x1="58" y1="410.0" x2="142.0" y2="410" stroke="black" stroke-width="1"/>
+<line x1="482" y1="410.0" x2="398.0" y2="410" stroke="black" stroke-width="1"/>
+<line x1="58" y1="410.0" x2="142.0" y2="472" stroke="black" stroke-width="1"/>
+<line x1="58" y1="410.0" x2="142.0" y2="534" stroke="black" stroke-width="1"/>
+<ellipse cx="270.0" cy="100" rx="128" ry="23" fill="white" stroke="black" stroke-width="1.3" stroke-dasharray="0"/>
+<text x="270.0" y="104.0" font-size="12" text-anchor="middle">UC-01 Sign in</text>
+<ellipse cx="270.0" cy="162" rx="128" ry="23" fill="white" stroke="black" stroke-width="1.3" stroke-dasharray="0"/>
+<text x="270.0" y="166.0" font-size="12" text-anchor="middle">UC-02 Change own password</text>
+<ellipse cx="270.0" cy="224" rx="128" ry="23" fill="white" stroke="black" stroke-width="1.3" stroke-dasharray="0"/>
+<text x="270.0" y="228.0" font-size="12" text-anchor="middle">UC-03 Sign out</text>
+<ellipse cx="270.0" cy="286" rx="128" ry="23" fill="white" stroke="black" stroke-width="1.3" stroke-dasharray="0"/>
+<text x="270.0" y="290.0" font-size="12" text-anchor="middle">UC-04 Manage user accounts</text>
+<ellipse cx="270.0" cy="348" rx="128" ry="23" fill="white" stroke="black" stroke-width="1.3" stroke-dasharray="0"/>
+<text x="270.0" y="345.5" font-size="12" text-anchor="middle">UC-05 Reset password or unlock</text>
+<text x="270.0" y="358.5" font-size="12" text-anchor="middle">account</text>
+<ellipse cx="270.0" cy="410" rx="128" ry="23" fill="white" stroke="black" stroke-width="1.3" stroke-dasharray="0"/>
+<text x="270.0" y="414.0" font-size="12" text-anchor="middle">UC-06 View the audit trail</text>
+<ellipse cx="270.0" cy="472" rx="128" ry="23" fill="white" stroke="black" stroke-width="1.3" stroke-dasharray="0"/>
+<text x="270.0" y="476.0" font-size="12" text-anchor="middle">UC-07 Maintain the price list</text>
+<ellipse cx="270.0" cy="534" rx="128" ry="23" fill="white" stroke="black" stroke-width="1.3" stroke-dasharray="0"/>
+<text x="270.0" y="531.5" font-size="12" text-anchor="middle">UC-08 View system health and</text>
+<text x="270.0" y="544.5" font-size="12" text-anchor="middle">backup status</text>
+</svg>

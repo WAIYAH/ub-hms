@@ -1,0 +1,3273 @@
+{
+    "database": "uhai_bora_hms",
+    "server": "10.4.32-MariaDB",
+    "tables": {
+        "appointments": {
+            "engine": "InnoDB",
+            "collation": "utf8mb4_unicode_ci",
+            "columns": [
+                {
+                    "name": "id",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "PRI",
+                    "dflt": null,
+                    "extra": "auto_increment",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "patient_id",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "MUL",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "doctor_id",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "MUL",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "appointment_date",
+                    "type": "date",
+                    "nullable": "NO",
+                    "ckey": "MUL",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "start_time",
+                    "type": "time",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "end_time",
+                    "type": "time",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "reason",
+                    "type": "varchar(255)",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": 255,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "status",
+                    "type": "enum('Booked','Attended','Missed','Cancelled')",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": "'Booked'",
+                    "extra": "",
+                    "maxlen": 9,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "cancel_reason",
+                    "type": "varchar(255)",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": 255,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "booked_by",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "MUL",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "created_at",
+                    "type": "datetime",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": "current_timestamp()",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "updated_at",
+                    "type": "datetime",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "on update current_timestamp()",
+                    "maxlen": null,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "slot_key",
+                    "type": "varchar(40)",
+                    "nullable": "YES",
+                    "ckey": "UNI",
+                    "dflt": "NULL",
+                    "extra": "STORED GENERATED",
+                    "maxlen": 40,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": "if(`status` in ('Booked','Attended'),concat(`doctor_id`,'|',`appointment_date`,'|',`start_time`),NULL)"
+                }
+            ],
+            "foreign_keys": [
+                {
+                    "col": "doctor_id",
+                    "ref_table": "users",
+                    "ref_col": "id",
+                    "delete_rule": "RESTRICT",
+                    "cname": "fk_appt_doctor"
+                },
+                {
+                    "col": "patient_id",
+                    "ref_table": "patients",
+                    "ref_col": "id",
+                    "delete_rule": "RESTRICT",
+                    "cname": "fk_appt_patient"
+                },
+                {
+                    "col": "booked_by",
+                    "ref_table": "users",
+                    "ref_col": "id",
+                    "delete_rule": "RESTRICT",
+                    "cname": "fk_appt_user"
+                }
+            ],
+            "indexes": [
+                {
+                    "name": "fk_appt_user",
+                    "unique": false,
+                    "columns": [
+                        "booked_by"
+                    ]
+                },
+                {
+                    "name": "ix_appt_day_status",
+                    "unique": false,
+                    "columns": [
+                        "appointment_date",
+                        "status"
+                    ]
+                },
+                {
+                    "name": "ix_appt_doctor_day",
+                    "unique": false,
+                    "columns": [
+                        "doctor_id",
+                        "appointment_date"
+                    ]
+                },
+                {
+                    "name": "ix_appt_patient_day",
+                    "unique": false,
+                    "columns": [
+                        "patient_id",
+                        "appointment_date"
+                    ]
+                },
+                {
+                    "name": "PRIMARY",
+                    "unique": true,
+                    "columns": [
+                        "id"
+                    ]
+                },
+                {
+                    "name": "uq_appt_slot",
+                    "unique": true,
+                    "columns": [
+                        "slot_key"
+                    ]
+                }
+            ],
+            "checks": []
+        },
+        "audit_log": {
+            "engine": "InnoDB",
+            "collation": "utf8mb4_unicode_ci",
+            "columns": [
+                {
+                    "name": "id",
+                    "type": "bigint(20) unsigned",
+                    "nullable": "NO",
+                    "ckey": "PRI",
+                    "dflt": null,
+                    "extra": "auto_increment",
+                    "maxlen": null,
+                    "prec": 20,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "user_id",
+                    "type": "int(10) unsigned",
+                    "nullable": "YES",
+                    "ckey": "MUL",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "action",
+                    "type": "varchar(40)",
+                    "nullable": "NO",
+                    "ckey": "MUL",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": 40,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "entity",
+                    "type": "varchar(40)",
+                    "nullable": "YES",
+                    "ckey": "MUL",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": 40,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "entity_id",
+                    "type": "int(10) unsigned",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "details",
+                    "type": "varchar(500)",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": 500,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "ip_address",
+                    "type": "varchar(45)",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": 45,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "created_at",
+                    "type": "datetime",
+                    "nullable": "NO",
+                    "ckey": "MUL",
+                    "dflt": "current_timestamp()",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                }
+            ],
+            "foreign_keys": [
+                {
+                    "col": "user_id",
+                    "ref_table": "users",
+                    "ref_col": "id",
+                    "delete_rule": "RESTRICT",
+                    "cname": "fk_audit_user"
+                }
+            ],
+            "indexes": [
+                {
+                    "name": "fk_audit_user",
+                    "unique": false,
+                    "columns": [
+                        "user_id"
+                    ]
+                },
+                {
+                    "name": "ix_audit_action_ip",
+                    "unique": false,
+                    "columns": [
+                        "action",
+                        "ip_address",
+                        "created_at"
+                    ]
+                },
+                {
+                    "name": "ix_audit_created",
+                    "unique": false,
+                    "columns": [
+                        "created_at"
+                    ]
+                },
+                {
+                    "name": "ix_audit_entity",
+                    "unique": false,
+                    "columns": [
+                        "entity",
+                        "entity_id"
+                    ]
+                },
+                {
+                    "name": "PRIMARY",
+                    "unique": true,
+                    "columns": [
+                        "id"
+                    ]
+                }
+            ],
+            "checks": []
+        },
+        "consultations": {
+            "engine": "InnoDB",
+            "collation": "utf8mb4_unicode_ci",
+            "columns": [
+                {
+                    "name": "id",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "PRI",
+                    "dflt": null,
+                    "extra": "auto_increment",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "visit_id",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "UNI",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "doctor_id",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "MUL",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "service_id",
+                    "type": "smallint(5) unsigned",
+                    "nullable": "YES",
+                    "ckey": "MUL",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 5,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "complaint",
+                    "type": "text",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": 65535,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "examination",
+                    "type": "text",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": 65535,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "diagnosis",
+                    "type": "varchar(255)",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": 255,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "icd10_code",
+                    "type": "varchar(10)",
+                    "nullable": "YES",
+                    "ckey": "MUL",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": 10,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "plan",
+                    "type": "text",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": 65535,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "created_at",
+                    "type": "datetime",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": "current_timestamp()",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "updated_at",
+                    "type": "datetime",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "on update current_timestamp()",
+                    "maxlen": null,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                }
+            ],
+            "foreign_keys": [
+                {
+                    "col": "doctor_id",
+                    "ref_table": "users",
+                    "ref_col": "id",
+                    "delete_rule": "RESTRICT",
+                    "cname": "fk_consult_doctor"
+                },
+                {
+                    "col": "icd10_code",
+                    "ref_table": "icd10_codes",
+                    "ref_col": "code",
+                    "delete_rule": "RESTRICT",
+                    "cname": "fk_consult_icd"
+                },
+                {
+                    "col": "service_id",
+                    "ref_table": "services",
+                    "ref_col": "id",
+                    "delete_rule": "RESTRICT",
+                    "cname": "fk_consult_service"
+                },
+                {
+                    "col": "visit_id",
+                    "ref_table": "visits",
+                    "ref_col": "id",
+                    "delete_rule": "RESTRICT",
+                    "cname": "fk_consult_visit"
+                }
+            ],
+            "indexes": [
+                {
+                    "name": "fk_consult_doctor",
+                    "unique": false,
+                    "columns": [
+                        "doctor_id"
+                    ]
+                },
+                {
+                    "name": "fk_consult_icd",
+                    "unique": false,
+                    "columns": [
+                        "icd10_code"
+                    ]
+                },
+                {
+                    "name": "fk_consult_service",
+                    "unique": false,
+                    "columns": [
+                        "service_id"
+                    ]
+                },
+                {
+                    "name": "PRIMARY",
+                    "unique": true,
+                    "columns": [
+                        "id"
+                    ]
+                },
+                {
+                    "name": "uq_consult_visit",
+                    "unique": true,
+                    "columns": [
+                        "visit_id"
+                    ]
+                }
+            ],
+            "checks": []
+        },
+        "icd10_codes": {
+            "engine": "InnoDB",
+            "collation": "utf8mb4_unicode_ci",
+            "columns": [
+                {
+                    "name": "code",
+                    "type": "varchar(10)",
+                    "nullable": "NO",
+                    "ckey": "PRI",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": 10,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "description",
+                    "type": "varchar(200)",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": 200,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "is_active",
+                    "type": "tinyint(1)",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": "1",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 3,
+                    "scale": 0,
+                    "genexpr": null
+                }
+            ],
+            "foreign_keys": [],
+            "indexes": [
+                {
+                    "name": "PRIMARY",
+                    "unique": true,
+                    "columns": [
+                        "code"
+                    ]
+                }
+            ],
+            "checks": []
+        },
+        "invoices": {
+            "engine": "InnoDB",
+            "collation": "utf8mb4_unicode_ci",
+            "columns": [
+                {
+                    "name": "id",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "PRI",
+                    "dflt": null,
+                    "extra": "auto_increment",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "invoice_no",
+                    "type": "varchar(20)",
+                    "nullable": "NO",
+                    "ckey": "UNI",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": 20,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "visit_id",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "UNI",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "total",
+                    "type": "decimal(12,2)",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": "0.00",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 12,
+                    "scale": 2,
+                    "genexpr": null
+                },
+                {
+                    "name": "amount_paid",
+                    "type": "decimal(12,2)",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": "0.00",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 12,
+                    "scale": 2,
+                    "genexpr": null
+                },
+                {
+                    "name": "status",
+                    "type": "enum('Unpaid','Partially paid','Paid')",
+                    "nullable": "NO",
+                    "ckey": "MUL",
+                    "dflt": "'Unpaid'",
+                    "extra": "",
+                    "maxlen": 14,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "created_by",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "MUL",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "created_at",
+                    "type": "datetime",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": "current_timestamp()",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "updated_at",
+                    "type": "datetime",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "on update current_timestamp()",
+                    "maxlen": null,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                }
+            ],
+            "foreign_keys": [
+                {
+                    "col": "created_by",
+                    "ref_table": "users",
+                    "ref_col": "id",
+                    "delete_rule": "RESTRICT",
+                    "cname": "fk_inv_user"
+                },
+                {
+                    "col": "visit_id",
+                    "ref_table": "visits",
+                    "ref_col": "id",
+                    "delete_rule": "RESTRICT",
+                    "cname": "fk_inv_visit"
+                }
+            ],
+            "indexes": [
+                {
+                    "name": "fk_inv_user",
+                    "unique": false,
+                    "columns": [
+                        "created_by"
+                    ]
+                },
+                {
+                    "name": "ix_invoice_status",
+                    "unique": false,
+                    "columns": [
+                        "status"
+                    ]
+                },
+                {
+                    "name": "PRIMARY",
+                    "unique": true,
+                    "columns": [
+                        "id"
+                    ]
+                },
+                {
+                    "name": "uq_invoice_no",
+                    "unique": true,
+                    "columns": [
+                        "invoice_no"
+                    ]
+                },
+                {
+                    "name": "uq_invoice_visit",
+                    "unique": true,
+                    "columns": [
+                        "visit_id"
+                    ]
+                }
+            ],
+            "checks": [
+                {
+                    "name": "chk_inv_amounts",
+                    "clause": "`total` >= 0 and `amount_paid` >= 0"
+                }
+            ]
+        },
+        "invoice_items": {
+            "engine": "InnoDB",
+            "collation": "utf8mb4_unicode_ci",
+            "columns": [
+                {
+                    "name": "id",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "PRI",
+                    "dflt": null,
+                    "extra": "auto_increment",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "invoice_id",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "MUL",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "source",
+                    "type": "enum('Consultation','Laboratory','Pharmacy','Service')",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": 12,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "source_id",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "description",
+                    "type": "varchar(150)",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": 150,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "quantity",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": "1",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "unit_price",
+                    "type": "decimal(10,2)",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 2,
+                    "genexpr": null
+                },
+                {
+                    "name": "line_total",
+                    "type": "decimal(12,2)",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 12,
+                    "scale": 2,
+                    "genexpr": null
+                }
+            ],
+            "foreign_keys": [
+                {
+                    "col": "invoice_id",
+                    "ref_table": "invoices",
+                    "ref_col": "id",
+                    "delete_rule": "RESTRICT",
+                    "cname": "fk_invi_invoice"
+                }
+            ],
+            "indexes": [
+                {
+                    "name": "PRIMARY",
+                    "unique": true,
+                    "columns": [
+                        "id"
+                    ]
+                },
+                {
+                    "name": "uq_invoice_source",
+                    "unique": true,
+                    "columns": [
+                        "invoice_id",
+                        "source",
+                        "source_id"
+                    ]
+                }
+            ],
+            "checks": [
+                {
+                    "name": "chk_invi_amounts",
+                    "clause": "`quantity` > 0 and `unit_price` >= 0 and `line_total` >= 0"
+                }
+            ]
+        },
+        "lab_requests": {
+            "engine": "InnoDB",
+            "collation": "utf8mb4_unicode_ci",
+            "columns": [
+                {
+                    "name": "id",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "PRI",
+                    "dflt": null,
+                    "extra": "auto_increment",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "visit_id",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "MUL",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "test_id",
+                    "type": "smallint(5) unsigned",
+                    "nullable": "NO",
+                    "ckey": "MUL",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 5,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "requested_by",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "MUL",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "clinical_notes",
+                    "type": "varchar(255)",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": 255,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "requested_at",
+                    "type": "datetime",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": "current_timestamp()",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "status",
+                    "type": "enum('Requested','In progress','Completed','Cancelled')",
+                    "nullable": "NO",
+                    "ckey": "MUL",
+                    "dflt": "'Requested'",
+                    "extra": "",
+                    "maxlen": 11,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "result",
+                    "type": "text",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": 65535,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "is_abnormal",
+                    "type": "tinyint(1)",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 3,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "result_by",
+                    "type": "int(10) unsigned",
+                    "nullable": "YES",
+                    "ckey": "MUL",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "result_at",
+                    "type": "datetime",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                }
+            ],
+            "foreign_keys": [
+                {
+                    "col": "requested_by",
+                    "ref_table": "users",
+                    "ref_col": "id",
+                    "delete_rule": "RESTRICT",
+                    "cname": "fk_lab_req_by"
+                },
+                {
+                    "col": "result_by",
+                    "ref_table": "users",
+                    "ref_col": "id",
+                    "delete_rule": "RESTRICT",
+                    "cname": "fk_lab_res_by"
+                },
+                {
+                    "col": "test_id",
+                    "ref_table": "lab_tests",
+                    "ref_col": "id",
+                    "delete_rule": "RESTRICT",
+                    "cname": "fk_lab_test"
+                },
+                {
+                    "col": "visit_id",
+                    "ref_table": "visits",
+                    "ref_col": "id",
+                    "delete_rule": "RESTRICT",
+                    "cname": "fk_lab_visit"
+                }
+            ],
+            "indexes": [
+                {
+                    "name": "fk_lab_res_by",
+                    "unique": false,
+                    "columns": [
+                        "result_by"
+                    ]
+                },
+                {
+                    "name": "fk_lab_test",
+                    "unique": false,
+                    "columns": [
+                        "test_id"
+                    ]
+                },
+                {
+                    "name": "fk_lab_visit",
+                    "unique": false,
+                    "columns": [
+                        "visit_id"
+                    ]
+                },
+                {
+                    "name": "ix_lab_requested_by",
+                    "unique": false,
+                    "columns": [
+                        "requested_by",
+                        "status"
+                    ]
+                },
+                {
+                    "name": "ix_lab_status",
+                    "unique": false,
+                    "columns": [
+                        "status"
+                    ]
+                },
+                {
+                    "name": "PRIMARY",
+                    "unique": true,
+                    "columns": [
+                        "id"
+                    ]
+                }
+            ],
+            "checks": []
+        },
+        "lab_tests": {
+            "engine": "InnoDB",
+            "collation": "utf8mb4_unicode_ci",
+            "columns": [
+                {
+                    "name": "id",
+                    "type": "smallint(5) unsigned",
+                    "nullable": "NO",
+                    "ckey": "PRI",
+                    "dflt": null,
+                    "extra": "auto_increment",
+                    "maxlen": null,
+                    "prec": 5,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "name",
+                    "type": "varchar(100)",
+                    "nullable": "NO",
+                    "ckey": "UNI",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": 100,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "reference_range",
+                    "type": "varchar(100)",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": 100,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "price",
+                    "type": "decimal(10,2)",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": "0.00",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 2,
+                    "genexpr": null
+                },
+                {
+                    "name": "is_active",
+                    "type": "tinyint(1)",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": "1",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 3,
+                    "scale": 0,
+                    "genexpr": null
+                }
+            ],
+            "foreign_keys": [],
+            "indexes": [
+                {
+                    "name": "PRIMARY",
+                    "unique": true,
+                    "columns": [
+                        "id"
+                    ]
+                },
+                {
+                    "name": "uq_lab_tests_name",
+                    "unique": true,
+                    "columns": [
+                        "name"
+                    ]
+                }
+            ],
+            "checks": [
+                {
+                    "name": "chk_lab_tests_price",
+                    "clause": "`price` >= 0"
+                }
+            ]
+        },
+        "medicines": {
+            "engine": "InnoDB",
+            "collation": "utf8mb4_unicode_ci",
+            "columns": [
+                {
+                    "name": "id",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "PRI",
+                    "dflt": null,
+                    "extra": "auto_increment",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "name",
+                    "type": "varchar(100)",
+                    "nullable": "NO",
+                    "ckey": "MUL",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": 100,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "form",
+                    "type": "varchar(30)",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": "''",
+                    "extra": "",
+                    "maxlen": 30,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "strength",
+                    "type": "varchar(30)",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": "''",
+                    "extra": "",
+                    "maxlen": 30,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "unit",
+                    "type": "varchar(20)",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": "'unit'",
+                    "extra": "",
+                    "maxlen": 20,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "unit_price",
+                    "type": "decimal(10,2)",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": "0.00",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 2,
+                    "genexpr": null
+                },
+                {
+                    "name": "reorder_level",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": "0",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "is_active",
+                    "type": "tinyint(1)",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": "1",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 3,
+                    "scale": 0,
+                    "genexpr": null
+                }
+            ],
+            "foreign_keys": [],
+            "indexes": [
+                {
+                    "name": "PRIMARY",
+                    "unique": true,
+                    "columns": [
+                        "id"
+                    ]
+                },
+                {
+                    "name": "uq_medicine",
+                    "unique": true,
+                    "columns": [
+                        "name",
+                        "form",
+                        "strength"
+                    ]
+                }
+            ],
+            "checks": [
+                {
+                    "name": "chk_medicines_price",
+                    "clause": "`unit_price` >= 0"
+                }
+            ]
+        },
+        "medicine_batches": {
+            "engine": "InnoDB",
+            "collation": "utf8mb4_unicode_ci",
+            "columns": [
+                {
+                    "name": "id",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "PRI",
+                    "dflt": null,
+                    "extra": "auto_increment",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "medicine_id",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "MUL",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "batch_no",
+                    "type": "varchar(40)",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": 40,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "expiry_date",
+                    "type": "date",
+                    "nullable": "NO",
+                    "ckey": "MUL",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "quantity",
+                    "type": "int(11)",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": "0",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "received_at",
+                    "type": "datetime",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": "current_timestamp()",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                }
+            ],
+            "foreign_keys": [
+                {
+                    "col": "medicine_id",
+                    "ref_table": "medicines",
+                    "ref_col": "id",
+                    "delete_rule": "RESTRICT",
+                    "cname": "fk_batch_medicine"
+                }
+            ],
+            "indexes": [
+                {
+                    "name": "ix_batch_expiry",
+                    "unique": false,
+                    "columns": [
+                        "expiry_date"
+                    ]
+                },
+                {
+                    "name": "PRIMARY",
+                    "unique": true,
+                    "columns": [
+                        "id"
+                    ]
+                },
+                {
+                    "name": "uq_batch",
+                    "unique": true,
+                    "columns": [
+                        "medicine_id",
+                        "batch_no"
+                    ]
+                }
+            ],
+            "checks": [
+                {
+                    "name": "chk_batch_quantity",
+                    "clause": "`quantity` >= 0"
+                }
+            ]
+        },
+        "op_sequences": {
+            "engine": "InnoDB",
+            "collation": "utf8mb4_unicode_ci",
+            "columns": [
+                {
+                    "name": "year",
+                    "type": "smallint(5) unsigned",
+                    "nullable": "NO",
+                    "ckey": "PRI",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 5,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "last_number",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": "0",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                }
+            ],
+            "foreign_keys": [],
+            "indexes": [
+                {
+                    "name": "PRIMARY",
+                    "unique": true,
+                    "columns": [
+                        "year"
+                    ]
+                }
+            ],
+            "checks": []
+        },
+        "patients": {
+            "engine": "InnoDB",
+            "collation": "utf8mb4_unicode_ci",
+            "columns": [
+                {
+                    "name": "id",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "PRI",
+                    "dflt": null,
+                    "extra": "auto_increment",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "op_number",
+                    "type": "varchar(20)",
+                    "nullable": "NO",
+                    "ckey": "UNI",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": 20,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "first_name",
+                    "type": "varchar(50)",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": 50,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "middle_name",
+                    "type": "varchar(50)",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": 50,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "last_name",
+                    "type": "varchar(50)",
+                    "nullable": "NO",
+                    "ckey": "MUL",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": 50,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "sex",
+                    "type": "enum('Female','Male')",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": 6,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "date_of_birth",
+                    "type": "date",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "dob_estimated",
+                    "type": "tinyint(1)",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": "0",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 3,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "national_id",
+                    "type": "varchar(20)",
+                    "nullable": "YES",
+                    "ckey": "UNI",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": 20,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "phone",
+                    "type": "varchar(15)",
+                    "nullable": "YES",
+                    "ckey": "MUL",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": 15,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "residence",
+                    "type": "varchar(100)",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": 100,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "allergies",
+                    "type": "varchar(255)",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": 255,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "next_of_kin_name",
+                    "type": "varchar(100)",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": 100,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "next_of_kin_phone",
+                    "type": "varchar(15)",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": 15,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "next_of_kin_relation",
+                    "type": "varchar(40)",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": 40,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "registered_by",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "MUL",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "created_at",
+                    "type": "datetime",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": "current_timestamp()",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "updated_at",
+                    "type": "datetime",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "on update current_timestamp()",
+                    "maxlen": null,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                }
+            ],
+            "foreign_keys": [
+                {
+                    "col": "registered_by",
+                    "ref_table": "users",
+                    "ref_col": "id",
+                    "delete_rule": "RESTRICT",
+                    "cname": "fk_patients_user"
+                }
+            ],
+            "indexes": [
+                {
+                    "name": "fk_patients_user",
+                    "unique": false,
+                    "columns": [
+                        "registered_by"
+                    ]
+                },
+                {
+                    "name": "ix_patients_name",
+                    "unique": false,
+                    "columns": [
+                        "last_name",
+                        "first_name"
+                    ]
+                },
+                {
+                    "name": "ix_patients_phone",
+                    "unique": false,
+                    "columns": [
+                        "phone"
+                    ]
+                },
+                {
+                    "name": "PRIMARY",
+                    "unique": true,
+                    "columns": [
+                        "id"
+                    ]
+                },
+                {
+                    "name": "uq_patients_national_id",
+                    "unique": true,
+                    "columns": [
+                        "national_id"
+                    ]
+                },
+                {
+                    "name": "uq_patients_op",
+                    "unique": true,
+                    "columns": [
+                        "op_number"
+                    ]
+                }
+            ],
+            "checks": []
+        },
+        "payments": {
+            "engine": "InnoDB",
+            "collation": "utf8mb4_unicode_ci",
+            "columns": [
+                {
+                    "name": "id",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "PRI",
+                    "dflt": null,
+                    "extra": "auto_increment",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "invoice_id",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "MUL",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "amount",
+                    "type": "decimal(12,2)",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 12,
+                    "scale": 2,
+                    "genexpr": null
+                },
+                {
+                    "name": "method",
+                    "type": "enum('Cash','M-Pesa','Card','Insurance')",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": 9,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "reference",
+                    "type": "varchar(40)",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": 40,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "received_by",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "MUL",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "paid_at",
+                    "type": "datetime",
+                    "nullable": "NO",
+                    "ckey": "MUL",
+                    "dflt": "current_timestamp()",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                }
+            ],
+            "foreign_keys": [
+                {
+                    "col": "invoice_id",
+                    "ref_table": "invoices",
+                    "ref_col": "id",
+                    "delete_rule": "RESTRICT",
+                    "cname": "fk_pay_invoice"
+                },
+                {
+                    "col": "received_by",
+                    "ref_table": "users",
+                    "ref_col": "id",
+                    "delete_rule": "RESTRICT",
+                    "cname": "fk_pay_user"
+                }
+            ],
+            "indexes": [
+                {
+                    "name": "fk_pay_invoice",
+                    "unique": false,
+                    "columns": [
+                        "invoice_id"
+                    ]
+                },
+                {
+                    "name": "fk_pay_user",
+                    "unique": false,
+                    "columns": [
+                        "received_by"
+                    ]
+                },
+                {
+                    "name": "ix_pay_paid_at",
+                    "unique": false,
+                    "columns": [
+                        "paid_at"
+                    ]
+                },
+                {
+                    "name": "PRIMARY",
+                    "unique": true,
+                    "columns": [
+                        "id"
+                    ]
+                }
+            ],
+            "checks": [
+                {
+                    "name": "chk_pay_amount",
+                    "clause": "`amount` > 0"
+                }
+            ]
+        },
+        "prescriptions": {
+            "engine": "InnoDB",
+            "collation": "utf8mb4_unicode_ci",
+            "columns": [
+                {
+                    "name": "id",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "PRI",
+                    "dflt": null,
+                    "extra": "auto_increment",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "visit_id",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "MUL",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "prescribed_by",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "MUL",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "status",
+                    "type": "enum('Pending','Partially dispensed','Dispensed')",
+                    "nullable": "NO",
+                    "ckey": "MUL",
+                    "dflt": "'Pending'",
+                    "extra": "",
+                    "maxlen": 19,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "created_at",
+                    "type": "datetime",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": "current_timestamp()",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                }
+            ],
+            "foreign_keys": [
+                {
+                    "col": "prescribed_by",
+                    "ref_table": "users",
+                    "ref_col": "id",
+                    "delete_rule": "RESTRICT",
+                    "cname": "fk_rx_user"
+                },
+                {
+                    "col": "visit_id",
+                    "ref_table": "visits",
+                    "ref_col": "id",
+                    "delete_rule": "RESTRICT",
+                    "cname": "fk_rx_visit"
+                }
+            ],
+            "indexes": [
+                {
+                    "name": "fk_rx_user",
+                    "unique": false,
+                    "columns": [
+                        "prescribed_by"
+                    ]
+                },
+                {
+                    "name": "fk_rx_visit",
+                    "unique": false,
+                    "columns": [
+                        "visit_id"
+                    ]
+                },
+                {
+                    "name": "ix_rx_status",
+                    "unique": false,
+                    "columns": [
+                        "status"
+                    ]
+                },
+                {
+                    "name": "PRIMARY",
+                    "unique": true,
+                    "columns": [
+                        "id"
+                    ]
+                }
+            ],
+            "checks": []
+        },
+        "prescription_items": {
+            "engine": "InnoDB",
+            "collation": "utf8mb4_unicode_ci",
+            "columns": [
+                {
+                    "name": "id",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "PRI",
+                    "dflt": null,
+                    "extra": "auto_increment",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "prescription_id",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "MUL",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "medicine_id",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "MUL",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "dosage",
+                    "type": "varchar(60)",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": 60,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "frequency",
+                    "type": "varchar(60)",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": 60,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "duration",
+                    "type": "varchar(60)",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": 60,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "quantity",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "dispensed_qty",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": "0",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                }
+            ],
+            "foreign_keys": [
+                {
+                    "col": "medicine_id",
+                    "ref_table": "medicines",
+                    "ref_col": "id",
+                    "delete_rule": "RESTRICT",
+                    "cname": "fk_rxi_medicine"
+                },
+                {
+                    "col": "prescription_id",
+                    "ref_table": "prescriptions",
+                    "ref_col": "id",
+                    "delete_rule": "RESTRICT",
+                    "cname": "fk_rxi_rx"
+                }
+            ],
+            "indexes": [
+                {
+                    "name": "fk_rxi_medicine",
+                    "unique": false,
+                    "columns": [
+                        "medicine_id"
+                    ]
+                },
+                {
+                    "name": "fk_rxi_rx",
+                    "unique": false,
+                    "columns": [
+                        "prescription_id"
+                    ]
+                },
+                {
+                    "name": "PRIMARY",
+                    "unique": true,
+                    "columns": [
+                        "id"
+                    ]
+                }
+            ],
+            "checks": [
+                {
+                    "name": "chk_rxi_qty",
+                    "clause": "`quantity` > 0 and `dispensed_qty` <= `quantity`"
+                }
+            ]
+        },
+        "roles": {
+            "engine": "InnoDB",
+            "collation": "utf8mb4_unicode_ci",
+            "columns": [
+                {
+                    "name": "id",
+                    "type": "tinyint(3) unsigned",
+                    "nullable": "NO",
+                    "ckey": "PRI",
+                    "dflt": null,
+                    "extra": "auto_increment",
+                    "maxlen": null,
+                    "prec": 3,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "code",
+                    "type": "varchar(30)",
+                    "nullable": "NO",
+                    "ckey": "UNI",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": 30,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "name",
+                    "type": "varchar(60)",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": 60,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "description",
+                    "type": "varchar(255)",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": 255,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                }
+            ],
+            "foreign_keys": [],
+            "indexes": [
+                {
+                    "name": "PRIMARY",
+                    "unique": true,
+                    "columns": [
+                        "id"
+                    ]
+                },
+                {
+                    "name": "uq_roles_code",
+                    "unique": true,
+                    "columns": [
+                        "code"
+                    ]
+                }
+            ],
+            "checks": []
+        },
+        "services": {
+            "engine": "InnoDB",
+            "collation": "utf8mb4_unicode_ci",
+            "columns": [
+                {
+                    "name": "id",
+                    "type": "smallint(5) unsigned",
+                    "nullable": "NO",
+                    "ckey": "PRI",
+                    "dflt": null,
+                    "extra": "auto_increment",
+                    "maxlen": null,
+                    "prec": 5,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "name",
+                    "type": "varchar(100)",
+                    "nullable": "NO",
+                    "ckey": "UNI",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": 100,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "category",
+                    "type": "enum('Consultation','Procedure','Other')",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": "'Other'",
+                    "extra": "",
+                    "maxlen": 12,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "price",
+                    "type": "decimal(10,2)",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": "0.00",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 2,
+                    "genexpr": null
+                },
+                {
+                    "name": "is_active",
+                    "type": "tinyint(1)",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": "1",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 3,
+                    "scale": 0,
+                    "genexpr": null
+                }
+            ],
+            "foreign_keys": [],
+            "indexes": [
+                {
+                    "name": "PRIMARY",
+                    "unique": true,
+                    "columns": [
+                        "id"
+                    ]
+                },
+                {
+                    "name": "uq_services_name",
+                    "unique": true,
+                    "columns": [
+                        "name"
+                    ]
+                }
+            ],
+            "checks": [
+                {
+                    "name": "chk_services_price",
+                    "clause": "`price` >= 0"
+                }
+            ]
+        },
+        "stock_movements": {
+            "engine": "InnoDB",
+            "collation": "utf8mb4_unicode_ci",
+            "columns": [
+                {
+                    "name": "id",
+                    "type": "bigint(20) unsigned",
+                    "nullable": "NO",
+                    "ckey": "PRI",
+                    "dflt": null,
+                    "extra": "auto_increment",
+                    "maxlen": null,
+                    "prec": 20,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "medicine_id",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "MUL",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "batch_id",
+                    "type": "int(10) unsigned",
+                    "nullable": "YES",
+                    "ckey": "MUL",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "type",
+                    "type": "enum('Receive','Dispense','Adjust')",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": 8,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "quantity",
+                    "type": "int(11)",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "reference",
+                    "type": "varchar(60)",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": 60,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "user_id",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "MUL",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "created_at",
+                    "type": "datetime",
+                    "nullable": "NO",
+                    "ckey": "MUL",
+                    "dflt": "current_timestamp()",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                }
+            ],
+            "foreign_keys": [
+                {
+                    "col": "batch_id",
+                    "ref_table": "medicine_batches",
+                    "ref_col": "id",
+                    "delete_rule": "RESTRICT",
+                    "cname": "fk_stock_batch"
+                },
+                {
+                    "col": "medicine_id",
+                    "ref_table": "medicines",
+                    "ref_col": "id",
+                    "delete_rule": "RESTRICT",
+                    "cname": "fk_stock_medicine"
+                },
+                {
+                    "col": "user_id",
+                    "ref_table": "users",
+                    "ref_col": "id",
+                    "delete_rule": "RESTRICT",
+                    "cname": "fk_stock_user"
+                }
+            ],
+            "indexes": [
+                {
+                    "name": "fk_stock_batch",
+                    "unique": false,
+                    "columns": [
+                        "batch_id"
+                    ]
+                },
+                {
+                    "name": "fk_stock_medicine",
+                    "unique": false,
+                    "columns": [
+                        "medicine_id"
+                    ]
+                },
+                {
+                    "name": "fk_stock_user",
+                    "unique": false,
+                    "columns": [
+                        "user_id"
+                    ]
+                },
+                {
+                    "name": "ix_stock_created",
+                    "unique": false,
+                    "columns": [
+                        "created_at"
+                    ]
+                },
+                {
+                    "name": "PRIMARY",
+                    "unique": true,
+                    "columns": [
+                        "id"
+                    ]
+                }
+            ],
+            "checks": []
+        },
+        "triage": {
+            "engine": "InnoDB",
+            "collation": "utf8mb4_unicode_ci",
+            "columns": [
+                {
+                    "name": "id",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "PRI",
+                    "dflt": null,
+                    "extra": "auto_increment",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "visit_id",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "UNI",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "temperature",
+                    "type": "decimal(4,1)",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 4,
+                    "scale": 1,
+                    "genexpr": null
+                },
+                {
+                    "name": "pulse",
+                    "type": "smallint(5) unsigned",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 5,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "bp_systolic",
+                    "type": "smallint(5) unsigned",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 5,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "bp_diastolic",
+                    "type": "smallint(5) unsigned",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 5,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "resp_rate",
+                    "type": "smallint(5) unsigned",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 5,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "spo2",
+                    "type": "tinyint(3) unsigned",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 3,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "weight_kg",
+                    "type": "decimal(5,1)",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 5,
+                    "scale": 1,
+                    "genexpr": null
+                },
+                {
+                    "name": "height_cm",
+                    "type": "decimal(5,1)",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 5,
+                    "scale": 1,
+                    "genexpr": null
+                },
+                {
+                    "name": "notes",
+                    "type": "varchar(500)",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": 500,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "recorded_by",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "MUL",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "recorded_at",
+                    "type": "datetime",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": "current_timestamp()",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                }
+            ],
+            "foreign_keys": [
+                {
+                    "col": "recorded_by",
+                    "ref_table": "users",
+                    "ref_col": "id",
+                    "delete_rule": "RESTRICT",
+                    "cname": "fk_triage_user"
+                },
+                {
+                    "col": "visit_id",
+                    "ref_table": "visits",
+                    "ref_col": "id",
+                    "delete_rule": "RESTRICT",
+                    "cname": "fk_triage_visit"
+                }
+            ],
+            "indexes": [
+                {
+                    "name": "fk_triage_user",
+                    "unique": false,
+                    "columns": [
+                        "recorded_by"
+                    ]
+                },
+                {
+                    "name": "PRIMARY",
+                    "unique": true,
+                    "columns": [
+                        "id"
+                    ]
+                },
+                {
+                    "name": "uq_triage_visit",
+                    "unique": true,
+                    "columns": [
+                        "visit_id"
+                    ]
+                }
+            ],
+            "checks": []
+        },
+        "users": {
+            "engine": "InnoDB",
+            "collation": "utf8mb4_unicode_ci",
+            "columns": [
+                {
+                    "name": "id",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "PRI",
+                    "dflt": null,
+                    "extra": "auto_increment",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "full_name",
+                    "type": "varchar(120)",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": 120,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "username",
+                    "type": "varchar(40)",
+                    "nullable": "NO",
+                    "ckey": "UNI",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": 40,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "password_hash",
+                    "type": "varchar(255)",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": 255,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "role_id",
+                    "type": "tinyint(3) unsigned",
+                    "nullable": "NO",
+                    "ckey": "MUL",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 3,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "phone",
+                    "type": "varchar(15)",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": 15,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "is_active",
+                    "type": "tinyint(1)",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": "1",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 3,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "must_change_password",
+                    "type": "tinyint(1)",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": "1",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 3,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "failed_attempts",
+                    "type": "tinyint(3) unsigned",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": "0",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 3,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "locked_until",
+                    "type": "datetime",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "last_login_at",
+                    "type": "datetime",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "created_at",
+                    "type": "datetime",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": "current_timestamp()",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "updated_at",
+                    "type": "datetime",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "on update current_timestamp()",
+                    "maxlen": null,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                }
+            ],
+            "foreign_keys": [
+                {
+                    "col": "role_id",
+                    "ref_table": "roles",
+                    "ref_col": "id",
+                    "delete_rule": "RESTRICT",
+                    "cname": "fk_users_role"
+                }
+            ],
+            "indexes": [
+                {
+                    "name": "fk_users_role",
+                    "unique": false,
+                    "columns": [
+                        "role_id"
+                    ]
+                },
+                {
+                    "name": "PRIMARY",
+                    "unique": true,
+                    "columns": [
+                        "id"
+                    ]
+                },
+                {
+                    "name": "uq_users_username",
+                    "unique": true,
+                    "columns": [
+                        "username"
+                    ]
+                }
+            ],
+            "checks": []
+        },
+        "visits": {
+            "engine": "InnoDB",
+            "collation": "utf8mb4_unicode_ci",
+            "columns": [
+                {
+                    "name": "id",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "PRI",
+                    "dflt": null,
+                    "extra": "auto_increment",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "patient_id",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "MUL",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "appointment_id",
+                    "type": "int(10) unsigned",
+                    "nullable": "YES",
+                    "ckey": "UNI",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "doctor_id",
+                    "type": "int(10) unsigned",
+                    "nullable": "YES",
+                    "ckey": "MUL",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "reason",
+                    "type": "varchar(255)",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": 255,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "visit_date",
+                    "type": "datetime",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": "current_timestamp()",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "status",
+                    "type": "enum('Open','Closed')",
+                    "nullable": "NO",
+                    "ckey": "MUL",
+                    "dflt": "'Open'",
+                    "extra": "",
+                    "maxlen": 6,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "opened_by",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "MUL",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "closed_at",
+                    "type": "datetime",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                }
+            ],
+            "foreign_keys": [
+                {
+                    "col": "appointment_id",
+                    "ref_table": "appointments",
+                    "ref_col": "id",
+                    "delete_rule": "RESTRICT",
+                    "cname": "fk_visits_appt"
+                },
+                {
+                    "col": "doctor_id",
+                    "ref_table": "users",
+                    "ref_col": "id",
+                    "delete_rule": "RESTRICT",
+                    "cname": "fk_visits_doctor"
+                },
+                {
+                    "col": "patient_id",
+                    "ref_table": "patients",
+                    "ref_col": "id",
+                    "delete_rule": "RESTRICT",
+                    "cname": "fk_visits_patient"
+                },
+                {
+                    "col": "opened_by",
+                    "ref_table": "users",
+                    "ref_col": "id",
+                    "delete_rule": "RESTRICT",
+                    "cname": "fk_visits_user"
+                }
+            ],
+            "indexes": [
+                {
+                    "name": "fk_visits_doctor",
+                    "unique": false,
+                    "columns": [
+                        "doctor_id"
+                    ]
+                },
+                {
+                    "name": "fk_visits_user",
+                    "unique": false,
+                    "columns": [
+                        "opened_by"
+                    ]
+                },
+                {
+                    "name": "ix_visits_patient",
+                    "unique": false,
+                    "columns": [
+                        "patient_id"
+                    ]
+                },
+                {
+                    "name": "ix_visits_status_date",
+                    "unique": false,
+                    "columns": [
+                        "status",
+                        "visit_date"
+                    ]
+                },
+                {
+                    "name": "PRIMARY",
+                    "unique": true,
+                    "columns": [
+                        "id"
+                    ]
+                },
+                {
+                    "name": "uq_visits_appointment",
+                    "unique": true,
+                    "columns": [
+                        "appointment_id"
+                    ]
+                }
+            ],
+            "checks": []
+        },
+        "visit_services": {
+            "engine": "InnoDB",
+            "collation": "utf8mb4_unicode_ci",
+            "columns": [
+                {
+                    "name": "id",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "PRI",
+                    "dflt": null,
+                    "extra": "auto_increment",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "visit_id",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "MUL",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "service_id",
+                    "type": "smallint(5) unsigned",
+                    "nullable": "NO",
+                    "ckey": "MUL",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 5,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "quantity",
+                    "type": "smallint(5) unsigned",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": "1",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 5,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "recorded_by",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "MUL",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "recorded_at",
+                    "type": "datetime",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": "current_timestamp()",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                }
+            ],
+            "foreign_keys": [
+                {
+                    "col": "service_id",
+                    "ref_table": "services",
+                    "ref_col": "id",
+                    "delete_rule": "RESTRICT",
+                    "cname": "fk_vs_service"
+                },
+                {
+                    "col": "recorded_by",
+                    "ref_table": "users",
+                    "ref_col": "id",
+                    "delete_rule": "RESTRICT",
+                    "cname": "fk_vs_user"
+                },
+                {
+                    "col": "visit_id",
+                    "ref_table": "visits",
+                    "ref_col": "id",
+                    "delete_rule": "RESTRICT",
+                    "cname": "fk_vs_visit"
+                }
+            ],
+            "indexes": [
+                {
+                    "name": "fk_vs_service",
+                    "unique": false,
+                    "columns": [
+                        "service_id"
+                    ]
+                },
+                {
+                    "name": "fk_vs_user",
+                    "unique": false,
+                    "columns": [
+                        "recorded_by"
+                    ]
+                },
+                {
+                    "name": "fk_vs_visit",
+                    "unique": false,
+                    "columns": [
+                        "visit_id"
+                    ]
+                },
+                {
+                    "name": "PRIMARY",
+                    "unique": true,
+                    "columns": [
+                        "id"
+                    ]
+                }
+            ],
+            "checks": [
+                {
+                    "name": "chk_vs_qty",
+                    "clause": "`quantity` > 0"
+                }
+            ]
+        }
+    }
+}

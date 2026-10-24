@@ -1,0 +1,31 @@
+digraph book {
+  graph [fontname="Arial", fontsize=13, bgcolor="white", pad="0.15"];
+  node  [fontname="Arial", fontsize=13, color="black", fontcolor="black"];
+  edge  [fontname="Arial", fontsize=11, color="black", fontcolor="black", arrowsize=0.8];
+  rankdir=TB; nodesep=0.3; ranksep=0.24;
+  node [fontsize=12, margin="0.1,0.05"];
+  edge [fontsize=11];
+  s [shape=box, style="rounded,bold", penwidth=1.5, label="Start"];
+  i [shape=parallelogram, label="Receive patient, doctor,\ndate, time and reason"];
+  c [shape=box, label="Check: patient and active\ndoctor exist; date is today or\nlater, within 90 days and a\nworking day; time is on the\n20-minute grid and not past"];
+  d1 [shape=diamond, margin="0.0,0.0", label="All checks passed?"];
+  e1 [shape=parallelogram, label="Show the reason beside the\nfield"];
+  t [shape=box, label="Begin a transaction and lock\nthe doctor's row"];
+  d2 [shape=diamond, margin="0.0,0.0", label="Doctor or patient\nalready booked then?"];
+  e2 [shape=parallelogram, label="Roll back; ask for another\nslot"];
+  w [shape=box, label="Save the appointment as Booked\n(the database's unique slot\nkey is the final guard), write\nthe audit entry, commit"];
+  o [shape=parallelogram, label="Show the diary for that\nday"];
+  f [shape=box, style="rounded,bold", penwidth=1.5, label="End"];
+  {rank=same; d1; e1;}
+  {rank=same; d2; e2;}
+  s -> i;
+  i -> c;
+  c -> d1;
+  d1 -> e1 [label="no"];
+  d1 -> t [label="yes"];
+  t -> d2;
+  d2 -> e2 [label="yes"];
+  d2 -> w [label="no"];
+  w -> o;
+  o -> f;
+}

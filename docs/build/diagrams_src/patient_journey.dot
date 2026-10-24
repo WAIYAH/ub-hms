@@ -1,0 +1,23 @@
+digraph journey {
+  graph [fontname="Arial", fontsize=13, bgcolor="white", pad="0.15"];
+  node  [fontname="Arial", fontsize=13, color="black", fontcolor="black"];
+  edge  [fontname="Arial", fontsize=11, color="black", fontcolor="black", arrowsize=0.8];
+
+  rankdir=TB; nodesep=0.9; ranksep=0.5;
+  node [shape=box, style="rounded", fontsize=13, margin="0.2,0.12"];
+  A [label=<<B>RECEPTION</B><BR/><BR ALIGN="LEFT"/>Register once (OPyy-nnnnn)<BR ALIGN="LEFT"/>Book appointment, no clash<BR ALIGN="LEFT"/>Check in, open the visit<BR ALIGN="LEFT"/>>];
+  B [label=<<B>TRIAGE</B><BR/><BR ALIGN="LEFT"/>Nurse records vital signs<BR ALIGN="LEFT"/>Procedures are recorded<BR ALIGN="LEFT"/>>];
+  C [label=<<B>CONSULTATION</B><BR/><BR ALIGN="LEFT"/>Doctor sees history and allergies<BR ALIGN="LEFT"/>Diagnosis: ICD-10 and words<BR ALIGN="LEFT"/>Requests tests, prescribes<BR ALIGN="LEFT"/>>];
+  D [label=<<B>LABORATORY</B><BR/><BR ALIGN="LEFT"/>Worklist, enter result<BR ALIGN="LEFT"/>Result returns to the<BR ALIGN="LEFT"/>requesting doctor<BR ALIGN="LEFT"/>>];
+  E [label=<<B>PHARMACY</B><BR/><BR ALIGN="LEFT"/>Prescription queue<BR ALIGN="LEFT"/>Dispense, first expiry first<BR ALIGN="LEFT"/>Stock deducted, alerts<BR ALIGN="LEFT"/>>];
+  F [label=<<B>CASHIER</B><BR/><BR ALIGN="LEFT"/>Invoice built automatically<BR ALIGN="LEFT"/>Full or part payment<BR ALIGN="LEFT"/>Receipt<BR ALIGN="LEFT"/>>];
+  G [label=<<B>MANAGEMENT</B><BR/><BR ALIGN="LEFT"/>Attendance, revenue, stock<BR ALIGN="LEFT"/>and laboratory reports<BR ALIGN="LEFT"/>>];
+  {rank=same; D; E;}
+  A -> B -> C;
+  C -> D [label="  test request"]; D -> C [label="result  ", constraint=false];
+  C -> E [label="  prescription"];
+  C -> F [label="consultation fee", style=dashed];
+  D -> F [label="test charge", style=dashed];
+  E -> F [label="medicine charge", style=dashed];
+  F -> G [label="records feed the reports"];
+}

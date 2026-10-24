@@ -1,0 +1,36 @@
+digraph consult {
+  graph [fontname="Arial", fontsize=13, bgcolor="white", pad="0.15"];
+  node  [fontname="Arial", fontsize=13, color="black", fontcolor="black"];
+  edge  [fontname="Arial", fontsize=11, color="black", fontcolor="black", arrowsize=0.8];
+  rankdir=TB; nodesep=0.3; ranksep=0.24;
+  node [fontsize=12, margin="0.1,0.05"];
+  edge [fontsize=11];
+  s [shape=box, style="rounded,bold", penwidth=1.5, label="Start: patient is waiting for the doctor"];
+  c [shape=parallelogram, label="Doctor enters complaint,\ndiagnosis, optional ICD-10\ncode and plan"];
+  d3 [shape=diamond, margin="0.0,0.0", label="Complaint, diagnosis,\ncode valid?"];
+  e2 [shape=parallelogram, label="Show messages and ask\nagain"];
+  d5 [shape=diamond, margin="0.0,0.0", label="Recorded by another\ndoctor?"];
+  e4 [shape=parallelogram, label="Refuse: only that doctor\ncan change it"];
+  sc [shape=box, label="Save the consultation, record\nthe doctor, charge the\nconsultation fee, write the\naudit entry"];
+  o [shape=box, label="Doctor requests tests,\nprescribes and records\nprocedures (own pages)"];
+  cl [shape=box, label="Doctor closes the visit"];
+  d4 [shape=diamond, margin="0.0,0.0", label="Consultation\nrecorded?"];
+  e3 [shape=parallelogram, label="Refuse: record the\nconsultation first"];
+  f [shape=box, style="rounded,bold", penwidth=1.5, label="End (visit closed)"];
+  {rank=same; d3; e2;}
+  {rank=same; d5; e4;}
+  {rank=same; d4; e3;}
+  s -> c;
+  c -> d3;
+  d3 -> e2 [label="no"];
+  e2 -> c [constraint=false];
+  d3 -> d5 [label="yes"];
+  d5 -> e4 [label="yes"];
+  d5 -> sc [label="no"];
+  sc -> o;
+  o -> cl;
+  cl -> d4;
+  d4 -> e3 [label="no"];
+  e3 -> o [constraint=false];
+  d4 -> f [label="yes"];
+}
