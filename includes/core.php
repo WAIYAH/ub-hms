@@ -17,7 +17,7 @@ foreach ([
 }
 
 // Modules added in later sprints are loaded when present.
-foreach (['laboratory', 'pharmacy', 'billing', 'reports'] as $module) {
+foreach (['laboratory', 'pharmacy', 'orders', 'billing', 'reports'] as $module) {
     $file = __DIR__ . '/' . $module . '.php';
     if (is_file($file)) {
         require_once $file;

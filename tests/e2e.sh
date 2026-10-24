@@ -171,8 +171,8 @@ sec_sprint1() {
   check E2E-035 "Signing out ends the session" '[[ "$r" == 303* && "$(code rec patients/index.php)" == 303 ]]'
 
   # lockout over HTTP
-  for i in 1 2 3 4 5; do login lock lab1 "Wrong#Password$i" >/dev/null; done
-  r=$(login lock lab1 "$DEMO_PW")
+  for i in 1 2 3 4 5; do login lock manager1 "Wrong#Password$i" >/dev/null; done
+  r=$(login lock manager1 "$DEMO_PW")
   check E2E-036 "An account locked by five wrong passwords refuses the right password" 'body | grep -q "locked"'
 }
 
@@ -288,6 +288,126 @@ sec_sprint2() {
   check E2E-070 "The doctor's patient record shows the diagnosis in the visit history" '[[ "$h" == *"Upper respiratory infection"* && "$h" == *"J06.9"* ]]'
   h=$(get admin admin/audit.php)
   check E2E-071 "The audit trail records check-in, triage and consultation" '[[ "$h" == *"checkin"* && "$h" == *"triage"* && "$h" == *"consultation"* ]]'
+}
+
+# =====================================================================
+# SPRINT 3: laboratory, prescriptions, dispensing, stock
+# =====================================================================
+
+# Register a patient, check in, triage and let doctor1 record a consultation. Sets NEW_PID and NEW_VID.
+e2e_new_visit() { # first last national_id
+  local r h svc
+  r=$(form rec patients/register.php patients/register.php --data-urlencode "first_name=$1" --data-urlencode "last_name=$2" --data-urlencode "sex=Female" --data-urlencode "date_of_birth=1993-07-07" --data-urlencode "national_id=$3" --data-urlencode "allergies=$4")
+  NEW_PID=$(echo "$r" | grep -o 'id=[0-9]*' | cut -d= -f2)
+  form rec "visits/checkin.php?patient_id=$NEW_PID" "visits/checkin.php?patient_id=$NEW_PID" --data-urlencode "patient_id=$NEW_PID" --data-urlencode "appointment_id=" --data-urlencode "reason=Fever" >/dev/null
+  h=$(get nurse "visits/queue.php?stage=triage")
+  NEW_VID=$(echo "$h" | grep -A10 "$1 $2" | grep -o 'triage.php?visit=[0-9]*' | head -1 | cut -d= -f2)
+  form nurse "visits/triage.php?visit=$NEW_VID" "visits/triage.php?visit=$NEW_VID" --data-urlencode "visit=$NEW_VID" --data-urlencode "action=triage" --data-urlencode "temperature=38.2" --data-urlencode "pulse=90" >/dev/null
+  h=$(get doc "visits/consult.php?visit=$NEW_VID")
+  svc=$(echo "$h" | grep -o '<option value="[0-9]*"[^>]*>General consultation' | grep -o 'value="[0-9]*"' | grep -o '[0-9]*' | head -1)
+  form doc "visits/consult.php?visit=$NEW_VID" "visits/consult.php?visit=$NEW_VID" --data-urlencode "visit=$NEW_VID" --data-urlencode "action=consultation" --data-urlencode "service_id=$svc" --data-urlencode "complaint=Fever and headache" --data-urlencode "diagnosis=Suspected malaria" --data-urlencode "icd10_code=B54" >/dev/null
+}
+
+sec_sprint3() {
+  echo; echo "== Sprint 3: laboratory, prescriptions, dispensing and stock"
+  local r h vid pid testid medid medid2 d60 d400 d200 d_old
+
+  login lab lab1 "$DEMO_PW" >/dev/null
+  login pharm pharmacist1 "$DEMO_PW" >/dev/null
+  login doc2 doctor2 "$DEMO_PW" >/dev/null
+  login cash cashier1 "$DEMO_PW" >/dev/null
+  d60=$(date -d "+60 days" +%F); d200=$(date -d "+200 days" +%F); d400=$(date -d "+400 days" +%F); d_old=$(date -d "-10 days" +%F)
+
+  # --- pharmacy set-up: medicines and stock ---
+  r=$(form pharm pharmacy/medicine.php pharmacy/medicine.php --data-urlencode "name=Paracetamol" --data-urlencode "strength=500 mg" --data-urlencode "form=Tablet" --data-urlencode "unit=tablet" --data-urlencode "unit_price=5.00" --data-urlencode "reorder_level=50" --data-urlencode "is_active=1")
+  check E2E-080 "The pharmacist adds a medicine to the list" '[[ "$r" == 303* ]] && get pharm pharmacy/medicines.php | grep -q "Paracetamol"'
+  r=$(form pharm pharmacy/medicine.php pharmacy/medicine.php --data-urlencode "name=Zincex" --data-urlencode "strength=20 mg" --data-urlencode "form=Dispersible" --data-urlencode "unit=tablet" --data-urlencode "unit_price=10.00" --data-urlencode "reorder_level=20" --data-urlencode "is_active=1")
+  r=$(form pharm pharmacy/medicine.php pharmacy/medicine.php --data-urlencode "name=<script>x</script>" --data-urlencode "unit_price=1" --data-urlencode "reorder_level=1" --data-urlencode "is_active=1")
+  check E2E-081 "Medicine names are escaped on screen" 'h=$(get pharm pharmacy/medicines.php); [[ "$h" == *"&lt;script&gt;x&lt;/script&gt;"* && "$h" != *"<script>x</script>"* ]]'
+  r=$(form pharm pharmacy/medicine.php pharmacy/medicine.php --data-urlencode "name=Bad" --data-urlencode "unit_price=abc" --data-urlencode "reorder_level=x")
+  check E2E-082 "An invalid price is refused" 'body | grep -q "Enter the price per unit"'
+
+  h=$(get pharm pharmacy/receive.php)
+  medid=$(echo "$h" | grep -o '<option value="[0-9]*">Paracetamol' | grep -o '[0-9]*' | head -1)
+  medid2=$(echo "$h" | grep -o '<option value="[0-9]*">Zincex' | grep -o '[0-9]*' | head -1)
+  r=$(form pharm pharmacy/receive.php pharmacy/receive.php --data-urlencode "medicine_id=$medid" --data-urlencode "batch_no=par-a1" --data-urlencode "expiry_date=$d60" --data-urlencode "quantity=30")
+  check E2E-083 "The pharmacist receives a batch that expires in 60 days" '[[ "$r" == 303* ]]'
+  r=$(form pharm pharmacy/receive.php pharmacy/receive.php --data-urlencode "medicine_id=$medid" --data-urlencode "batch_no=PAR-B2" --data-urlencode "expiry_date=$d400" --data-urlencode "quantity=500")
+  r=$(form pharm pharmacy/receive.php pharmacy/receive.php --data-urlencode "medicine_id=$medid2" --data-urlencode "batch_no=ZN-1" --data-urlencode "expiry_date=$d200" --data-urlencode "quantity=10")
+  r=$(form pharm pharmacy/receive.php pharmacy/receive.php --data-urlencode "medicine_id=$medid" --data-urlencode "batch_no=OLD1" --data-urlencode "expiry_date=$d_old" --data-urlencode "quantity=10")
+  check E2E-084 "Stock that has already expired cannot be received" 'body | grep -q "already expired"'
+  h=$(get pharm pharmacy/stock.php)
+  check E2E-085 "Stock page shows usable stock of 530 Paracetamol and Zincex as Low" '[[ "$h" == *"530"* && "$h" == *"Zincex"* && "$h" == *"badge-low"* ]]'
+  h=$(get pharm index.php)
+  check E2E-086 "The pharmacist dashboard warns about low stock and the batch expiring soon" '[[ "$h" == *"Reorder and use soon"* && "$h" == *"Zincex"* && "$h" == *"PAR-A1"* ]]'
+  h=$(get pharm pharmacy/batches.php)
+  check E2E-087 "Batches are listed with their expiry state" '[[ "$h" == *"PAR-A1"* && "$h" == *"badge-expiring"* && "$h" == *"PAR-B2"* ]]'
+
+  # --- a patient is seen by doctor1 ---
+  e2e_new_visit Imani Wekesa 32000003 "Penicillin"; vid=$NEW_VID; pid=$NEW_PID
+  h=$(get doc "visits/consult.php?visit=$vid")
+  check E2E-088 "The consultation page offers test requests and prescribing" '[[ "$h" == *"Request tests"* && "$h" == *"Prescribe"* && "$h" == *"Paracetamol 500 mg Tablet (530 in stock)"* ]]'
+
+  # --- laboratory round trip ---
+  testid=$(echo "$h" | grep -o 'name="test_ids\[\]" value="[0-9]*"> Malaria' | grep -o 'value="[0-9]*"' | grep -o '[0-9]*')
+  r=$(form doc "visits/consult.php?visit=$vid" "visits/consult.php?visit=$vid" --data-urlencode "visit=$vid" --data-urlencode "action=add_lab" --data-urlencode "test_ids[]=$testid" --data-urlencode "clinical_notes=Fever 3 days")
+  check E2E-089 "The doctor requests a malaria test" '[[ "$r" == 303* ]] && get doc "visits/consult.php?visit=$vid" | grep -q "Waiting for the laboratory"'
+  r=$(form doc "visits/consult.php?visit=$vid" "visits/consult.php?visit=$vid" --data-urlencode "visit=$vid" --data-urlencode "action=add_lab" --data-urlencode "test_ids[]=$testid")
+  check E2E-090 "Requesting the same pending test again is refused" 'get doc "visits/consult.php?visit=$vid" | grep -q "already been requested"'
+
+  h=$(get lab lab/index.php)
+  check E2E-091 "The laboratory worklist shows the test, the patient and the requesting doctor" '[[ "$h" == *"Malaria test"* && "$h" == *"Imani Wekesa"* && "$h" == *"Dr. Samuel Kamau"* ]]'
+  local lid; lid=$(echo "$h" | grep -A12 "Imani Wekesa" | grep -o 'lab/result.php?id=[0-9]*' | head -1 | grep -o '[0-9]*$')
+  r=$(form lab lab/index.php lab/index.php --data-urlencode "id=$lid")
+  check E2E-092 "The technologist starts the test" '[[ "$r" == 303* ]] && get lab lab/index.php | grep -q "In progress"'
+  r=$(form lab "lab/result.php?id=$lid" "lab/result.php?id=$lid" --data-urlencode "id=$lid" --data-urlencode "result=")
+  check E2E-093 "An empty result is refused" 'body | grep -q "Enter the result"'
+  r=$(form lab "lab/result.php?id=$lid" "lab/result.php?id=$lid" --data-urlencode "id=$lid" --data-urlencode "result=Malaria parasites seen (+)" --data-urlencode "is_abnormal=1")
+  check E2E-094 "The technologist enters the result" '[[ "$r" == 303* ]]'
+  h=$(get doc lab/results.php)
+  check E2E-095 "The result appears in the requesting doctor's list" '[[ "$h" == *"Malaria parasites seen (+)"* && "$h" == *"Abnormal"* ]]'
+  h=$(get doc "visits/consult.php?visit=$vid")
+  check E2E-096 "The result also appears on the consultation page" '[[ "$h" == *"Malaria parasites seen (+)"* ]]'
+  h=$(get doc2 lab/results.php)
+  check E2E-097 "Another doctor does not see this doctor's results" '[[ "$h" != *"Malaria parasites seen"* ]]'
+
+  # --- prescribing and dispensing ---
+  r=$(form doc "visits/consult.php?visit=$vid" "visits/consult.php?visit=$vid" --data-urlencode "visit=$vid" --data-urlencode "action=add_rx" \
+      --data-urlencode "rx[0][medicine_id]=$medid" --data-urlencode "rx[0][quantity]=40" --data-urlencode "rx[0][dosage]=1 tablet" --data-urlencode "rx[0][frequency]=three times a day" --data-urlencode "rx[0][duration]=5 days" \
+      --data-urlencode "rx[1][medicine_id]=$medid2" --data-urlencode "rx[1][quantity]=50" --data-urlencode "rx[1][dosage]=1 tablet" --data-urlencode "rx[1][frequency]=daily" --data-urlencode "rx[1][duration]=10 days")
+  check E2E-098 "The doctor prescribes two medicines" '[[ "$r" == 303* ]] && get doc "visits/consult.php?visit=$vid" | grep -q "Pending"'
+  r=$(form doc "visits/consult.php?visit=$vid" "visits/consult.php?visit=$vid" --data-urlencode "visit=$vid" --data-urlencode "action=add_rx" --data-urlencode "rx[0][medicine_id]=$medid" --data-urlencode "rx[0][quantity]=0" --data-urlencode "rx[0][dosage]=1" --data-urlencode "rx[0][frequency]=daily")
+  check E2E-099 "A prescription line with quantity zero is refused" 'get doc "visits/consult.php?visit=$vid" | grep -q "whole number from 1 to 9999"'
+
+  h=$(get pharm pharmacy/index.php)
+  check E2E-100 "The prescription is waiting in the pharmacy queue with an allergy flag" '[[ "$h" == *"Imani Wekesa"* && "$h" == *"Allergy"* ]]'
+  local rxid; rxid=$(echo "$h" | grep -o 'dispense.php?id=[0-9]*' | tail -1 | grep -o '[0-9]*$')
+  h=$(get pharm "pharmacy/dispense.php?id=$rxid")
+  local item1 item2; item1=$(echo "$h" | grep -o 'name="qty\[[0-9]*\]"' | head -1 | grep -o '[0-9]*'); item2=$(echo "$h" | grep -o 'name="qty\[[0-9]*\]"' | tail -1 | grep -o '[0-9]*')
+  check E2E-101 "The dispensing page shows what to give and the stock available" '[[ "$h" == *"three times a day"* && "$h" == *"530"* ]]'
+  r=$(post pharm "pharmacy/dispense.php?id=$rxid" --data-urlencode "id=$rxid" --data-urlencode "qty[$item1]=40")
+  check E2E-102 "Dispensing without a CSRF token is refused" '[[ "$r" == 419* ]]'
+  r=$(form pharm "pharmacy/dispense.php?id=$rxid" "pharmacy/dispense.php?id=$rxid" --data-urlencode "id=$rxid" --data-urlencode "qty[$item1]=40" --data-urlencode "qty[$item2]=50")
+  check E2E-103 "Dispensing more Zincex than is in stock is refused and nothing is deducted" 'body | grep -q "only 10 in stock" && get pharm pharmacy/stock.php | grep -q "530"'
+  r=$(form pharm "pharmacy/dispense.php?id=$rxid" "pharmacy/dispense.php?id=$rxid" --data-urlencode "id=$rxid" --data-urlencode "qty[$item1]=40" --data-urlencode "qty[$item2]=10")
+  check E2E-104 "Dispensing what is in stock succeeds" '[[ "$r" == 303* ]]'
+  h=$(get pharm pharmacy/batches.php)
+  check E2E-105 "The batch expiring first was used first (30 from PAR-A1, 10 from PAR-B2)" '[[ "$h" == *"PAR-B2"* && "$h" != *">PAR-A1<"* ]] && echo "$h" | grep -A8 "PAR-B2" | grep -q ">490<"'
+  h=$(get pharm "pharmacy/batches.php?medicine_id=$medid")
+  check E2E-106 "The stock ledger shows the receipt and each dispensed batch" '[[ "$h" == *"Dispense"* && "$h" == *"-30"* && "$h" == *"-10"* && "$h" == *"Receive"* ]]'
+  h=$(get pharm pharmacy/index.php)
+  check E2E-107 "A partly dispensed prescription stays in the queue" '[[ "$h" == *"Partially dispensed"* ]]'
+
+  # --- separation of duties ---
+  check E2E-108 "A laboratory technologist cannot open the pharmacy (403)" '[[ "$(code lab pharmacy/index.php)" == 403 ]]'
+  check E2E-109 "A pharmacist cannot open the laboratory worklist (403)" '[[ "$(code pharm lab/index.php)" == 403 ]]'
+  check E2E-110 "A nurse cannot open the laboratory worklist (403)" '[[ "$(code nurse lab/index.php)" == 403 ]]'
+  check E2E-111 "A doctor cannot dispense medicines (403)" '[[ "$(code doc pharmacy/index.php)" == 403 ]]'
+  check E2E-112 "A doctor can view stock but not receive it (403)" '[[ "$(code doc pharmacy/stock.php)" == 200 && "$(code doc pharmacy/receive.php)" == 403 ]]'
+  check E2E-113 "A cashier cannot open stock or the laboratory (403)" '[[ "$(code cash pharmacy/stock.php)" == 403 && "$(code cash lab/index.php)" == 403 ]]'
+  h=$(get admin admin/audit.php)
+  check E2E-114 "The audit trail records test results, dispensing and stock receipts" '[[ "$h" == *"dispense"* && "$h" == *"result"* && "$h" == *"receive"* ]]'
+  check E2E-115 "The audit trail does not contain the lab result text" '[[ "$h" != *"Malaria parasites"* ]]'
 }
 
 # Later sprints add their own sec_* functions above this line.
