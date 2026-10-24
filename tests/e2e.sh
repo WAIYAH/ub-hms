@@ -176,6 +176,120 @@ sec_sprint1() {
   check E2E-036 "An account locked by five wrong passwords refuses the right password" 'body | grep -q "locked"'
 }
 
+# =====================================================================
+# SPRINT 2: appointments, check-in, triage, consultation
+# =====================================================================
+
+# Run a line of PHP against the e2e database (used to set up data a browser cannot, such as a booking for earlier today).
+php_eval() {
+  UBHMS_DB_NAME="$UBHMS_DB_NAME" "$PHP_BIN" -r 'define("APP_ROOT", $argv[1]); require APP_ROOT . "/includes/core.php"; '"$2" "$ROOT" 2>&1
+}
+next_workday() { # prints the next date that is not a Sunday, at least $1 days ahead
+  local d=${1:-1}
+  while [ "$(date -d "+$d day" +%u)" = "7" ]; do d=$((d+1)); done
+  date -d "+$d day" +%F
+}
+
+sec_sprint2() {
+  echo; echo "== Sprint 2: appointments, check-in, triage and consultation"
+  local r h pid pid2 docid day
+
+  login rec reception1 "$DEMO_PW" >/dev/null
+  login nurse nurse1 "$DEMO_PW" >/dev/null
+  login doc doctor1 "$DEMO_PW" >/dev/null
+
+  # two patients to work with
+  r=$(form rec patients/register.php patients/register.php --data-urlencode "first_name=Baraka" --data-urlencode "last_name=Mwiti" --data-urlencode "sex=Male" --data-urlencode "date_of_birth=1990-01-01" --data-urlencode "national_id=32000001" --data-urlencode "allergies=Penicillin")
+  pid=$(echo "$r" | grep -o 'id=[0-9]*' | cut -d= -f2)
+  r=$(form rec patients/register.php patients/register.php --data-urlencode "first_name=Zawadi" --data-urlencode "last_name=Chepkoech" --data-urlencode "sex=Female" --data-urlencode "date_of_birth=1995-03-03" --data-urlencode "national_id=32000002")
+  pid2=$(echo "$r" | grep -o 'id=[0-9]*' | cut -d= -f2)
+
+  # --- appointments ---
+  h=$(get rec "appointments/book.php?patient_id=$pid")
+  docid=$(echo "$h" | grep -o '<option value="[0-9]*">Dr. Samuel Kamau' | grep -o '[0-9]*' | head -1)
+  day=$(next_workday 2)
+  h=$(get rec "appointments/book.php?patient_id=$pid&doctor_id=$docid&date=$day")
+  check E2E-040 "Booking page shows 27 free time slots for a working day" '[[ "$(echo "$h" | grep -o "name=\"start_time\"" | wc -l)" -eq 27 ]]'
+
+  r=$(form rec "appointments/book.php?patient_id=$pid&doctor_id=$docid&date=$day" "appointments/book.php?patient_id=$pid" --data-urlencode "patient_id=$pid" --data-urlencode "doctor_id=$docid" --data-urlencode "date=$day" --data-urlencode "start_time=10:00" --data-urlencode "reason=Review")
+  check E2E-041 "Receptionist books an appointment and returns to the diary" '[[ "$r" == 303* && "$r" == *appointments/index.php* ]]'
+  h=$(get rec "appointments/index.php?date=$day")
+  check E2E-042 "The diary lists the booked appointment" '[[ "$h" == *"Baraka Mwiti"* && "$h" == *"10:00"* && "$h" == *"Booked"* ]]'
+
+  r=$(form rec "appointments/book.php?patient_id=$pid2" "appointments/book.php?patient_id=$pid2" --data-urlencode "patient_id=$pid2" --data-urlencode "doctor_id=$docid" --data-urlencode "date=$day" --data-urlencode "start_time=10:00")
+  check E2E-043 "A second booking for the same doctor and time is refused" 'body | grep -q "already booked"'
+  r=$(form rec "appointments/book.php?patient_id=$pid2" "appointments/book.php?patient_id=$pid2" --data-urlencode "patient_id=$pid2" --data-urlencode "doctor_id=$docid" --data-urlencode "date=$day" --data-urlencode "start_time=10:20")
+  check E2E-044 "The next slot is still free and can be booked" '[[ "$r" == 303* ]]'
+  r=$(form rec "appointments/book.php?patient_id=$pid2" "appointments/book.php?patient_id=$pid2" --data-urlencode "patient_id=$pid2" --data-urlencode "doctor_id=$docid" --data-urlencode "date=2020-01-06" --data-urlencode "start_time=10:00")
+  check E2E-045 "A date in the past is refused" 'body | grep -q "already passed"'
+  local sunday; sunday=$(date -d "next sunday" +%F)
+  r=$(form rec "appointments/book.php?patient_id=$pid2" "appointments/book.php?patient_id=$pid2" --data-urlencode "patient_id=$pid2" --data-urlencode "doctor_id=$docid" --data-urlencode "date=$sunday" --data-urlencode "start_time=10:00")
+  check E2E-046 "Sunday is refused because the clinic is closed" 'body | grep -q "closed"'
+
+  # cancel
+  local aid; aid=$(get rec "appointments/index.php?date=$day" | grep -B30 "Zawadi" | grep -o 'name="id" value="[0-9]*"' | tail -1 | grep -o '[0-9]*')
+  r=$(form rec "appointments/index.php?date=$day" appointments/action.php --data-urlencode "id=$aid" --data-urlencode "status=Cancelled" --data-urlencode "back=$day")
+  check E2E-047 "An appointment can be cancelled from the diary" '[[ "$r" == 303* ]] && get rec "appointments/index.php?date=$day" | grep -q "Cancelled"'
+  r=$(post rec appointments/action.php --data-urlencode "id=$aid" --data-urlencode "status=Cancelled")
+  check E2E-048 "Changing an appointment without a CSRF token is refused" '[[ "$r" == 419* ]]'
+
+  # --- check-in from an appointment made for earlier today (set up directly) ---
+  php_eval x 'db_exec("INSERT INTO appointments (patient_id, doctor_id, appointment_date, start_time, end_time, reason, booked_by) VALUES (?, ?, CURDATE(), \"06:00:00\", \"06:20:00\", \"E2E check-in\", ?)", ['"$pid2"', '"$docid"', '"$(php_eval x 'echo db_value("SELECT id FROM users WHERE username=\"reception1\"");')"']);' >/dev/null
+  h=$(get rec "visits/checkin.php?patient_id=$pid2")
+  check E2E-049 "Check-in offers today's booked appointment" '[[ "$h" == *"Booked appointment at"* && "$h" == *"06:00"* ]]'
+  local appt; appt=$(echo "$h" | grep -o 'name="appointment_id" value="[0-9]*"' | head -1 | grep -o '[0-9]*')
+  r=$(form rec "visits/checkin.php?patient_id=$pid2" "visits/checkin.php?patient_id=$pid2" --data-urlencode "patient_id=$pid2" --data-urlencode "appointment_id=$appt")
+  check E2E-050 "Checking in from the appointment opens a visit and goes to the triage queue" '[[ "$r" == 303* && "$r" == *stage=triage* ]]'
+  h=$(get rec "appointments/index.php?date=$(date +%F)&doctor_id=")
+  check E2E-051 "The appointment now shows as Attended" '[[ "$h" == *"Attended"* ]]'
+  r=$(form rec "visits/checkin.php?patient_id=$pid2" "visits/checkin.php?patient_id=$pid2" --data-urlencode "patient_id=$pid2" --data-urlencode "appointment_id=")
+  check E2E-052 "A patient with an open visit cannot be checked in twice" 'body | grep -q "already has an open visit"'
+
+  # --- walk-in and triage ---
+  r=$(form rec "visits/checkin.php?patient_id=$pid" "visits/checkin.php?patient_id=$pid" --data-urlencode "patient_id=$pid" --data-urlencode "appointment_id=" --data-urlencode "reason=Fever and cough")
+  check E2E-053 "A walk-in patient is checked in without an appointment" '[[ "$r" == 303* ]]'
+  h=$(get nurse "visits/queue.php?stage=triage")
+  check E2E-054 "The nurse's triage queue lists both patients with an allergy flag" '[[ "$h" == *"Baraka Mwiti"* && "$h" == *"Zawadi Chepkoech"* && "$h" == *"Allergy"* ]]'
+  local vid; vid=$(echo "$h" | grep -A10 "Baraka Mwiti" | grep -o 'triage.php?visit=[0-9]*' | head -1 | cut -d= -f2)
+  r=$(form nurse "visits/triage.php?visit=$vid" "visits/triage.php?visit=$vid" --data-urlencode "visit=$vid" --data-urlencode "action=triage" --data-urlencode "temperature=60" --data-urlencode "pulse=5")
+  check E2E-055 "Impossible vital signs are rejected with messages" 'body | grep -q "Temperature" && body | grep -q "Pulse"'
+  r=$(form nurse "visits/triage.php?visit=$vid" "visits/triage.php?visit=$vid" --data-urlencode "visit=$vid" --data-urlencode "action=triage" --data-urlencode "temperature=38.6" --data-urlencode "pulse=104" --data-urlencode "bp_systolic=124" --data-urlencode "bp_diastolic=80" --data-urlencode "spo2=97" --data-urlencode "weight_kg=70" --data-urlencode "notes=Dry cough")
+  check E2E-056 "The nurse saves triage" '[[ "$r" == 303* ]]'
+  r=$(form nurse "visits/triage.php?visit=$vid" "visits/triage.php?visit=$vid" --data-urlencode "visit=$vid" --data-urlencode "action=service" --data-urlencode "service_id=$(php_eval x 'echo db_value("SELECT id FROM services WHERE name=\"Injection administration\"");')" --data-urlencode "quantity=1")
+  check E2E-057 "The nurse records a procedure" '[[ "$r" == 303* ]] && get nurse "visits/triage.php?visit=$vid" | grep -q "Injection administration"'
+
+  # --- consultation ---
+  h=$(get doc "visits/queue.php?stage=consult")
+  check E2E-058 "The doctor's queue shows the triaged patient" '[[ "$h" == *"Baraka Mwiti"* ]]'
+  h=$(get doc "visits/consult.php?visit=$vid")
+  check E2E-059 "The consultation page shows triage, allergy warning and the ICD-10 list" '[[ "$h" == *"38.6"* && "$h" == *"Penicillin"* && "$h" == *"icd-list"* && "$h" == *"J06.9"* ]]'
+  local svc; svc=$(echo "$h" | grep -o '<option value="[0-9]*"[^>]*>General consultation' | grep -o 'value="[0-9]*"' | grep -o '[0-9]*' | head -1)
+  r=$(form doc "visits/consult.php?visit=$vid" "visits/consult.php?visit=$vid" --data-urlencode "visit=$vid" --data-urlencode "action=consultation" --data-urlencode "service_id=$svc" --data-urlencode "complaint=" --data-urlencode "diagnosis=")
+  check E2E-060 "A consultation without complaint and diagnosis is refused" 'body | grep -q "Please correct the following"'
+  r=$(form doc "visits/consult.php?visit=$vid" "visits/consult.php?visit=$vid" --data-urlencode "visit=$vid" --data-urlencode "action=consultation" --data-urlencode "service_id=$svc" --data-urlencode "complaint=Cough <b>three</b> days" --data-urlencode "diagnosis=Upper respiratory infection" --data-urlencode "icd10_code=J06.9" --data-urlencode "plan=Fluids and rest")
+  check E2E-061 "The doctor saves the consultation" '[[ "$r" == 303* ]]'
+  h=$(get doc "visits/consult.php?visit=$vid")
+  check E2E-062 "Typed markup in the complaint is shown as text, not run" '[[ "$h" == *"&lt;b&gt;three&lt;/b&gt;"* && "$h" != *"<b>three</b>"* ]]'
+  r=$(form doc "visits/consult.php?visit=$vid" "visits/consult.php?visit=$vid" --data-urlencode "visit=$vid" --data-urlencode "action=consultation" --data-urlencode "service_id=$svc" --data-urlencode "complaint=Cough" --data-urlencode "diagnosis=Test" --data-urlencode "icd10_code=ZZ99")
+  check E2E-063 "An ICD-10 code that is not in the hospital list is refused" 'body | grep -q "not in the hospital list"'
+  r=$(post doc "visits/consult.php?visit=$vid" --data-urlencode "visit=$vid" --data-urlencode "action=consultation")
+  check E2E-064 "Saving a consultation without a CSRF token is refused" '[[ "$r" == 419* ]]'
+
+  # --- access control for the clinical flow ---
+  check E2E-065 "A nurse cannot open the consultation page (403)" '[[ "$(code nurse "visits/consult.php?visit=$vid")" == 403 ]]'
+  check E2E-066 "A receptionist cannot open the triage page (403)" '[[ "$(code rec "visits/triage.php?visit=$vid")" == 403 ]]'
+  check E2E-067 "A doctor cannot book appointments (403)" '[[ "$(code doc appointments/book.php)" == 403 ]]'
+  h=$(get rec "patients/view.php?id=$pid")
+  check E2E-068 "The receptionist sees the visit but not the diagnosis" '[[ "$h" == *"Visits"* && "$h" != *"Upper respiratory infection"* ]]'
+
+  r=$(form doc "visits/consult.php?visit=$vid" "visits/consult.php?visit=$vid" --data-urlencode "visit=$vid" --data-urlencode "action=close")
+  check E2E-069 "The doctor closes the visit" '[[ "$r" == 303* ]]'
+  h=$(get doc "patients/view.php?id=$pid")
+  check E2E-070 "The doctor's patient record shows the diagnosis in the visit history" '[[ "$h" == *"Upper respiratory infection"* && "$h" == *"J06.9"* ]]'
+  h=$(get admin admin/audit.php)
+  check E2E-071 "The audit trail records check-in, triage and consultation" '[[ "$h" == *"checkin"* && "$h" == *"triage"* && "$h" == *"consultation"* ]]'
+}
+
 # Later sprints add their own sec_* functions above this line.
 for fn in sec_sprint1 sec_sprint2 sec_sprint3 sec_sprint4 sec_sprint5; do
   if declare -F "$fn" > /dev/null; then "$fn"; fi

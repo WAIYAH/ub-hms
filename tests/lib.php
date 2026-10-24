@@ -159,6 +159,17 @@ function freeze_time(string $when): void
 
 /* ---------- Factories ---------- */
 
+/** Ids change between tests (the price lists are re-inserted), so always look them up by name. */
+function service_id(string $name): int
+{
+    return (int) db_value('SELECT id FROM services WHERE name = ?', [$name]);
+}
+
+function lab_test_id(string $name): int
+{
+    return (int) db_value('SELECT id FROM lab_tests WHERE name = ?', [$name]);
+}
+
 const TEST_PASSWORD = 'Test#Passw0rd!';
 
 function make_user(string $role, ?string $username = null, array $o = []): int

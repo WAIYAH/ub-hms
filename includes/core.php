@@ -11,13 +11,13 @@ if (!defined('APP_ROOT')) {
 
 foreach ([
     'helpers', 'db', 'csrf', 'audit', 'auth', 'layout',
-    'users', 'patients',
+    'users', 'patients', 'appointments', 'clinical', 'dashboard',
 ] as $module) {
     require_once __DIR__ . '/' . $module . '.php';
 }
 
 // Modules added in later sprints are loaded when present.
-foreach (['appointments', 'clinical', 'laboratory', 'pharmacy', 'billing', 'reports'] as $module) {
+foreach (['laboratory', 'pharmacy', 'billing', 'reports'] as $module) {
     $file = __DIR__ . '/' . $module . '.php';
     if (is_file($file)) {
         require_once $file;
