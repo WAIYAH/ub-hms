@@ -58,7 +58,7 @@ FEATURES = [
     dict(key='F03', module=1, title='Patient import from a spreadsheet file', priority='Low', objectives=[1],
          description='Moves patients already recorded in a spreadsheet or in the paper register into the system in one step, after the file has been checked.',
          stimulus=[
-             ('The receptionist chooses a CSV file and presses Check file.', 'The system shows each row as To be added, Possible duplicate or Error, and saves nothing.'),
+             ('The receptionist chooses a CSV file and presses Check the file.', 'The system shows each row as Valid, Duplicate or Error, and saves nothing.'),
              ('The receptionist confirms.', 'The system registers only the valid rows, issues their OP numbers and logs the import.'),
          ],
          reqs=[
