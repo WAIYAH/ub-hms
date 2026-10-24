@@ -1,0 +1,1347 @@
+{
+    "run_at": "2026-10-24 11:16:19",
+    "php": "8.2.12",
+    "database": "uhai_bora_hms_test",
+    "total": 167,
+    "passed": 167,
+    "failed": 0,
+    "seconds": 175.72,
+    "results": [
+        {
+            "id": "UT-COR-001",
+            "suite": "Core helpers and security primitives",
+            "name": "e() escapes HTML so injected markup is shown as text",
+            "status": "PASS",
+            "message": "",
+            "ms": 0
+        },
+        {
+            "id": "UT-COR-002",
+            "suite": "Core helpers and security primitives",
+            "name": "normalize_phone accepts the common Kenyan formats",
+            "status": "PASS",
+            "message": "",
+            "ms": 0
+        },
+        {
+            "id": "UT-COR-003",
+            "suite": "Core helpers and security primitives",
+            "name": "normalize_phone rejects numbers that are not Kenyan mobiles",
+            "status": "PASS",
+            "message": "",
+            "ms": 0
+        },
+        {
+            "id": "UT-COR-004",
+            "suite": "Core helpers and security primitives",
+            "name": "is_valid_date rejects impossible dates",
+            "status": "PASS",
+            "message": "",
+            "ms": 0
+        },
+        {
+            "id": "UT-COR-005",
+            "suite": "Core helpers and security primitives",
+            "name": "clean_text removes control characters and extra spaces and limits length",
+            "status": "PASS",
+            "message": "",
+            "ms": 0
+        },
+        {
+            "id": "UT-COR-006",
+            "suite": "Core helpers and security primitives",
+            "name": "to_cents avoids floating point errors in money maths",
+            "status": "PASS",
+            "message": "",
+            "ms": 0
+        },
+        {
+            "id": "UT-COR-007",
+            "suite": "Core helpers and security primitives",
+            "name": "age_on counts whole years correctly",
+            "status": "PASS",
+            "message": "",
+            "ms": 0
+        },
+        {
+            "id": "UT-COR-008",
+            "suite": "Core helpers and security primitives",
+            "name": "password_problems enforces the password policy",
+            "status": "PASS",
+            "message": "",
+            "ms": 0
+        },
+        {
+            "id": "UT-COR-009",
+            "suite": "Core helpers and security primitives",
+            "name": "generated temporary passwords always satisfy the policy",
+            "status": "PASS",
+            "message": "",
+            "ms": 1
+        },
+        {
+            "id": "UT-COR-010",
+            "suite": "Core helpers and security primitives",
+            "name": "CSRF tokens are random, stable within a session and verified in constant time",
+            "status": "PASS",
+            "message": "",
+            "ms": 0
+        },
+        {
+            "id": "UT-COR-011",
+            "suite": "Core helpers and security primitives",
+            "name": "every permission belongs to at least one role and every granted permission exists",
+            "status": "PASS",
+            "message": "",
+            "ms": 0
+        },
+        {
+            "id": "UT-COR-012",
+            "suite": "Core helpers and security primitives",
+            "name": "least privilege: roles cannot do other departments' work",
+            "status": "PASS",
+            "message": "",
+            "ms": 0
+        },
+        {
+            "id": "UT-COR-013",
+            "suite": "Core helpers and security primitives",
+            "name": "audit() writes who, what, which record and from which address",
+            "status": "PASS",
+            "message": "",
+            "ms": 68
+        },
+        {
+            "id": "UT-COR-014",
+            "suite": "Core helpers and security primitives",
+            "name": "db_tx rolls back every change when something fails",
+            "status": "PASS",
+            "message": "",
+            "ms": 68
+        },
+        {
+            "id": "UT-COR-015",
+            "suite": "Core helpers and security primitives",
+            "name": "prepared statements keep SQL injection text as plain data",
+            "status": "PASS",
+            "message": "",
+            "ms": 96
+        },
+        {
+            "id": "UT-AUT-001",
+            "suite": "Module 6: authentication and account security",
+            "name": "correct username and password signs in and records the time",
+            "status": "PASS",
+            "message": "",
+            "ms": 87
+        },
+        {
+            "id": "UT-AUT-002",
+            "suite": "Module 6: authentication and account security",
+            "name": "username is case-insensitive but the password is not",
+            "status": "PASS",
+            "message": "",
+            "ms": 133
+        },
+        {
+            "id": "UT-AUT-003",
+            "suite": "Module 6: authentication and account security",
+            "name": "wrong password and unknown username give the same message",
+            "status": "PASS",
+            "message": "",
+            "ms": 288
+        },
+        {
+            "id": "UT-AUT-004",
+            "suite": "Module 6: authentication and account security",
+            "name": "an account locks after five wrong passwords, even for the right password",
+            "status": "PASS",
+            "message": "",
+            "ms": 408
+        },
+        {
+            "id": "UT-AUT-005",
+            "suite": "Module 6: authentication and account security",
+            "name": "unlocking restores access and a good sign-in resets the failure counter",
+            "status": "PASS",
+            "message": "",
+            "ms": 819
+        },
+        {
+            "id": "UT-AUT-006",
+            "suite": "Module 6: authentication and account security",
+            "name": "a deactivated account cannot sign in",
+            "status": "PASS",
+            "message": "",
+            "ms": 66
+        },
+        {
+            "id": "UT-AUT-007",
+            "suite": "Module 6: authentication and account security",
+            "name": "too many failures from one computer blocks that computer",
+            "status": "PASS",
+            "message": "",
+            "ms": 3230
+        },
+        {
+            "id": "UT-AUT-008",
+            "suite": "Module 6: authentication and account security",
+            "name": "every failed and successful attempt can be traced in the audit trail",
+            "status": "PASS",
+            "message": "",
+            "ms": 233
+        },
+        {
+            "id": "UT-AUT-009",
+            "suite": "Module 6: authentication and account security",
+            "name": "passwords are stored hashed, never as plain text",
+            "status": "PASS",
+            "message": "",
+            "ms": 35
+        },
+        {
+            "id": "UT-AUT-010",
+            "suite": "Module 6: authentication and account security",
+            "name": "start_user_session stores the user and issues a fresh CSRF token",
+            "status": "PASS",
+            "message": "",
+            "ms": 33
+        },
+        {
+            "id": "UT-AUT-011",
+            "suite": "Module 6: authentication and account security",
+            "name": "user_can follows the signed-in role",
+            "status": "PASS",
+            "message": "",
+            "ms": 67
+        },
+        {
+            "id": "UT-AUT-012",
+            "suite": "Module 6: authentication and account security",
+            "name": "set_user_password replaces the old password and can force a change",
+            "status": "PASS",
+            "message": "",
+            "ms": 155
+        },
+        {
+            "id": "UT-PAT-001",
+            "suite": "Module 1: patient registration",
+            "name": "registration issues a unique outpatient number in the form OPyy-nnnnn",
+            "status": "PASS",
+            "message": "",
+            "ms": 165
+        },
+        {
+            "id": "UT-PAT-002",
+            "suite": "Module 1: patient registration",
+            "name": "outpatient numbers run in sequence and are never reused",
+            "status": "PASS",
+            "message": "",
+            "ms": 189
+        },
+        {
+            "id": "UT-PAT-003",
+            "suite": "Module 1: patient registration",
+            "name": "the serial restarts each year",
+            "status": "PASS",
+            "message": "",
+            "ms": 497
+        },
+        {
+            "id": "UT-PAT-004",
+            "suite": "Module 1: patient registration",
+            "name": "a failed registration does not use up an outpatient number",
+            "status": "PASS",
+            "message": "",
+            "ms": 55
+        },
+        {
+            "id": "UT-PAT-005",
+            "suite": "Module 1: patient registration",
+            "name": "required fields are checked",
+            "status": "PASS",
+            "message": "",
+            "ms": 34
+        },
+        {
+            "id": "UT-PAT-006",
+            "suite": "Module 1: patient registration",
+            "name": "future and impossible dates of birth are refused",
+            "status": "PASS",
+            "message": "",
+            "ms": 99
+        },
+        {
+            "id": "UT-PAT-007",
+            "suite": "Module 1: patient registration",
+            "name": "phone numbers are validated and stored in one format",
+            "status": "PASS",
+            "message": "",
+            "ms": 67
+        },
+        {
+            "id": "UT-PAT-008",
+            "suite": "Module 1: patient registration",
+            "name": "names reject digits and symbols but accept apostrophes and hyphens",
+            "status": "PASS",
+            "message": "",
+            "ms": 165
+        },
+        {
+            "id": "UT-PAT-009",
+            "suite": "Module 1: patient registration",
+            "name": "the same ID number cannot be registered twice",
+            "status": "PASS",
+            "message": "",
+            "ms": 67
+        },
+        {
+            "id": "UT-PAT-010",
+            "suite": "Module 1: patient registration",
+            "name": "same name and date of birth is flagged and needs confirmation",
+            "status": "PASS",
+            "message": "",
+            "ms": 110
+        },
+        {
+            "id": "UT-PAT-011",
+            "suite": "Module 1: patient registration",
+            "name": "a patient can have no ID number (children) without clashing with other children",
+            "status": "PASS",
+            "message": "",
+            "ms": 110
+        },
+        {
+            "id": "UT-PAT-012",
+            "suite": "Module 1: patient registration",
+            "name": "registering writes an audit entry without health details",
+            "status": "PASS",
+            "message": "",
+            "ms": 67
+        },
+        {
+            "id": "UT-PAT-013",
+            "suite": "Module 1: patient registration",
+            "name": "correcting details keeps the outpatient number and logs the field names only",
+            "status": "PASS",
+            "message": "",
+            "ms": 301
+        },
+        {
+            "id": "UT-PAT-014",
+            "suite": "Module 1: patient registration",
+            "name": "a correction cannot take another patient's ID number",
+            "status": "PASS",
+            "message": "",
+            "ms": 136
+        },
+        {
+            "id": "UT-PAT-015",
+            "suite": "Module 1: patient registration",
+            "name": "search finds patients by outpatient number, name, ID number and phone",
+            "status": "PASS",
+            "message": "",
+            "ms": 233
+        },
+        {
+            "id": "UT-PAT-016",
+            "suite": "Module 1: patient registration",
+            "name": "search treats % and _ as ordinary characters",
+            "status": "PASS",
+            "message": "",
+            "ms": 70
+        },
+        {
+            "id": "UT-PAT-017",
+            "suite": "Module 1: patient registration",
+            "name": "search is paged",
+            "status": "PASS",
+            "message": "",
+            "ms": 558
+        },
+        {
+            "id": "UT-PAT-018",
+            "suite": "Module 1: patient registration",
+            "name": "CSV preview classifies rows and saves nothing",
+            "status": "PASS",
+            "message": "",
+            "ms": 78
+        },
+        {
+            "id": "UT-PAT-019",
+            "suite": "Module 1: patient registration",
+            "name": "CSV import registers only the valid rows and logs it",
+            "status": "PASS",
+            "message": "",
+            "ms": 179
+        },
+        {
+            "id": "UT-PAT-020",
+            "suite": "Module 1: patient registration",
+            "name": "a CSV without the required columns is rejected",
+            "status": "PASS",
+            "message": "",
+            "ms": 12
+        },
+        {
+            "id": "UT-USR-001",
+            "suite": "Module 6: user management",
+            "name": "an account is created with a one-time password that must be changed",
+            "status": "PASS",
+            "message": "",
+            "ms": 100
+        },
+        {
+            "id": "UT-USR-002",
+            "suite": "Module 6: user management",
+            "name": "account details are validated",
+            "status": "PASS",
+            "message": "",
+            "ms": 0
+        },
+        {
+            "id": "UT-USR-003",
+            "suite": "Module 6: user management",
+            "name": "usernames must be unique",
+            "status": "PASS",
+            "message": "",
+            "ms": 71
+        },
+        {
+            "id": "UT-USR-004",
+            "suite": "Module 6: user management",
+            "name": "the last active administrator cannot be deactivated or demoted",
+            "status": "PASS",
+            "message": "",
+            "ms": 188
+        },
+        {
+            "id": "UT-USR-005",
+            "suite": "Module 6: user management",
+            "name": "an administrator cannot deactivate their own account",
+            "status": "PASS",
+            "message": "",
+            "ms": 133
+        },
+        {
+            "id": "UT-USR-006",
+            "suite": "Module 6: user management",
+            "name": "deactivating an account stops sign-in and reactivating restores it",
+            "status": "PASS",
+            "message": "",
+            "ms": 299
+        },
+        {
+            "id": "UT-USR-007",
+            "suite": "Module 6: user management",
+            "name": "a password reset invalidates the old password and forces a new one",
+            "status": "PASS",
+            "message": "",
+            "ms": 301
+        },
+        {
+            "id": "UT-USR-008",
+            "suite": "Module 6: user management",
+            "name": "account management is recorded in the audit trail",
+            "status": "PASS",
+            "message": "",
+            "ms": 134
+        },
+        {
+            "id": "UT-USR-009",
+            "suite": "Module 6: user management",
+            "name": "list_users filters by name and role; list_doctors returns only active doctors",
+            "status": "PASS",
+            "message": "",
+            "ms": 103
+        },
+        {
+            "id": "UT-USR-010",
+            "suite": "Module 6: user management",
+            "name": "the audit trail can be filtered by user, action and date",
+            "status": "PASS",
+            "message": "",
+            "ms": 449
+        },
+        {
+            "id": "UT-APT-001",
+            "suite": "Module 1: appointments",
+            "name": "a working day has 27 twenty-minute slots from 08:00 to 16:40",
+            "status": "PASS",
+            "message": "",
+            "ms": 0
+        },
+        {
+            "id": "UT-APT-002",
+            "suite": "Module 1: appointments",
+            "name": "the clinic is closed on Sundays and invalid dates have no slots",
+            "status": "PASS",
+            "message": "",
+            "ms": 0
+        },
+        {
+            "id": "UT-APT-003",
+            "suite": "Module 1: appointments",
+            "name": "a valid booking is saved as Booked with its end time and an audit entry",
+            "status": "PASS",
+            "message": "",
+            "ms": 201
+        },
+        {
+            "id": "UT-APT-004",
+            "suite": "Module 1: appointments",
+            "name": "the same doctor cannot be booked twice for the same slot",
+            "status": "PASS",
+            "message": "",
+            "ms": 211
+        },
+        {
+            "id": "UT-APT-005",
+            "suite": "Module 1: appointments",
+            "name": "different doctors may be booked at the same time, and the same doctor at other times",
+            "status": "PASS",
+            "message": "",
+            "ms": 740
+        },
+        {
+            "id": "UT-APT-006",
+            "suite": "Module 1: appointments",
+            "name": "a patient cannot hold two appointments at the same time",
+            "status": "PASS",
+            "message": "",
+            "ms": 167
+        },
+        {
+            "id": "UT-APT-007",
+            "suite": "Module 1: appointments",
+            "name": "past dates and times that have already passed today are refused",
+            "status": "PASS",
+            "message": "",
+            "ms": 199
+        },
+        {
+            "id": "UT-APT-008",
+            "suite": "Module 1: appointments",
+            "name": "times off the slot grid or outside clinic hours are refused",
+            "status": "PASS",
+            "message": "",
+            "ms": 103
+        },
+        {
+            "id": "UT-APT-009",
+            "suite": "Module 1: appointments",
+            "name": "closed days and dates too far ahead are refused",
+            "status": "PASS",
+            "message": "",
+            "ms": 114
+        },
+        {
+            "id": "UT-APT-010",
+            "suite": "Module 1: appointments",
+            "name": "only registered patients and active doctors can be booked",
+            "status": "PASS",
+            "message": "",
+            "ms": 170
+        },
+        {
+            "id": "UT-APT-011",
+            "suite": "Module 1: appointments",
+            "name": "a cancelled appointment releases its slot for someone else",
+            "status": "PASS",
+            "message": "",
+            "ms": 520
+        },
+        {
+            "id": "UT-APT-012",
+            "suite": "Module 1: appointments",
+            "name": "missed only after the time has passed; cancelled only before it",
+            "status": "PASS",
+            "message": "",
+            "ms": 322
+        },
+        {
+            "id": "UT-APT-013",
+            "suite": "Module 1: appointments",
+            "name": "only a Booked appointment can change status",
+            "status": "PASS",
+            "message": "",
+            "ms": 201
+        },
+        {
+            "id": "UT-APT-014",
+            "suite": "Module 1: appointments",
+            "name": "the database itself refuses a double booking even if the application check is bypassed",
+            "status": "PASS",
+            "message": "",
+            "ms": 652
+        },
+        {
+            "id": "UT-APT-015",
+            "suite": "Module 1: appointments",
+            "name": "overdue booked appointments become Missed; future ones and attended ones are left alone",
+            "status": "PASS",
+            "message": "",
+            "ms": 291
+        },
+        {
+            "id": "UT-APT-016",
+            "suite": "Module 1: appointments",
+            "name": "doctor_day_slots reports free, taken and past slots",
+            "status": "PASS",
+            "message": "",
+            "ms": 145
+        },
+        {
+            "id": "UT-APT-017",
+            "suite": "Module 1: appointments",
+            "name": "the diary filters by date, doctor and status in time order",
+            "status": "PASS",
+            "message": "",
+            "ms": 778
+        },
+        {
+            "id": "UT-APT-018",
+            "suite": "Module 1: appointments",
+            "name": "two bookings racing for one slot: exactly one succeeds",
+            "status": "PASS",
+            "message": "",
+            "ms": 166
+        },
+        {
+            "id": "UT-VIS-001",
+            "suite": "Module 2: visits, triage and consultation",
+            "name": "checking in from an appointment marks it Attended and assigns the doctor",
+            "status": "PASS",
+            "message": "",
+            "ms": 402
+        },
+        {
+            "id": "UT-VIS-002",
+            "suite": "Module 2: visits, triage and consultation",
+            "name": "a walk-in can be checked in with or without a preferred doctor",
+            "status": "PASS",
+            "message": "",
+            "ms": 691
+        },
+        {
+            "id": "UT-VIS-003",
+            "suite": "Module 2: visits, triage and consultation",
+            "name": "a patient cannot have two open visits",
+            "status": "PASS",
+            "message": "",
+            "ms": 155
+        },
+        {
+            "id": "UT-VIS-004",
+            "suite": "Module 2: visits, triage and consultation",
+            "name": "check-in refuses another patient's, a cancelled, or a future appointment",
+            "status": "PASS",
+            "message": "",
+            "ms": 563
+        },
+        {
+            "id": "UT-VIS-005",
+            "suite": "Module 2: visits, triage and consultation",
+            "name": "queues show each stage; a doctor sees own and unassigned patients only",
+            "status": "PASS",
+            "message": "",
+            "ms": 1164
+        },
+        {
+            "id": "UT-TRI-001",
+            "suite": "Module 2: visits, triage and consultation",
+            "name": "valid vital signs are saved and move the patient to the doctor queue",
+            "status": "PASS",
+            "message": "",
+            "ms": 268
+        },
+        {
+            "id": "UT-TRI-002",
+            "suite": "Module 2: visits, triage and consultation",
+            "name": "implausible or non-numeric vital signs are refused with a message for each field",
+            "status": "PASS",
+            "message": "",
+            "ms": 388
+        },
+        {
+            "id": "UT-TRI-003",
+            "suite": "Module 2: visits, triage and consultation",
+            "name": "blood pressure needs both values with the upper higher than the lower",
+            "status": "PASS",
+            "message": "",
+            "ms": 229
+        },
+        {
+            "id": "UT-TRI-004",
+            "suite": "Module 2: visits, triage and consultation",
+            "name": "an empty triage form is refused but a note alone is enough",
+            "status": "PASS",
+            "message": "",
+            "ms": 233
+        },
+        {
+            "id": "UT-TRI-005",
+            "suite": "Module 2: visits, triage and consultation",
+            "name": "correcting triage updates the same record and is audited",
+            "status": "PASS",
+            "message": "",
+            "ms": 761
+        },
+        {
+            "id": "UT-TRI-006",
+            "suite": "Module 2: visits, triage and consultation",
+            "name": "triage cannot be recorded on a closed visit",
+            "status": "PASS",
+            "message": "",
+            "ms": 444
+        },
+        {
+            "id": "UT-CON-001",
+            "suite": "Module 2: visits, triage and consultation",
+            "name": "a consultation is saved, assigns the doctor, moves the stage and is audited",
+            "status": "PASS",
+            "message": "",
+            "ms": 388
+        },
+        {
+            "id": "UT-CON-002",
+            "suite": "Module 2: visits, triage and consultation",
+            "name": "complaint, diagnosis and consultation type are required; ICD-10 is optional but validated",
+            "status": "PASS",
+            "message": "",
+            "ms": 266
+        },
+        {
+            "id": "UT-CON-003",
+            "suite": "Module 2: visits, triage and consultation",
+            "name": "only the doctor who recorded a consultation can change it",
+            "status": "PASS",
+            "message": "",
+            "ms": 277
+        },
+        {
+            "id": "UT-CON-004",
+            "suite": "Module 2: visits, triage and consultation",
+            "name": "a visit can be closed only after a consultation, and a closed visit is locked",
+            "status": "PASS",
+            "message": "",
+            "ms": 553
+        },
+        {
+            "id": "UT-CON-005",
+            "suite": "Module 2: visits, triage and consultation",
+            "name": "procedures are recorded with quantity checks and listed",
+            "status": "PASS",
+            "message": "",
+            "ms": 315
+        },
+        {
+            "id": "UT-CON-006",
+            "suite": "Module 2: visits, triage and consultation",
+            "name": "earlier visits are listed newest first and exclude the current visit",
+            "status": "PASS",
+            "message": "",
+            "ms": 652
+        },
+        {
+            "id": "UT-CON-007",
+            "suite": "Module 2: visits, triage and consultation",
+            "name": "the visit history shows diagnoses to doctors but not to other roles",
+            "status": "PASS",
+            "message": "",
+            "ms": 292
+        },
+        {
+            "id": "UT-CON-008",
+            "suite": "Module 2: visits, triage and consultation",
+            "name": "ICD-10 lookup finds codes by code or by words",
+            "status": "PASS",
+            "message": "",
+            "ms": 161
+        },
+        {
+            "id": "UT-CON-009",
+            "suite": "Module 2: visits, triage and consultation",
+            "name": "the dashboard counts waiting patients for nurses and doctors",
+            "status": "PASS",
+            "message": "",
+            "ms": 202
+        },
+        {
+            "id": "UT-LAB-001",
+            "suite": "Module 3: laboratory",
+            "name": "tests are requested by the doctor and linked to the visit and the doctor",
+            "status": "PASS",
+            "message": "",
+            "ms": 652
+        },
+        {
+            "id": "UT-LAB-002",
+            "suite": "Module 3: laboratory",
+            "name": "tests need an open visit with a consultation and at least one test",
+            "status": "PASS",
+            "message": "",
+            "ms": 350
+        },
+        {
+            "id": "UT-LAB-003",
+            "suite": "Module 3: laboratory",
+            "name": "a pending test cannot be requested twice but can be repeated after it is completed",
+            "status": "PASS",
+            "message": "",
+            "ms": 388
+        },
+        {
+            "id": "UT-LAB-004",
+            "suite": "Module 3: laboratory",
+            "name": "an unknown test in the list stops the whole request (nothing half-saved)",
+            "status": "PASS",
+            "message": "",
+            "ms": 340
+        },
+        {
+            "id": "UT-LAB-005",
+            "suite": "Module 3: laboratory",
+            "name": "the worklist shows open requests oldest first with patient and requesting doctor",
+            "status": "PASS",
+            "message": "",
+            "ms": 583
+        },
+        {
+            "id": "UT-LAB-006",
+            "suite": "Module 3: laboratory",
+            "name": "the laboratory starts a test and enters the result, which is recorded with who and when",
+            "status": "PASS",
+            "message": "",
+            "ms": 366
+        },
+        {
+            "id": "UT-LAB-007",
+            "suite": "Module 3: laboratory",
+            "name": "a result can be entered without starting, but not empty and not for a cancelled request",
+            "status": "PASS",
+            "message": "",
+            "ms": 366
+        },
+        {
+            "id": "UT-LAB-008",
+            "suite": "Module 3: laboratory",
+            "name": "the result returns to the doctor who requested the test, not to other doctors",
+            "status": "PASS",
+            "message": "",
+            "ms": 439
+        },
+        {
+            "id": "UT-LAB-009",
+            "suite": "Module 3: laboratory",
+            "name": "only the requesting doctor can cancel, and only before the laboratory starts",
+            "status": "PASS",
+            "message": "",
+            "ms": 940
+        },
+        {
+            "id": "UT-LAB-010",
+            "suite": "Module 3: laboratory",
+            "name": "a corrected result is audited as an amendment and the audit trail holds no result text",
+            "status": "PASS",
+            "message": "",
+            "ms": 747
+        },
+        {
+            "id": "UT-LAB-011",
+            "suite": "Module 3: laboratory",
+            "name": "the visit history shows tests with their results to a doctor",
+            "status": "PASS",
+            "message": "",
+            "ms": 545
+        },
+        {
+            "id": "UT-LAB-012",
+            "suite": "Module 3: laboratory",
+            "name": "the dashboard shows waiting tests to the laboratory and ready results to the doctor",
+            "status": "PASS",
+            "message": "",
+            "ms": 354
+        },
+        {
+            "id": "UT-PHA-001",
+            "suite": "Module 4: pharmacy and inventory",
+            "name": "medicine details are validated and the same medicine cannot be listed twice",
+            "status": "PASS",
+            "message": "",
+            "ms": 277
+        },
+        {
+            "id": "UT-PHA-002",
+            "suite": "Module 4: pharmacy and inventory",
+            "name": "receiving stock creates a batch, a ledger entry and an audit record",
+            "status": "PASS",
+            "message": "",
+            "ms": 168
+        },
+        {
+            "id": "UT-PHA-003",
+            "suite": "Module 4: pharmacy and inventory",
+            "name": "stock that is already expired or has bad details is refused at receipt",
+            "status": "PASS",
+            "message": "",
+            "ms": 165
+        },
+        {
+            "id": "UT-PHA-004",
+            "suite": "Module 4: pharmacy and inventory",
+            "name": "receiving more of an existing batch adds to it only when the expiry date matches",
+            "status": "PASS",
+            "message": "",
+            "ms": 204
+        },
+        {
+            "id": "UT-PHA-005",
+            "suite": "Module 4: pharmacy and inventory",
+            "name": "usable stock ignores expired batches and status is OK, Low or Out against the reorder level",
+            "status": "PASS",
+            "message": "",
+            "ms": 227
+        },
+        {
+            "id": "UT-PHA-006",
+            "suite": "Module 4: pharmacy and inventory",
+            "name": "expiry_state flags batches expiring within 90 days and those already expired",
+            "status": "PASS",
+            "message": "",
+            "ms": 0
+        },
+        {
+            "id": "UT-PHA-007",
+            "suite": "Module 4: pharmacy and inventory",
+            "name": "alerts list low stock, out of stock, expiring and expired batches",
+            "status": "PASS",
+            "message": "",
+            "ms": 883
+        },
+        {
+            "id": "UT-PHA-008",
+            "suite": "Module 4: pharmacy and inventory",
+            "name": "stock adjustments need a reason, cannot go below zero and are recorded in the ledger",
+            "status": "PASS",
+            "message": "",
+            "ms": 335
+        },
+        {
+            "id": "UT-PHA-009",
+            "suite": "Module 4: pharmacy and inventory",
+            "name": "prescribing needs an open consulted visit and complete, valid lines",
+            "status": "PASS",
+            "message": "",
+            "ms": 798
+        },
+        {
+            "id": "UT-PHA-010",
+            "suite": "Module 4: pharmacy and inventory",
+            "name": "prescribing is refused before the consultation is recorded",
+            "status": "PASS",
+            "message": "",
+            "ms": 1042
+        },
+        {
+            "id": "UT-PHA-011",
+            "suite": "Module 4: pharmacy and inventory",
+            "name": "a recorded allergy that matches the medicine name produces a reminder",
+            "status": "PASS",
+            "message": "",
+            "ms": 1326
+        },
+        {
+            "id": "UT-PHA-012",
+            "suite": "Module 4: pharmacy and inventory",
+            "name": "dispensing deducts stock, updates the prescription and writes the ledger",
+            "status": "PASS",
+            "message": "",
+            "ms": 824
+        },
+        {
+            "id": "UT-PHA-013",
+            "suite": "Module 4: pharmacy and inventory",
+            "name": "stock is taken from the earliest-expiring batch first and can span batches",
+            "status": "PASS",
+            "message": "",
+            "ms": 981
+        },
+        {
+            "id": "UT-PHA-014",
+            "suite": "Module 4: pharmacy and inventory",
+            "name": "expired stock is never dispensed even when it is the only stock",
+            "status": "PASS",
+            "message": "",
+            "ms": 995
+        },
+        {
+            "id": "UT-PHA-015",
+            "suite": "Module 4: pharmacy and inventory",
+            "name": "a partial dispense leaves the rest on the prescription until it is completed",
+            "status": "PASS",
+            "message": "",
+            "ms": 1320
+        },
+        {
+            "id": "UT-PHA-016",
+            "suite": "Module 4: pharmacy and inventory",
+            "name": "dispensing several medicines is all-or-nothing",
+            "status": "PASS",
+            "message": "",
+            "ms": 1165
+        },
+        {
+            "id": "UT-PHA-017",
+            "suite": "Module 4: pharmacy and inventory",
+            "name": "dispensing needs at least one quantity",
+            "status": "PASS",
+            "message": "",
+            "ms": 1155
+        },
+        {
+            "id": "UT-PHA-018",
+            "suite": "Module 4: pharmacy and inventory",
+            "name": "the stock ledger always agrees with the batch balances",
+            "status": "PASS",
+            "message": "",
+            "ms": 1727
+        },
+        {
+            "id": "UT-PHA-019",
+            "suite": "Module 4: pharmacy and inventory",
+            "name": "the database refuses a negative batch balance even if the application is bypassed",
+            "status": "PASS",
+            "message": "",
+            "ms": 335
+        },
+        {
+            "id": "UT-PHA-020",
+            "suite": "Module 4: pharmacy and inventory",
+            "name": "the pharmacy queue lists the oldest prescription first",
+            "status": "PASS",
+            "message": "",
+            "ms": 1173
+        },
+        {
+            "id": "UT-PHA-021",
+            "suite": "Module 4: pharmacy and inventory",
+            "name": "editing a medicine is audited with the fields that changed and the price movement",
+            "status": "PASS",
+            "message": "",
+            "ms": 266
+        },
+        {
+            "id": "UT-BIL-001",
+            "suite": "Module 5: billing and payments",
+            "name": "the first recorded service creates the invoice automatically with the consultation fee",
+            "status": "PASS",
+            "message": "",
+            "ms": 313
+        },
+        {
+            "id": "UT-BIL-002",
+            "suite": "Module 5: billing and payments",
+            "name": "no invoice exists until something billable has been recorded",
+            "status": "PASS",
+            "message": "",
+            "ms": 206
+        },
+        {
+            "id": "UT-BIL-003",
+            "suite": "Module 5: billing and payments",
+            "name": "laboratory tests are added to the invoice at the test price and removed if cancelled",
+            "status": "PASS",
+            "message": "",
+            "ms": 731
+        },
+        {
+            "id": "UT-BIL-004",
+            "suite": "Module 5: billing and payments",
+            "name": "dispensed medicines are charged by the quantity actually given",
+            "status": "PASS",
+            "message": "",
+            "ms": 881
+        },
+        {
+            "id": "UT-BIL-005",
+            "suite": "Module 5: billing and payments",
+            "name": "procedures are charged by quantity",
+            "status": "PASS",
+            "message": "",
+            "ms": 1207
+        },
+        {
+            "id": "UT-BIL-006",
+            "suite": "Module 5: billing and payments",
+            "name": "syncing again never duplicates a charge",
+            "status": "PASS",
+            "message": "",
+            "ms": 442
+        },
+        {
+            "id": "UT-BIL-007",
+            "suite": "Module 5: billing and payments",
+            "name": "a full journey produces one itemised invoice with the right total",
+            "status": "PASS",
+            "message": "",
+            "ms": 1893
+        },
+        {
+            "id": "UT-BIL-008",
+            "suite": "Module 5: billing and payments",
+            "name": "partial then full payment moves the invoice from Unpaid to Partially paid to Paid",
+            "status": "PASS",
+            "message": "",
+            "ms": 535
+        },
+        {
+            "id": "UT-BIL-009",
+            "suite": "Module 5: billing and payments",
+            "name": "a payment can never exceed the balance and the amount must be a valid sum of money",
+            "status": "PASS",
+            "message": "",
+            "ms": 819
+        },
+        {
+            "id": "UT-BIL-010",
+            "suite": "Module 5: billing and payments",
+            "name": "each payment method is accepted with the right reference",
+            "status": "PASS",
+            "message": "",
+            "ms": 606
+        },
+        {
+            "id": "UT-BIL-011",
+            "suite": "Module 5: billing and payments",
+            "name": "references are required where the method needs them and an M-Pesa code cannot be used twice",
+            "status": "PASS",
+            "message": "",
+            "ms": 392
+        },
+        {
+            "id": "UT-BIL-012",
+            "suite": "Module 5: billing and payments",
+            "name": "a charge added after payment raises the balance and reopens the invoice",
+            "status": "PASS",
+            "message": "",
+            "ms": 356
+        },
+        {
+            "id": "UT-BIL-013",
+            "suite": "Module 5: billing and payments",
+            "name": "a charge cannot be removed if the invoice would then be over-paid",
+            "status": "PASS",
+            "message": "",
+            "ms": 968
+        },
+        {
+            "id": "UT-BIL-014",
+            "suite": "Module 5: billing and payments",
+            "name": "before payment a price change updates the line; after payment the agreed price is kept",
+            "status": "PASS",
+            "message": "",
+            "ms": 436
+        },
+        {
+            "id": "UT-BIL-015",
+            "suite": "Module 5: billing and payments",
+            "name": "money is calculated exactly with no rounding drift",
+            "status": "PASS",
+            "message": "",
+            "ms": 1548
+        },
+        {
+            "id": "UT-BIL-016",
+            "suite": "Module 5: billing and payments",
+            "name": "payments are audited with amount and method and receipts have a number",
+            "status": "PASS",
+            "message": "",
+            "ms": 1499
+        },
+        {
+            "id": "UT-BIL-017",
+            "suite": "Module 5: billing and payments",
+            "name": "the invoice list filters by status, balance, text and date",
+            "status": "PASS",
+            "message": "",
+            "ms": 778
+        },
+        {
+            "id": "UT-BIL-018",
+            "suite": "Module 5: billing and payments",
+            "name": "collections for a day are totalled by method and by cashier",
+            "status": "PASS",
+            "message": "",
+            "ms": 1015
+        },
+        {
+            "id": "UT-BIL-019",
+            "suite": "Module 5: billing and payments",
+            "name": "the database refuses a payment of zero or less and a second invoice for one visit",
+            "status": "PASS",
+            "message": "",
+            "ms": 630
+        },
+        {
+            "id": "UT-BIL-020",
+            "suite": "Module 5: billing and payments",
+            "name": "the cashier dashboard shows invoices waiting and money collected",
+            "status": "PASS",
+            "message": "",
+            "ms": 477
+        },
+        {
+            "id": "UT-REP-001",
+            "suite": "Module 5: management reports",
+            "name": "the report range defaults to this month and swaps dates given the wrong way round",
+            "status": "PASS",
+            "message": "",
+            "ms": 0
+        },
+        {
+            "id": "UT-REP-002",
+            "suite": "Module 5: management reports",
+            "name": "the attendance report counts appointments by outcome, visits, walk-ins and new patients",
+            "status": "PASS",
+            "message": "",
+            "ms": 1326
+        },
+        {
+            "id": "UT-REP-003",
+            "suite": "Module 5: management reports",
+            "name": "an empty period gives zeros and no attendance rate",
+            "status": "PASS",
+            "message": "",
+            "ms": 4
+        },
+        {
+            "id": "UT-REP-004",
+            "suite": "Module 5: management reports",
+            "name": "the revenue report separates billed from collected, by method and by type of service",
+            "status": "PASS",
+            "message": "",
+            "ms": 1711
+        },
+        {
+            "id": "UT-REP-005",
+            "suite": "Module 5: management reports",
+            "name": "the stock report shows movements in the period, stock value and alerts",
+            "status": "PASS",
+            "message": "",
+            "ms": 2401
+        },
+        {
+            "id": "UT-REP-006",
+            "suite": "Module 5: management reports",
+            "name": "the laboratory report counts requests, completions, abnormal results and time taken",
+            "status": "PASS",
+            "message": "",
+            "ms": 1591
+        },
+        {
+            "id": "UT-REP-007",
+            "suite": "Module 5: management reports",
+            "name": "CSV export neutralises spreadsheet formulas but leaves numbers alone",
+            "status": "PASS",
+            "message": "",
+            "ms": 0
+        },
+        {
+            "id": "UT-REP-008",
+            "suite": "Module 5: management reports",
+            "name": "only the managers and the right departments may open each report",
+            "status": "PASS",
+            "message": "",
+            "ms": 0
+        },
+        {
+            "id": "UT-INT-001",
+            "suite": "Integration: the six modules working together",
+            "name": "one patient passes through all six modules and every hand-over carries the right data",
+            "status": "PASS",
+            "message": "",
+            "ms": 1751
+        },
+        {
+            "id": "UT-INT-002",
+            "suite": "Integration: the six modules working together",
+            "name": "every important action in the journey left an audit entry by the person who did it",
+            "status": "PASS",
+            "message": "",
+            "ms": 1976
+        },
+        {
+            "id": "UT-INT-003",
+            "suite": "Integration: the six modules working together",
+            "name": "the stock ledger, invoices and payments all reconcile after the journey",
+            "status": "PASS",
+            "message": "",
+            "ms": 2712
+        },
+        {
+            "id": "UT-INT-004",
+            "suite": "Integration: the six modules working together",
+            "name": "the integrity check actually detects corrupted records",
+            "status": "PASS",
+            "message": "",
+            "ms": 2022
+        },
+        {
+            "id": "UT-INT-005",
+            "suite": "Integration: the six modules working together",
+            "name": "records cannot be deleted out from under the data that refers to them",
+            "status": "PASS",
+            "message": "",
+            "ms": 2120
+        },
+        {
+            "id": "UT-INT-006",
+            "suite": "Integration: the six modules working together",
+            "name": "every table has a primary key and every foreign key column is indexed",
+            "status": "PASS",
+            "message": "",
+            "ms": 1628
+        },
+        {
+            "id": "UT-INT-007",
+            "suite": "Integration: the six modules working together",
+            "name": "sessions expire after 30 idle minutes or 8 hours in total",
+            "status": "PASS",
+            "message": "",
+            "ms": 0
+        },
+        {
+            "id": "UT-INT-008",
+            "suite": "Integration: the six modules working together",
+            "name": "internal folders are shielded from the web and the default configuration holds no secrets",
+            "status": "PASS",
+            "message": "",
+            "ms": 17
+        },
+        {
+            "id": "UT-INT-009",
+            "suite": "Integration: the six modules working together",
+            "name": "no page can change data from a plain GET: every state-changing page requires a POST with a token",
+            "status": "PASS",
+            "message": "",
+            "ms": 6
+        },
+        {
+            "id": "UT-INT-010",
+            "suite": "Integration: the six modules working together",
+            "name": "the health page checks run and report a sound database",
+            "status": "PASS",
+            "message": "",
+            "ms": 19
+        },
+        {
+            "id": "UT-INT-011",
+            "suite": "Integration: the six modules working together",
+            "name": "a second doctor cannot read results for another doctor's tests but can still see the patient history",
+            "status": "PASS",
+            "message": "",
+            "ms": 1346
+        }
+    ]
+}

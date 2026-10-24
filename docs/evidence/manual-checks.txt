@@ -1,0 +1,11 @@
+UB-HMS manual checks (24 October 2026, development computer: Core i7-1165G7, 15.8 GB RAM, MariaDB 10.4.32 on port 3307)
+
+MAN-01  Backup of the large synthetic database (20,040 patients, 30,067 visits, 30,063 invoices, 102,844 audit entries; 62 MB of data and indexes)
+        Command: powershell -File scripts\backup.ps1   with UBHMS_DB_NAME=uhai_bora_hms_perf
+        Result:  PASS. "backup ok: uhai_bora_hms_perf_20261024_113446.sql.zip (3140.4 KB)", finished in 3.3 seconds.
+
+MAN-02  Restore of that backup into a new, empty database
+        Command: powershell -File scripts\restore.ps1 -BackupFile <that file> -DbName uhai_bora_hms_restored -Yes
+        Result:  PASS. A safety backup of the (empty) target was made first; the restore took 39.4 seconds.
+                 Row counts and the sum of invoice totals were identical in the original and the restored database:
+                 patients 20,040; visits 30,067; invoices 30,063; payments 30,054; audit_log 102,844; sum of invoice totals KSh 24,063,058.00.

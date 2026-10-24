@@ -1,0 +1,187 @@
+PASS  E2E-001  Anonymous visitor is redirected to the sign-in page
+PASS  E2E-002  Security headers are sent (CSP, frame, nosniff)
+PASS  E2E-003  Sign-in without a CSRF token is refused (419)
+PASS  E2E-004  Wrong password is refused with a neutral message
+PASS  E2E-005  Unknown username gets the same neutral message
+PASS  E2E-006  First sign-in sends the administrator to change the password
+PASS  E2E-007  Pages are blocked until the password is changed
+PASS  E2E-008  A weak new password is rejected with reasons
+PASS  E2E-009  A strong new password is accepted and the dashboard opens
+PASS  E2E-010  Administrator menu shows user accounts and audit trail but no patient pages
+PASS  E2E-011  Administrator cannot open patient records (403)
+PASS  E2E-012  Receptionist signs in with the demo account
+PASS  E2E-013  Receptionist cannot open user accounts (403)
+PASS  E2E-014  Receptionist cannot open the audit trail (403)
+PASS  E2E-015  Administrator creates an account and sees a one-time password
+PASS  E2E-016  The new user must change the one-time password at first sign-in
+PASS  E2E-017  A duplicate username is refused
+PASS  E2E-018  Receptionist registers a patient and receives an outpatient number
+PASS  E2E-019  The record shows an outpatient number in the OPyy-nnnnn format
+PASS  E2E-020  The same ID number cannot be registered again
+PASS  E2E-021  Same name and date of birth is flagged for confirmation
+PASS  E2E-022  Missing required fields show an error summary
+PASS  E2E-023  Stored text is escaped on screen (no script injection)
+PASS  E2E-024  SQL injection text in the search box finds nothing
+PASS  E2E-025  Search by name finds the patient
+PASS  E2E-026  Search by phone number finds the patient
+PASS  E2E-027  Search by ID number finds the patient
+PASS  E2E-028  A receptionist can correct patient details
+PASS  E2E-029  Saving a patient without a CSRF token is refused
+PASS  E2E-030  A plain link (GET) cannot sign a user out
+PASS  E2E-031  Audit trail shows sign-ins, patient registration and views
+PASS  E2E-032  Audit trail records the computer address
+PASS  E2E-033  Audit trail never contains the patient names or phone numbers
+PASS  E2E-034  Sign-in page does not redirect to other websites
+PASS  E2E-035  Signing out ends the session
+PASS  E2E-036  An account locked by five wrong passwords refuses the right password
+PASS  E2E-040  Booking page shows 27 free time slots for a working day
+PASS  E2E-041  Receptionist books an appointment and returns to the diary
+PASS  E2E-042  The diary lists the booked appointment
+PASS  E2E-043  A second booking for the same doctor and time is refused
+PASS  E2E-044  The next slot is still free and can be booked
+PASS  E2E-045  A date in the past is refused
+PASS  E2E-046  Sunday is refused because the clinic is closed
+PASS  E2E-047  An appointment can be cancelled from the diary
+PASS  E2E-048  Changing an appointment without a CSRF token is refused
+PASS  E2E-049  Check-in offers today's booked appointment
+PASS  E2E-050  Checking in from the appointment opens a visit and goes to the triage queue
+PASS  E2E-051  The appointment now shows as Attended
+PASS  E2E-052  A patient with an open visit cannot be checked in twice
+PASS  E2E-053  A walk-in patient is checked in without an appointment
+PASS  E2E-054  The nurse's triage queue lists both patients with an allergy flag
+PASS  E2E-055  Impossible vital signs are rejected with messages
+PASS  E2E-056  The nurse saves triage
+PASS  E2E-057  The nurse records a procedure
+PASS  E2E-058  The doctor's queue shows the triaged patient
+PASS  E2E-059  The consultation page shows triage, allergy warning and the ICD-10 list
+PASS  E2E-060  A consultation without complaint and diagnosis is refused
+PASS  E2E-061  The doctor saves the consultation
+PASS  E2E-062  Typed markup in the complaint is shown as text, not run
+PASS  E2E-063  An ICD-10 code that is not in the hospital list is refused
+PASS  E2E-064  Saving a consultation without a CSRF token is refused
+PASS  E2E-065  A nurse cannot open the consultation page (403)
+PASS  E2E-066  A receptionist cannot open the triage page (403)
+PASS  E2E-067  A doctor cannot book appointments (403)
+PASS  E2E-068  The receptionist sees the visit but not the diagnosis
+PASS  E2E-069  The doctor closes the visit
+PASS  E2E-070  The doctor's patient record shows the diagnosis in the visit history
+PASS  E2E-071  The audit trail records check-in, triage and consultation
+PASS  E2E-080  The pharmacist adds a medicine to the list
+PASS  E2E-081  Medicine names are escaped on screen
+PASS  E2E-082  An invalid price is refused
+PASS  E2E-083  The pharmacist receives a batch that expires in 60 days
+PASS  E2E-084  Stock that has already expired cannot be received
+PASS  E2E-085  Stock page shows usable stock of 530 Paracetamol and Zincex as Low
+PASS  E2E-086  The pharmacist dashboard warns about low stock and the batch expiring soon
+PASS  E2E-087  Batches are listed with their expiry state
+PASS  E2E-088  The consultation page offers test requests and prescribing
+PASS  E2E-089  The doctor requests a malaria test
+PASS  E2E-090  Requesting the same pending test again is refused
+PASS  E2E-091  The laboratory worklist shows the test, the patient and the requesting doctor
+PASS  E2E-092  The technologist starts the test
+PASS  E2E-093  An empty result is refused
+PASS  E2E-094  The technologist enters the result
+PASS  E2E-095  The result appears in the requesting doctor's list
+PASS  E2E-096  The result also appears on the consultation page
+PASS  E2E-097  Another doctor does not see this doctor's results
+PASS  E2E-098  The doctor prescribes two medicines
+PASS  E2E-099  A prescription line with quantity zero is refused
+PASS  E2E-100  The prescription is waiting in the pharmacy queue with an allergy flag
+PASS  E2E-101  The dispensing page shows what to give and the stock available
+PASS  E2E-102  Dispensing without a CSRF token is refused
+PASS  E2E-103  Dispensing more Zincex than is in stock is refused and nothing is deducted
+PASS  E2E-104  Dispensing what is in stock succeeds
+PASS  E2E-105  The batch expiring first was used first (30 from PAR-A1, 10 from PAR-B2)
+PASS  E2E-106  The stock ledger shows the receipt and each dispensed batch
+PASS  E2E-107  A partly dispensed prescription stays in the queue
+PASS  E2E-108  A laboratory technologist cannot open the pharmacy (403)
+PASS  E2E-109  A pharmacist cannot open the laboratory worklist (403)
+PASS  E2E-110  A nurse cannot open the laboratory worklist (403)
+PASS  E2E-111  A doctor cannot dispense medicines (403)
+PASS  E2E-112  A doctor can view stock but not receive it (403)
+PASS  E2E-113  A cashier cannot open stock or the laboratory (403)
+PASS  E2E-114  The audit trail records test results, dispensing and stock receipts
+PASS  E2E-115  The audit trail does not contain the lab result text
+PASS  E2E-120  The cashier sees the new invoice in the list of unpaid invoices
+PASS  E2E-121  The invoice was created automatically and lists each service with its price
+PASS  E2E-122  The invoice total is KSh 950.00 with the same balance due
+PASS  E2E-123  There is no way to edit a charge on the invoice (no price or quantity fields)
+PASS  E2E-124  A payment without a CSRF token is refused
+PASS  E2E-125  Paying more than the balance is refused
+PASS  E2E-126  An M-Pesa payment needs a valid confirmation code
+PASS  E2E-127  A part-payment by M-Pesa is recorded and a receipt is shown
+PASS  E2E-128  The invoice is now Partially paid with a balance of KSh 550.00
+PASS  E2E-129  The same M-Pesa code cannot be used twice
+PASS  E2E-130  The balance is cleared by an insurance payment and the invoice is Paid
+PASS  E2E-131  A paid invoice accepts no further payment
+PASS  E2E-132  The receipt shows the receipt number, method, amount and who received it
+PASS  E2E-133  The cashier's summary shows today's collections by method
+PASS  E2E-134  A manager cannot open individual invoices: managers see totals in reports, not what each patient was charged for (403)
+PASS  E2E-135  A manager cannot post a payment (403)
+PASS  E2E-136  A doctor and a nurse cannot open invoices (403)
+PASS  E2E-137  A receptionist cannot open reports (403)
+PASS  E2E-138  A cashier cannot open reports (403)
+PASS  E2E-139  The revenue report shows billed, collected and the split by method
+PASS  E2E-140  The attendance report shows visits and new patients for the day
+PASS  E2E-141  The laboratory report lists the malaria test and the requesting doctor
+PASS  E2E-142  The stock report shows Paracetamol received and dispensed today
+PASS  E2E-143  The revenue report downloads as a CSV file
+PASS  E2E-144  The CSV contains the collected total
+PASS  E2E-145  The audit trail records payments and report exports
+PASS  E2E-146  The audit trail does not repeat the M-Pesa code
+PASS  E2E-147  The manager's dashboard shows revenue and stock alerts
+PASS  E2E-200  Access matrix: patients/index.php is open only to roles holding patients.view
+PASS  E2E-201  Access matrix: patients/register.php is open only to roles holding patients.register
+PASS  E2E-202  Access matrix: patients/import.php is open only to roles holding patients.import
+PASS  E2E-203  Access matrix: appointments/index.php is open only to roles holding appointments.view
+PASS  E2E-204  Access matrix: appointments/book.php is open only to roles holding appointments.book
+PASS  E2E-205  Access matrix: visits/checkin.php is open only to roles holding visits.checkin
+PASS  E2E-206  Access matrix: visits/queue.php is open only to roles holding visits.view
+PASS  E2E-207  Access matrix: lab/index.php is open only to roles holding lab.worklist
+PASS  E2E-208  Access matrix: lab/results.php is open only to roles holding lab.request
+PASS  E2E-209  Access matrix: pharmacy/index.php is open only to roles holding pharmacy.dispense
+PASS  E2E-210  Access matrix: pharmacy/stock.php is open only to roles holding pharmacy.stock
+PASS  E2E-211  Access matrix: pharmacy/batches.php is open only to roles holding pharmacy.stock
+PASS  E2E-212  Access matrix: pharmacy/receive.php is open only to roles holding pharmacy.manage
+PASS  E2E-213  Access matrix: pharmacy/medicines.php is open only to roles holding pharmacy.manage
+PASS  E2E-214  Access matrix: billing/index.php is open only to roles holding billing.view
+PASS  E2E-215  Access matrix: reports/attendance.php is open only to roles holding reports.attendance
+PASS  E2E-216  Access matrix: reports/revenue.php is open only to roles holding reports.revenue
+PASS  E2E-217  Access matrix: reports/stock.php is open only to roles holding reports.stock
+PASS  E2E-218  Access matrix: reports/lab.php is open only to roles holding reports.lab
+PASS  E2E-219  Access matrix: admin/users.php is open only to roles holding users.manage
+PASS  E2E-220  Access matrix: admin/user.php is open only to roles holding users.manage
+PASS  E2E-221  Access matrix: admin/prices.php is open only to roles holding settings.manage
+PASS  E2E-222  Access matrix: admin/audit.php is open only to roles holding audit.view
+PASS  E2E-223  Access matrix: admin/health.php is open only to roles holding system.health
+PASS  E2E-224  All 192 role-and-page combinations behave exactly as the permission table says
+PASS  E2E-225  A forbidden POST (receptionist trying to deactivate an account) is refused before the token is even checked (403)
+PASS  E2E-226  Refused requests are recorded in the audit trail
+PASS  E2E-227  A receptionist's visit page shows no vital signs or diagnosis
+PASS  E2E-228  A doctor's visit page shows the clinical record
+PASS  E2E-229  A manager cannot open individual invoices (reports only)
+PASS  E2E-230  The session cookie is HttpOnly and SameSite=Strict
+PASS  E2E-231  A new session id is issued at sign-in (session fixation defence)
+PASS  E2E-232  After sign-out the old session cookie no longer works (replay defence)
+PASS  E2E-233  A token taken from one session is rejected in another (CSRF tokens are per session)
+PASS  E2E-234  A session left idle past the limit is ended automatically
+PASS  E2E-235  Deactivating an account ends that person's open session immediately
+PASS  E2E-236  Changing a password requires the current password
+PASS  E2E-237  A SQL injection attempt in the sign-in form fails with the normal message
+PASS  E2E-238  SQL in the invoice filters is treated as text (no error, tables intact)
+PASS  E2E-239  Rubbish in report dates falls back to a safe default
+PASS  E2E-240  SQL in the audit trail filters returns nothing and breaks nothing
+PASS  E2E-241  Markup stored in allergies and residence is shown as harmless text
+PASS  E2E-242  A user name containing a script tag is escaped in the user list
+PASS  E2E-243  No page contains inline scripts or inline event handlers (compatible with the strict CSP)
+PASS  E2E-244  Pages are served with no-store caching so records are not kept in the browser after sign-out
+PASS  E2E-245  A spreadsheet formula typed as a medicine name is neutralised in the CSV download
+PASS  E2E-246  A missing record shows a calm error page without file paths or stack traces
+PASS  E2E-247  Unexpected input types are handled without warnings
+PASS  E2E-248  Unusual HTTP methods do not change data
+PASS  E2E-249  The system health page shows the integrity check result
+PASS  E2E-250  The administrator can change a price and the change is audited with old and new values
+PASS  E2E-251  An invalid price is refused
+PASS  E2E-252  Opening the audit trail is itself recorded in the audit trail
+Finished: 2026-10-24 11:33:13
+Totals: 185 run, 185 passed, 0 failed

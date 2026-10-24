@@ -1,0 +1,25 @@
+
+PASS  APA-001  The sign-in page is served by Apache and PHP
+PASS  APA-002  The database schema file is refused (403)
+PASS  APA-003  The installer script is refused (403)
+PASS  APA-004  Application code in includes/ is refused (403)
+PASS  APA-005  The configuration file is refused (403)
+PASS  APA-006  The local configuration file is refused (403)
+PASS  APA-007  The test runner is refused (403)
+PASS  APA-008  The test script is refused (403)
+PASS  APA-009  The application log is refused (403)
+PASS  APA-010  The backups folder is refused (403)
+PASS  APA-011  The documentation folder is refused (403)
+PASS  APA-012  The backup script is refused (403)
+PASS  APA-013  Markdown and other internal file types are refused (403)
+PASS  APA-014  Dot-files are refused (403)
+PASS  APA-015  Directory listing is switched off: a folder URL shows no file list (got 404)
+PASS  APA-016  The stylesheet is served
+PASS  APA-017  The script file is served
+PASS  APA-018  A missing page shows the branded error page, not the server default
+PASS  APA-019  Security headers are sent and the PHP version is not advertised
+PASS  APA-020  The session cookie is HttpOnly and SameSite=Strict
+PASS  APA-021  A .git folder would not be served (403/404)
+PASS  APA-022  A demonstration doctor can sign in and open the dashboard through Apache
+PASS  APA-023  Role-based access works through Apache: a doctor is refused the user accounts page (403)
+Totals: 23 run, 23 passed, 0 failed

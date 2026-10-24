@@ -1,0 +1,20 @@
+UB-HMS response times measured through Apache (2026-10-24 11:26)
+Computer: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, 4 cores, 15.8 GB RAM; database 10.4.32-MariaDB on port 3307, database uhai_bora_hms_perf
+Each row: mean and 95th-percentile time to serve one page, for one user and for ten users working at the same time (each with their own session, no pause between requests); errors = responses that were not 2xx.
+
+PERF-01 Dashboard (receptionist)               1 user:     34 ms mean     43 ms 95th  errors 0/100   10 users:     34 ms mean     54 ms 95th  errors 0/100
+PERF-02 Patient search by surname (2,000 hits) 1 user:     94 ms mean    231 ms 95th  errors 0/60   10 users:    175 ms mean    409 ms 95th  errors 0/60
+PERF-03 Patient search by outpatient number    1 user:     62 ms mean     99 ms 95th  errors 0/100   10 users:    169 ms mean    531 ms 95th  errors 0/100
+PERF-04 Patient record with history            1 user:     82 ms mean    147 ms 95th  errors 0/100   10 users:    159 ms mean    705 ms 95th  errors 0/100
+PERF-05 Appointment diary (one day)            1 user:     28 ms mean     37 ms 95th  errors 0/100   10 users:     18 ms mean     34 ms 95th  errors 0/100
+PERF-06 Visit queue                            1 user:     28 ms mean     33 ms 95th  errors 0/100   10 users:     15 ms mean     27 ms 95th  errors 0/100
+PERF-07 Laboratory worklist                    1 user:     28 ms mean     36 ms 95th  errors 0/100   10 users:     19 ms mean     32 ms 95th  errors 0/100
+PERF-08 Doctor: my test results                1 user:     95 ms mean    132 ms 95th  errors 0/100   10 users:    440 ms mean    759 ms 95th  errors 0/100
+PERF-09 Medicine stock list                    1 user:     30 ms mean     47 ms 95th  errors 0/100   10 users:     23 ms mean     42 ms 95th  errors 0/100
+PERF-10 Invoice search (30,000 invoices)       1 user:     59 ms mean     84 ms 95th  errors 0/100   10 users:    195 ms mean    261 ms 95th  errors 0/100
+PERF-11 Attendance report, 14 days             1 user:    138 ms mean    409 ms 95th  errors 0/40   10 users:    260 ms mean    571 ms 95th  errors 0/40
+PERF-12 Revenue report, 14 days                1 user:    138 ms mean    470 ms 95th  errors 0/40   10 users:    314 ms mean    642 ms 95th  errors 0/40
+PERF-13 Revenue report, 20 months              1 user:    608 ms mean  1,120 ms 95th  errors 0/20   10 users:  2,223 ms mean  2,628 ms 95th  errors 0/40
+PERF-14 Stock report                           1 user:     72 ms mean    112 ms 95th  errors 0/40   10 users:    151 ms mean    299 ms 95th  errors 0/40
+PERF-15 Laboratory report, 20 months           1 user:    137 ms mean    386 ms 95th  errors 0/20   10 users:    307 ms mean    560 ms 95th  errors 0/40
+PERF-16 Audit trail (100,000 entries)          1 user:    100 ms mean    361 ms 95th  errors 0/60   10 users:    219 ms mean    368 ms 95th  errors 0/60
