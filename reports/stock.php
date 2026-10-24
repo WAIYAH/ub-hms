@@ -30,7 +30,7 @@ page_start('Stock report', 'r-stock');
     <tbody>
     <?php foreach ($r['rows'] as $m): ?>
         <tr><td><?= e(medicine_label($m)) ?></td><td class="num"><?= $m['on_hand'] ?></td><td class="num"><?= (int) $m['reorder_level'] ?></td><td><?= badge($m['status']) ?></td>
-            <td><?= $m['next_expiry'] ? e(fmt_date($m['next_expiry'])) : '' ?></td><td class="num"><?= $m['expired_qty'] ?></td>
+            <td class="nowrap"><?= $m['next_expiry'] ? e(fmt_date($m['next_expiry'])) : '' ?></td><td class="num"><?= $m['expired_qty'] ?></td>
             <td class="num"><?= $m['received'] ?></td><td class="num"><?= $m['dispensed'] ?></td><td class="num"><?= ($m['adjusted'] > 0 ? '+' : '') . $m['adjusted'] ?></td><td class="num"><?= e(fmt_money($m['value'])) ?></td></tr>
     <?php endforeach; ?>
     <?php if (!$r['rows']): ?><tr><td colspan="10" class="empty">No medicines on the list.</td></tr><?php endif; ?>

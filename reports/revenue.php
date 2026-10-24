@@ -53,7 +53,7 @@ page_start('Revenue report', 'r-revenue');
     <tbody>
     <?php foreach ($r['days'] as $d): ?>
         <?php if (to_cents($d['billed']) === 0 && to_cents($d['collected']) === 0) { continue; } ?>
-        <tr><td><?= e(fmt_date($d['date'])) ?></td><td class="num"><?= e(fmt_money($d['billed'])) ?></td><td class="num"><?= e(fmt_money($d['collected'])) ?></td><td class="num"><?= (int) $d['payments'] ?></td></tr>
+        <tr><td class="nowrap"><?= e(fmt_date($d['date'])) ?></td><td class="num"><?= e(fmt_money($d['billed'])) ?></td><td class="num"><?= e(fmt_money($d['collected'])) ?></td><td class="num"><?= (int) $d['payments'] ?></td></tr>
     <?php endforeach; ?>
     </tbody>
 </table>

@@ -33,7 +33,7 @@ page_start('Attendance report', 'r-attendance');
     <tbody>
     <?php foreach ($r['days'] as $d): ?>
         <?php if ($d['booked'] + $d['attended'] + $d['missed'] + $d['cancelled'] + $d['visits'] + $d['new_patients'] === 0) { continue; } ?>
-        <tr><td><?= e(fmt_date($d['date'])) ?></td><td class="num"><?= $d['booked'] ?></td><td class="num"><?= $d['attended'] ?></td><td class="num"><?= $d['missed'] ?></td><td class="num"><?= $d['cancelled'] ?></td><td class="num"><?= $d['walkins'] ?></td><td class="num"><?= $d['visits'] ?></td><td class="num"><?= $d['new_patients'] ?></td></tr>
+        <tr><td class="nowrap"><?= e(fmt_date($d['date'])) ?></td><td class="num"><?= $d['booked'] ?></td><td class="num"><?= $d['attended'] ?></td><td class="num"><?= $d['missed'] ?></td><td class="num"><?= $d['cancelled'] ?></td><td class="num"><?= $d['walkins'] ?></td><td class="num"><?= $d['visits'] ?></td><td class="num"><?= $d['new_patients'] ?></td></tr>
     <?php endforeach; ?>
     </tbody>
     <tfoot><tr><td>Total</td><td class="num"><?= $r['totals']['booked'] ?></td><td class="num"><?= $r['totals']['attended'] ?></td><td class="num"><?= $r['totals']['missed'] ?></td><td class="num"><?= $r['totals']['cancelled'] ?></td><td class="num"><?= $r['totals']['walkins'] ?></td><td class="num"><?= $r['totals']['visits'] ?></td><td class="num"><?= $r['totals']['new_patients'] ?></td></tr></tfoot>

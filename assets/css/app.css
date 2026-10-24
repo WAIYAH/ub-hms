@@ -99,11 +99,12 @@ a:hover { color: var(--brand-dark); }
 /* Tables */
 .table-wrap { overflow-x: auto; background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 1rem; }
 table.data { width: 100%; border-collapse: collapse; }
-table.data th, table.data td { padding: .6rem .8rem; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
-table.data th { background: #eaf1f0; font-size: .85rem; text-transform: uppercase; letter-spacing: .03em; color: var(--brand-dark); white-space: nowrap; }
+table.data th, table.data td { padding: .5rem .6rem; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
+table.data td { font-size: .92rem; }
+table.data th { background: #eaf1f0; font-size: .8rem; text-transform: uppercase; letter-spacing: .02em; color: var(--brand-dark); white-space: nowrap; }
 table.data tbody tr:hover { background: #f8fbfb; }
 table.data tfoot td { font-weight: 700; background: #f1f6f6; }
-table.data td.num, table.data th.num { text-align: right; font-variant-numeric: tabular-nums; }
+table.data td.num, table.data th.num { white-space: nowrap; text-align: right; font-variant-numeric: tabular-nums; }
 .empty { padding: 1.5rem; text-align: center; color: var(--muted); }
 
 /* Forms */
@@ -151,7 +152,7 @@ dl.kv { display: grid; grid-template-columns: max-content 1fr; gap: .35rem 1.25r
 dl.kv dt { color: var(--muted); font-weight: 600; }
 dl.kv dd { margin: 0; }
 .record-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: .5rem 1rem; }
-.op-number { font-family: Consolas, "Courier New", monospace; background: var(--brand-light); color: var(--brand-dark); padding: .1rem .5rem; border-radius: 4px; font-weight: 700; }
+.op-number { white-space: nowrap; font-family: Consolas, "Courier New", monospace; background: var(--brand-light); color: var(--brand-dark); padding: .1rem .5rem; border-radius: 4px; font-weight: 700; }
 .allergy { background: var(--danger-bg); border: 1px solid #e8a29d; color: #6d130e; padding: .5rem .75rem; border-radius: var(--radius); margin-bottom: 1rem; }
 .timeline { list-style: none; margin: 0; padding: 0; }
 .timeline li { border-left: 3px solid var(--brand); padding: .15rem 0 .85rem 1rem; position: relative; }

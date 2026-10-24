@@ -56,7 +56,7 @@ page_start('User accounts', 'users');
             <td><?= e($u['role_name']) ?></td>
             <td><?= (int) $u['is_active'] ? badge($u['is_locked'] ? 'Locked' : 'Active') : badge('Inactive') ?></td>
             <td><?= $u['last_login_at'] ? e(fmt_datetime($u['last_login_at'])) : '<span class="muted">Never</span>' ?></td>
-            <td class="nowrap">
+            <td>
                 <a class="btn btn-small btn-secondary" href="<?= e(url('admin/user.php', ['id' => $u['id']])) ?>">Edit</a>
                 <?php if ($u['is_locked']): ?>
                     <?= form_open('admin/users.php', 'inline') ?><input type="hidden" name="id" value="<?= (int) $u['id'] ?>"><input type="hidden" name="action" value="unlock"><button class="btn btn-small" type="submit">Unlock</button></form>

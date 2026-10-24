@@ -44,7 +44,7 @@ class Shooter:
         self.n = 0
         self.log = []
 
-    def context(self, width=960, height=720, mobile=False):
+    def context(self, width=1120, height=720, mobile=False):
         return self.browser.new_context(viewport={'width': width, 'height': height}, device_scale_factor=2, locale='en-GB',
                                         timezone_id='Africa/Nairobi', is_mobile=mobile)
 
@@ -68,7 +68,7 @@ class Shooter:
         page.goto(BASE + '/login.php')
         page.fill('#username', user)
         page.fill('#password', pw)
-        page.click('button[type=submit]')
+        page.click('#main button[type=submit]')
         page.wait_for_load_state('networkidle')
 
 
@@ -108,12 +108,12 @@ def main():
                 pg.fill('#f_current_password', ADMIN_PW_OLD)
                 pg.fill('#f_new_password', 'weak')
                 pg.fill('#f_confirm_password', 'weak')
-                pg.click('button[type=submit]')
+                pg.click('#main button[type=submit]')
                 s.shot(pg, '04-password-weak')
                 pg.fill('#f_current_password', ADMIN_PW_OLD)
                 pg.fill('#f_new_password', ADMIN_PW_NEW)
                 pg.fill('#f_confirm_password', ADMIN_PW_NEW)
-                pg.click('button[type=submit]')
+                pg.click('#main button[type=submit]')
                 pg.wait_for_load_state('networkidle')
             else:
                 s.login(pg, ADMIN_USER, ADMIN_PW_NEW)
@@ -132,7 +132,7 @@ def main():
             s.shot(pg, '11-reception-dashboard', full=True)
             pg.goto(BASE + '/patients/index.php?q=' + info['patient_last']); s.shot(pg, '12-patient-search', full=True, max_height=1000)
             pg.goto(BASE + '/patients/register.php'); s.shot(pg, '13-patient-register', full=True)
-            pg.click('button[type=submit]'); pg.wait_for_load_state('networkidle'); s.shot(pg, '14-patient-register-errors', full=True, max_height=1500)
+            pg.click('#main button[type=submit]'); pg.wait_for_load_state('networkidle'); s.shot(pg, '14-patient-register-errors', full=True, max_height=1500)
             pg.goto(BASE + '/patients/view.php?id=' + str(info['patient_id'])); s.shot(pg, '15-patient-record-reception', full=True, max_height=1500)
             pg.goto(BASE + '/appointments/index.php?date=' + date.today().isoformat() + '&doctor_id='); s.shot(pg, '16-appointment-diary', full=True, max_height=1400)
             pg.goto(BASE + f'/appointments/book.php?patient_id={info["patient_id"]}&doctor_id={info["doctor1"]}&date={next_workday(1)}'); s.shot(pg, '17-book-appointment', full=True, max_height=1700)
@@ -150,7 +150,7 @@ def main():
             pg.goto(BASE + '/visits/queue.php?stage=triage'); s.shot(pg, '23-triage-queue', full=True, max_height=1100)
             pg.goto(BASE + '/visits/triage.php?visit=' + str(info['triage_visit']))
             pg.fill('#f_temperature', '60'); pg.fill('#f_pulse', '5')
-            pg.click('form[method=post] button[type=submit]'); pg.wait_for_load_state('networkidle')
+            pg.click('#main form[method=post] button[type=submit]'); pg.wait_for_load_state('networkidle')
             s.shot(pg, '24-triage-errors', full=True, max_height=1500)
             pg.goto(BASE + '/visits/triage.php?visit=' + str(info['triage_visit'])); s.shot(pg, '25-triage-form', full=True, max_height=1500)
             ctx.close()
@@ -164,7 +164,7 @@ def main():
             pg.goto(BASE + '/visits/consult.php?visit=' + str(info['orders_visit'])); s.shot(pg, '28-consult-top', full=True, max_height=1500)
             pg.evaluate("document.querySelector('.card h2').scrollIntoView()")
             h = pg.evaluate("[...document.querySelectorAll('h2')].find(e => e.textContent.trim() === 'Laboratory tests').getBoundingClientRect().top + window.scrollY")
-            pg.evaluate(f'window.scrollTo(0, {h - 20})'); s.shot(pg, '29-consult-orders')
+            pg.evaluate(f'window.scrollTo(0, {h - 80})'); s.shot(pg, '29-consult-orders')
             pg.goto(BASE + '/patients/view.php?id=' + str(info['patient_id'])); s.shot(pg, '30-patient-record-doctor', full=True, max_height=1700)
             pg.goto(BASE + '/lab/results.php'); s.shot(pg, '31-my-test-results', full=True, max_height=1400)
             pg.goto(BASE + '/visits/consult.php?visit=' + str(info['result_visit'])); s.shot(pg, '32-consult-with-result', full=True, max_height=2200)
@@ -211,7 +211,7 @@ def main():
             ctx.close()
 
             # ---------- manager ----------
-            ctx = s.context()
+            ctx = s.context(width=1280)
             pg = ctx.new_page()
             s.login(pg, 'manager1', DEMO_PW)
             s.shot(pg, '50-manager-dashboard', full=True, max_height=1800)
