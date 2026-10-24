@@ -25,7 +25,7 @@ return [
 
     'session' => [
         'name'             => 'UBHMSSESSID',
-        'idle_timeout'     => 1800,   // seconds without activity before sign-out (30 minutes)
+        'idle_timeout'     => (int) (getenv('UBHMS_IDLE_TIMEOUT') ?: 1800),   // seconds without activity before sign-out (30 minutes)
         'absolute_timeout' => 28800,  // seconds since sign-in before sign-out (8 hours)
     ],
 

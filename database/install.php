@@ -2,10 +2,12 @@
 /**
  * Command-line installer.
  *
- *   php database/install.php [--db=NAME] [--admin-user=admin] [--admin-pass=SECRET] [--demo] [--force]
+ *   php database/install.php [--db=NAME] [--admin-user=admin] [--admin-pass=SECRET] [--demo[=basic]] [--force]
  *
  * Creates the database if needed, loads database/schema.sql, creates the first
- * administrator and (with --demo) loads synthetic demonstration data.
+ * administrator and (with --demo) loads synthetic demonstration data. --demo=basic loads
+ * only the demonstration staff and patients; plain --demo adds two weeks of clinic history,
+ * medicines and stock as well.
  * Refuses to run when UB-HMS tables already exist unless --force is given,
  * because the schema script drops every table.
  */
@@ -77,7 +79,7 @@ echo "(You will be asked to choose a new password at first sign-in.)\n";
 
 if (isset($opts['demo'])) {
     require_once APP_ROOT . '/database/demo_data.php';
-    $summary = seed_demo_data();
+    $summary = seed_demo_data(($opts['demo'] ?? true) !== 'basic');
     echo "Synthetic demonstration data loaded:\n";
     foreach ($summary as $k => $v) {
         echo sprintf("  %-28s %s\n", $k, $v);

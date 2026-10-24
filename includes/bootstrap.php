@@ -65,16 +65,12 @@ function start_web_session(): void
     session_start();
 
     $now = time();
-    if (isset($_SESSION['user'])) {
-        $idle = $now - (int) ($_SESSION['last_activity'] ?? 0);
-        $age = $now - (int) ($_SESSION['signed_in_at'] ?? 0);
-        if ($idle > (int) config('session.idle_timeout') || $age > (int) config('session.absolute_timeout')) {
-            $userId = (int) $_SESSION['user']['id'];
-            audit('session_expired', 'user', $userId, 'Signed out automatically', $userId);
-            end_user_session();
-            session_start();
-            flash('info', 'You were signed out because the session was inactive for too long. Please sign in again.');
-        }
+    if (session_has_expired($_SESSION, $now, (int) config('session.idle_timeout'), (int) config('session.absolute_timeout'))) {
+        $userId = (int) $_SESSION['user']['id'];
+        audit('session_expired', 'user', $userId, 'Signed out automatically', $userId);
+        end_user_session();
+        session_start();
+        flash('info', 'You were signed out because the session was inactive for too long. Please sign in again.');
     }
     $_SESSION['last_activity'] = $now;
 }

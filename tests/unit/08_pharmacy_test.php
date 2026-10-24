@@ -341,3 +341,15 @@ test('UT-PHA-020', 'the pharmacy queue lists the oldest prescription first', fun
     $q = pharmacy_queue();
     assert_same([$rx2, $rx1], array_map(fn ($r) => (int) $r['id'], $q));
 });
+
+test('UT-PHA-021', 'editing a medicine is audited with the fields that changed and the price movement', function () {
+    $m = make_medicine('Editdrug', '10.00', 20);
+    $u = make_user('pharmacist');
+    [$c] = validate_medicine_input(['name' => 'Editdrug', 'form' => 'Tablet', 'strength' => '500 mg', 'unit' => 'tablet', 'unit_price' => '12.50', 'reorder_level' => '20', 'is_active' => '1']);
+    save_medicine($m, $c, $u);
+    $detail = (string) db_value("SELECT details FROM audit_log WHERE entity = 'medicine' AND action = 'update' ORDER BY id DESC LIMIT 1");
+    assert_contains('unit_price (10.00 to 12.50)', $detail);
+    assert_not_contains('reorder_level', $detail, 'unchanged fields are not listed');
+    save_medicine($m, $c, $u);
+    assert_contains('Saved with no changes', (string) db_value("SELECT details FROM audit_log WHERE entity = 'medicine' ORDER BY id DESC LIMIT 1"));
+});

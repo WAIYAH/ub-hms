@@ -39,7 +39,7 @@ record() { # status id description
   if [ "$1" = "PASS" ]; then pass=$((pass+1)); else fail=$((fail+1)); fi
 }
 check() { # id description expression
-  if eval "$3"; then record PASS "$1" "$2"; else record FAIL "$1" "$2"; fi
+  if eval "$3"; then record PASS "$1" "$2"; return 0; else record FAIL "$1" "$2"; return 1; fi
 }
 
 # ---------- HTTP helpers (one cookie jar per "browser": admin, rec, doc ...) ----------
@@ -57,7 +57,13 @@ last_id() { grep -o 'id=[0-9]*' | tail -1 | cut -d= -f2; }
 
 # ---------- set-up ----------
 echo "== Setting up database $UBHMS_DB_NAME"
-"$PHP_BIN" "$ROOT/database/install.php" --force --demo --admin-user="$ADMIN_USER" --admin-pass="$ADMIN_PW1" > "$J/install.log" 2>&1 || { cat "$J/install.log"; echo "Install failed"; exit 2; }
+"$PHP_BIN" "$ROOT/database/install.php" --force --demo=basic --admin-user="$ADMIN_USER" --admin-pass="$ADMIN_PW1" > "$J/install.log" 2>&1 || { cat "$J/install.log"; echo "Install failed"; exit 2; }
+if [ "${E2E_LEAST_PRIVILEGE:-0}" = "1" ]; then
+  # Run the web application as the restricted database account, as a real installation should.
+  "$PHP_BIN" "$ROOT/database/create_app_user.php" --user=ubhms_app --password='E2e#AppUser2026!' --host=localhost > "$J/appuser.log" 2>&1 || { cat "$J/appuser.log"; echo "App user set-up failed"; exit 2; }
+  export UBHMS_DB_USER=ubhms_app UBHMS_DB_PASS='E2e#AppUser2026!'
+  echo "== The web server will connect as the least-privilege account ubhms_app"
+fi
 echo "== Starting web server on $B"
 "$PHP_BIN" -S "127.0.0.1:$PORT" -t "$ROOT" > "$J/server.log" 2>&1 &
 SERVER_PID=$!
@@ -458,7 +464,7 @@ sec_sprint4() {
   check E2E-133 "The cashier's summary shows today's collections by method" '[[ "$h" == *"My collections today"* && "$h" == *"KSh 400.00"* && "$h" == *"KSh 550.00"* && "$h" == *"KSh 950.00"* ]]'
 
   # access control
-  check E2E-134 "A manager can view invoices but there is no payment form" 'h=$(get mgr "billing/invoice.php?id=$iid"); [[ "$h" == *"Invoice INV-"* && "$h" != *"Take a payment"* ]]'
+  check E2E-134 "A manager cannot open individual invoices: managers see totals in reports, not what each patient was charged for (403)" '[[ "$(code mgr "billing/invoice.php?id=$iid")" == 403 ]]'
   r=$(form mgr index.php billing/pay.php --data-urlencode "invoice_id=$iid" --data-urlencode "method=Cash" --data-urlencode "amount=1")
   check E2E-135 "A manager cannot post a payment (403)" '[[ "$(code mgr billing/pay.php)" == 403 || "$r" == 403* ]]'
   check E2E-136 "A doctor and a nurse cannot open invoices (403)" '[[ "$(code doc billing/index.php)" == 403 && "$(code nurse billing/index.php)" == 403 ]]'
@@ -483,6 +489,146 @@ sec_sprint4() {
   check E2E-146 "The audit trail does not repeat the M-Pesa code" '[[ "$h" != *"QJK4H2M9XP"* ]]'
   h=$(get mgr index.php)
   check E2E-147 "The manager's dashboard shows revenue and stock alerts" '[[ "$h" == *"Collected today"* && "$h" == *"Unpaid balances"* ]]'
+}
+
+# =====================================================================
+# SPRINT 5: integration and security (OWASP Top 10)
+# =====================================================================
+cookie_value() { grep -h "UBHMSSESSID" "$J/$1" 2>/dev/null | awk '{print $NF}' | tail -1; }
+
+sec_sprint5() {
+  echo; echo "== Sprint 5: access control matrix and security checks (OWASP Top 10)"
+  local r h
+  local n=199
+  chk() { n=$((n+1)); check "E2E-$n" "$@"; }
+
+  # --- A01 Broken access control: every page against every role, driven by the permission matrix ---
+  local pages=(
+    "patients/index.php:patients.view" "patients/register.php:patients.register" "patients/import.php:patients.import"
+    "appointments/index.php:appointments.view" "appointments/book.php:appointments.book" "visits/checkin.php:visits.checkin"
+    "visits/queue.php:visits.view" "lab/index.php:lab.worklist" "lab/results.php:lab.request"
+    "pharmacy/index.php:pharmacy.dispense" "pharmacy/stock.php:pharmacy.stock" "pharmacy/batches.php:pharmacy.stock"
+    "pharmacy/receive.php:pharmacy.manage" "pharmacy/medicines.php:pharmacy.manage" "billing/index.php:billing.view"
+    "reports/attendance.php:reports.attendance" "reports/revenue.php:reports.revenue" "reports/stock.php:reports.stock" "reports/lab.php:reports.lab"
+    "admin/users.php:users.manage" "admin/user.php:users.manage" "admin/prices.php:settings.manage" "admin/audit.php:audit.view" "admin/health.php:system.health"
+  )
+  declare -A jar=( [admin]=admin [manager]=mgr [receptionist]=rec [nurse]=nurse [doctor]=doc [lab]=lab [pharmacist]=pharm [cashier]=cash )
+  login rec reception1 "$DEMO_PW" >/dev/null; login nurse nurse1 "$DEMO_PW" >/dev/null; login doc doctor1 "$DEMO_PW" >/dev/null
+  login lab lab1 "$DEMO_PW" >/dev/null; login pharm pharmacist1 "$DEMO_PW" >/dev/null; login cash cashier1 "$DEMO_PW" >/dev/null; login mgr manager1 "$DEMO_PW" >/dev/null
+  local combos=0 wrong=0 page perm expected role want got
+  for entry in "${pages[@]}"; do
+    page=${entry%%:*}; perm=${entry##*:}
+    expected=$(php_eval x 'foreach (permission_matrix() as $r => $p) { echo $r, ":", in_array("'"$perm"'", $p, true) ? "200" : "403", " "; }')
+    bad=""
+    for pair in $expected; do
+      role=${pair%%:*}; want=${pair##*:}
+      got=$(code "${jar[$role]}" "$page"); combos=$((combos+1))
+      [ "$got" = "$want" ] || { bad="$bad $role(got $got, expected $want)"; wrong=$((wrong+1)); }
+    done
+    chk "Access matrix: $page is open only to roles holding $perm" '[ -z "$bad" ]' || echo "      mismatch:$bad"
+  done
+  chk "All $combos role-and-page combinations behave exactly as the permission table says" '[ "$wrong" -eq 0 ]'
+
+  r=$(post rec admin/users.php --data-urlencode "id=1" --data-urlencode "action=deactivate")
+  chk "A forbidden POST (receptionist trying to deactivate an account) is refused before the token is even checked (403)" '[[ "$r" == 403* ]]'
+  chk "Refused requests are recorded in the audit trail" 'get admin admin/audit.php | grep -q "access_denied"'
+
+  # --- A01: least privilege on shared pages ---
+  local vid2; vid2=$(php_eval x 'echo db_value("SELECT id FROM visits ORDER BY id DESC LIMIT 1");')
+  h=$(get rec "visits/view.php?id=$vid2")
+  chk "A receptionist's visit page shows no vital signs or diagnosis" '[[ "$h" != *"Oxygen saturation"* && "$h" != *"Pulse (beats"* && "$h" != *"Diagnosis"* ]]'
+  h=$(get doc "visits/view.php?id=$vid2")
+  chk "A doctor's visit page shows the clinical record" '[[ "$h" == *"Diagnosis"* ]]'
+  chk "A manager cannot open individual invoices (reports only)" '[[ "$(code mgr billing/index.php)" == 403 ]]'
+
+  # --- A02/A07 cookies, fixation, replay, timeouts ---
+  h=$(curl -s -D - -o /dev/null "$B/login.php")
+  chk "The session cookie is HttpOnly and SameSite=Strict" '[[ "$h" == *"HttpOnly"* && "$h" == *"SameSite=Strict"* ]]'
+  local t; t=$(token fix login.php); local before; before=$(cookie_value fix)
+  post fix login.php --data-urlencode "_csrf=$t" --data-urlencode "username=cashier1" --data-urlencode "password=$DEMO_PW" >/dev/null
+  local after; after=$(cookie_value fix)
+  chk "A new session id is issued at sign-in (session fixation defence)" '[ -n "$before" ] && [ -n "$after" ] && [ "$before" != "$after" ]'
+  cp "$J/fix" "$J/fix_old"
+  form fix index.php logout.php >/dev/null
+  chk "After sign-out the old session cookie no longer works (replay defence)" '[[ "$(code fix_old billing/index.php)" == 303 ]]'
+
+  chk "A token taken from one session is rejected in another (CSRF tokens are per session)" 'tok=$(token rec index.php); r2=$(post doc logout.php --data-urlencode "_csrf=$tok"); [[ "$r2" == 419* ]]'
+
+  # idle timeout: a second server with a 2-second limit
+  local B_SAVE="$B"; B="http://127.0.0.1:$((PORT+1))"
+  UBHMS_IDLE_TIMEOUT=2 "$PHP_BIN" -S "127.0.0.1:$((PORT+1))" -t "$ROOT" > "$J/server2.log" 2>&1 &
+  local pid2=$!
+  for i in $(seq 1 30); do curl -s -o /dev/null "$B/login.php" && break; sleep 0.3; done
+  login idle cashier1 "$DEMO_PW" >/dev/null
+  local a b; a=$(code idle billing/index.php); sleep 3; b=$(code idle billing/index.php)
+  kill "$pid2" 2>/dev/null; B="$B_SAVE"
+  chk "A session left idle past the limit is ended automatically" '[ "$a" = 200 ] && [ "$b" = 303 ]'
+
+  # a deactivated user loses access at once
+  login n2 nurse2 "$DEMO_PW" >/dev/null
+  local uid; uid=$(get admin "admin/users.php?q=nurse2" | grep -o 'user.php?id=[0-9]*' | head -1 | grep -o '[0-9]*$')
+  a=$(code n2 visits/queue.php)
+  form admin admin/users.php admin/users.php --data-urlencode "id=$uid" --data-urlencode "action=deactivate" >/dev/null
+  b=$(code n2 visits/queue.php)
+  form admin admin/users.php admin/users.php --data-urlencode "id=$uid" --data-urlencode "action=activate" >/dev/null
+  chk "Deactivating an account ends that person's open session immediately" '[ "$a" = 200 ] && [ "$b" = 303 ]'
+
+  r=$(form cash password.php password.php --data-urlencode "current_password=wrong" --data-urlencode "new_password=Another#Pass123" --data-urlencode "confirm_password=Another#Pass123")
+  chk "Changing a password requires the current password" 'body | grep -q "current password is not correct"'
+
+  # --- A03 injection and XSS ---
+  r=$(login sqli "admin' OR '1'='1' -- " "x")
+  chk "A SQL injection attempt in the sign-in form fails with the normal message" 'body | grep -q "username or password is not correct"'
+  h=$(get cash "billing/index.php?q=%27%20OR%201%3D1%20--%20&status=%27%3B%20DROP%20TABLE%20invoices%3B--")
+  chk "SQL in the invoice filters is treated as text (no error, tables intact)" '[[ "$h" == *"Invoices"* && "$h" != *"SQL"* && "$h" != *"Fatal"* ]] && [[ "$(code cash billing/index.php)" == 200 ]]'
+  h=$(get mgr "reports/revenue.php?from=%27%3B%20DROP%20TABLE%20payments%3B--&to=2026-13-45")
+  chk "Rubbish in report dates falls back to a safe default" '[[ "$h" == *"Revenue report"* && "$h" != *"SQL"* ]]'
+  h=$(get admin "admin/audit.php?action=%27%20OR%201%3D1%20--&user_id=1%20OR%201%3D1")
+  chk "SQL in the audit trail filters returns nothing and breaks nothing" '[[ "$h" == *"Audit trail"* && "$h" != *"SQL"* ]]'
+
+  r=$(form rec patients/register.php patients/register.php --data-urlencode "first_name=Xssy" --data-urlencode "last_name=Allergy" --data-urlencode "sex=Male" --data-urlencode "date_of_birth=1980-02-02" --data-urlencode "allergies=<img src=x onerror=alert(1)>" --data-urlencode "residence=\"><script>alert(2)</script>")
+  local xp; xp=$(echo "$r" | grep -o 'id=[0-9]*' | cut -d= -f2)
+  h=$(get rec "patients/view.php?id=$xp")
+  chk "Markup stored in allergies and residence is shown as harmless text" '[[ "$h" == *"&lt;img src=x onerror=alert(1)&gt;"* && "$h" != *"<img src=x"* && "$h" != *"<script>alert(2)"* ]]'
+  r=$(form admin admin/user.php admin/user.php --data-urlencode "full_name=<script>alert(3)</script> Nurse" --data-urlencode "username=xss.user" --data-urlencode "role=nurse")
+  h=$(get admin admin/users.php)
+  chk "A user name containing a script tag is escaped in the user list" '[[ "$h" == *"&lt;script&gt;alert(3)&lt;/script&gt; Nurse"* && "$h" != *"<script>alert(3)"* ]]'
+  local bad=0
+  for p in index.php patients/index.php appointments/index.php billing/index.php pharmacy/stock.php; do
+    case $p in patients/*|appointments/*) jr=rec;; billing/*) jr=cash;; pharmacy/*) jr=pharm;; *) jr=rec;; esac
+    h=$(get $jr $p)
+    if echo "$h" | grep -Eq '<script>|<script [^>]*[^>]>[^<]|[[:space:]]on(click|load|error|submit|mouseover)='; then bad=$((bad+1)); fi
+  done
+  chk "No page contains inline scripts or inline event handlers (compatible with the strict CSP)" '[ "$bad" -eq 0 ]'
+  h=$(curl -s -D - -o /dev/null -b "$J/rec" "$B/patients/index.php")
+  chk "Pages are served with no-store caching so records are not kept in the browser after sign-out" '[[ "$h" == *"no-store"* ]]'
+
+  # CSV formula injection
+  r=$(form pharm pharmacy/medicine.php pharmacy/medicine.php --data-urlencode "name==HYPERLINK(\"http://evil.example\",\"x\")" --data-urlencode "unit_price=1" --data-urlencode "reorder_level=1" --data-urlencode "is_active=1")
+  curl -s -b "$J/mgr" -o "$J/stock.csv" "$B/reports/stock.php?format=csv&from=2000-01-01&to=2100-01-01"
+  local apos="'"; local fcell; fcell=$(grep -o ".=HYPERLINK" "$J/stock.csv" | head -1)
+  chk "A spreadsheet formula typed as a medicine name is neutralised in the CSV download" '[[ "$fcell" == "${apos}=HYPERLINK" ]]'
+
+  # --- A05 misconfiguration / error handling ---
+  h=$(get doc "visits/consult.php?visit=999999")
+  chk "A missing record shows a calm error page without file paths or stack traces" '[[ "$h" == *"does not exist"* && "$h" != *"Stack trace"* && "$h" != *"ub-hms"* && "$h" != *".php on line"* ]]'
+  h=$(get doc "patients/view.php?id[]=1")
+  chk "Unexpected input types are handled without warnings" '[[ "$h" != *"Warning"* && "$h" != *"Fatal"* && "$h" != *"Notice"* ]]'
+  r=$(curl -s -o /dev/null -w '%{http_code}' -X PUT -b "$J/doc" "$B/patients/index.php")
+  chk "Unusual HTTP methods do not change data" '[[ "$r" == 200 || "$r" == 405 || "$r" == 303 ]]'
+  h=$(get admin admin/health.php)
+  chk "The system health page shows the integrity check result" '[[ "$h" == *"Data integrity"* && "$h" == *"All records reconcile"* ]]'
+
+  # --- price list ---
+  local sid; sid=$(get admin admin/prices.php | grep -o 'name="id" value="[0-9]*"' | head -1 | grep -o '[0-9]*')
+  r=$(form admin admin/prices.php admin/prices.php --data-urlencode "kind=service" --data-urlencode "id=$sid" --data-urlencode "price=550" --data-urlencode "is_active=1")
+  h=$(get admin admin/audit.php)
+  chk "The administrator can change a price and the change is audited with old and new values" '[[ "$r" == 303* && "$h" == *"price_change"* && "$h" == *"to 550"* ]]'
+  r=$(form admin admin/prices.php admin/prices.php --data-urlencode "kind=service" --data-urlencode "id=$sid" --data-urlencode "price=abc" --data-urlencode "is_active=1")
+  chk "An invalid price is refused" 'get admin admin/prices.php | grep -q "Enter the price as a number"'
+  form admin admin/prices.php admin/prices.php --data-urlencode "kind=service" --data-urlencode "id=$sid" --data-urlencode "price=500" --data-urlencode "is_active=1" >/dev/null
+  get admin admin/audit.php >/dev/null
+  chk "Opening the audit trail is itself recorded in the audit trail" 'get admin admin/audit.php | grep -q "Opened the audit trail"'
 }
 
 # Later sprints add their own sec_* functions above this line.

@@ -12,6 +12,9 @@ $filters = [
 $page = max(1, get_int('page') ?? 1);
 $perPage = 50;
 [$rows, $total] = search_audit($filters, $perPage, ($page - 1) * $perPage);
+if ($page === 1) {
+    audit('view', 'audit_log', null, 'Opened the audit trail');
+}
 
 $actions = array_column(db_all('SELECT DISTINCT action FROM audit_log ORDER BY action'), 'action');
 $entities = array_column(db_all('SELECT DISTINCT entity FROM audit_log WHERE entity IS NOT NULL ORDER BY entity'), 'entity');

@@ -89,16 +89,20 @@ function seed_demo_patients(int $count = 40): int
     return $done;
 }
 
+require_once __DIR__ . '/demo_clinical.php';
+
 /** Create everything the demo needs. Returns a summary for the installer to print. */
-function seed_demo_data(): array
+function seed_demo_data(bool $full = true): array
 {
     $summary = [];
     $summary['staff accounts'] = seed_demo_users();
     $summary['patients registered'] = seed_demo_patients();
-    foreach (['seed_demo_appointments_and_visits', 'seed_demo_pharmacy', 'seed_demo_billing'] as $fn) {
-        if (function_exists($fn)) {
-            $summary += $fn();
-        }
+    if (!$full) {
+        return $summary;
+    }
+    // stock first, then two weeks of clinic history that uses it, then the summary
+    foreach (['seed_demo_pharmacy', 'seed_demo_appointments_and_visits', 'seed_demo_billing'] as $fn) {
+        $summary += $fn();
     }
     return $summary;
 }

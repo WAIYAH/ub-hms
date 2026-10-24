@@ -31,6 +31,7 @@ page_start('Visit summary', 'visits');
     </div>
 </div>
 
+<?php if (user_can('triage.record') || $clinical): ?>
 <div class="card">
     <h2>Triage</h2>
     <?php if ($triage): ?>
@@ -42,6 +43,7 @@ page_start('Visit summary', 'visits');
         </dl>
     <?php else: ?><p class="muted">Not recorded.</p><?php endif; ?>
 </div>
+<?php endif; ?>
 
 <?php if ($consultation): ?>
 <div class="card">

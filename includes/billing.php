@@ -80,7 +80,9 @@ function billing_sync_visit(int $visitId, int $userId): void
                 // another request created the invoice a moment ago
                 $id = (int) db_value('SELECT id FROM invoices WHERE visit_id = ?', [$visitId]);
             }
-            db_exec("UPDATE invoices SET invoice_no = ? WHERE id = ? AND invoice_no LIKE 'TMP%'", [sprintf('INV-%s-%06d', app_now()->format('Y'), $id), $id]);
+            $number = sprintf('INV-%s-%06d', app_now()->format('Y'), $id);
+            db_exec("UPDATE invoices SET invoice_no = ? WHERE id = ? AND invoice_no LIKE 'TMP%'", [$number, $id]);
+            audit('create', 'invoice', $id, "Invoice $number created automatically for visit $visitId", $userId);
             $inv = db_one('SELECT * FROM invoices WHERE id = ? FOR UPDATE', [$id]);
         }
         $invoiceId = (int) $inv['id'];
@@ -312,7 +314,7 @@ function dashboard_tiles_billing(array $user): array
     if (user_can('reports.revenue')) {
         $all = collections_for_day(app_today());
         $t[] = dashboard_tile('Collected today', fmt_money($all['total']), 'reports/revenue.php');
-        $t[] = dashboard_tile('Unpaid balances', fmt_money(db_value("SELECT COALESCE(SUM(total - amount_paid), 0) FROM invoices WHERE status <> 'Paid'")), 'billing/index.php?open=1', 'warn');
+        $t[] = dashboard_tile('Unpaid balances', fmt_money(db_value("SELECT COALESCE(SUM(total - amount_paid), 0) FROM invoices WHERE status <> 'Paid'")), 'reports/revenue.php', 'warn');
     }
     return $t;
 }

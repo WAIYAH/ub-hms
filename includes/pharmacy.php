@@ -55,18 +55,25 @@ function save_medicine(?int $id, array $c, int $userId): int
         );
         audit('create', 'medicine', $id, 'Medicine added: ' . $c['name'], $userId);
     } else {
+        $old = get_medicine($id);
+        $changed = [];
+        foreach (['name', 'form', 'strength', 'unit', 'unit_price', 'reorder_level', 'is_active'] as $field) {
+            if ((string) ($old[$field] ?? '') !== (string) $c[$field]) {
+                $changed[] = $field . ($field === 'unit_price' ? ' (' . $old[$field] . ' to ' . $c[$field] . ')' : '');
+            }
+        }
         db_exec(
             'UPDATE medicines SET name = ?, form = ?, strength = ?, unit = ?, unit_price = ?, reorder_level = ?, is_active = ? WHERE id = ?',
             [$c['name'], $c['form'], $c['strength'], $c['unit'], $c['unit_price'], (int) $c['reorder_level'], $c['is_active'], $id]
         );
-        audit('update', 'medicine', $id, 'Medicine details changed', $userId);
+        audit('update', 'medicine', $id, $changed ? 'Changed: ' . implode(', ', $changed) : 'Saved with no changes', $userId);
     }
     return $id;
 }
 
 function medicine_label(array $m): string
 {
-    return trim($m['name'] . ' ' . ($m['strength'] ?? '') . ' ' . ($m['form'] ?? ''));
+    return implode(' ', array_filter([$m['name'], $m['strength'] ?? '', $m['form'] ?? ''], static fn ($part) => $part !== ''));
 }
 
 /**

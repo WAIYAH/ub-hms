@@ -11,7 +11,7 @@ if (!defined('APP_ROOT')) {
 
 foreach ([
     'helpers', 'db', 'csrf', 'audit', 'auth', 'layout',
-    'users', 'patients', 'appointments', 'clinical', 'dashboard',
+    'users', 'patients', 'appointments', 'clinical', 'dashboard', 'health',
 ] as $module) {
     require_once __DIR__ . '/' . $module . '.php';
 }

@@ -9,7 +9,7 @@
 declare(strict_types=1);
 
 /** Hash checked when a username does not exist, so response time does not reveal which names are real. */
-const TIMING_DUMMY_HASH = '$2y$10$dg7H8/9GXyDKsBk.n.79IeCUgUGzIBEBDc1ojdNy3KVZ7wvYmwrq2';
+const TIMING_DUMMY_HASH = '$2y$11$s.P4..0KtsinXErDMYFvJ.sP.ELi8FiBlTQzB0TtVEbm7SzPlJqXG';
 
 /* ---------- Roles and permissions ---------- */
 
@@ -71,7 +71,7 @@ function permission_matrix(): array
         'admin' => ['users.manage', 'audit.view', 'settings.manage', 'system.health'],
         'manager' => [
             'audit.view', 'reports.attendance', 'reports.revenue', 'reports.stock', 'reports.lab',
-            'billing.view', 'pharmacy.stock',
+            'pharmacy.stock',
         ],
         'receptionist' => [
             'patients.view', 'patients.register', 'patients.edit', 'patients.import',
@@ -191,6 +191,19 @@ function generate_temp_password(): string
         [$chars[$i], $chars[$j]] = [$chars[$j], $chars[$i]];
     }
     return implode('', $chars);
+}
+
+/**
+ * Has a signed-in session run out of time? It expires after $idle seconds without
+ * activity or $absolute seconds after sign-in, whichever comes first.
+ */
+function session_has_expired(array $session, int $now, int $idle, int $absolute): bool
+{
+    if (!isset($session['user'])) {
+        return false;
+    }
+    return ($now - (int) ($session['last_activity'] ?? 0)) > $idle
+        || ($now - (int) ($session['signed_in_at'] ?? 0)) > $absolute;
 }
 
 /* ---------- Sign-in ---------- */

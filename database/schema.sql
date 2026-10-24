@@ -5,9 +5,12 @@
 --   3 Laboratory management                    4 Pharmacy and inventory
 --   5 Billing and reports                      6 User management and security
 --
--- Works on MariaDB 10.4+ (XAMPP) and MySQL 8. It creates tables and standard
--- reference data only. Create an empty database first, or run
--- `php database/install.php`, which does both.
+-- Tested on MariaDB 10.4.32 (the version bundled with XAMPP 8.2.12). It uses
+-- only standard features (InnoDB, foreign keys, CHECK constraints and a stored
+-- generated column) that current MariaDB and MySQL 8 also provide, but only
+-- MariaDB 10.4.32 has been tested. It creates tables and standard reference
+-- data only. Create an empty database first, or run `php database/install.php`,
+-- which does both.
 --
 -- WARNING: this script drops and recreates every UB-HMS table.
 -- Never run it against a database that holds real patient information.

@@ -26,8 +26,9 @@ All data in the demonstration database is synthetic (made up). No real patient i
 
 ## Requirements
 
-- PHP 8.1 or newer (tested on 8.2) with `pdo_mysql` and `mbstring`
-- MariaDB 10.4+ or MySQL 8 (XAMPP provides both)
+- PHP 8.1 or newer with `pdo_mysql` and `mbstring` (tested on PHP 8.2.12)
+- MariaDB or MySQL (tested only on MariaDB 10.4.32, the version in XAMPP 8.2.12; newer MariaDB and MySQL 8 should work but have not been tested)
+- Apache 2.4 with `mod_headers` and `AllowOverride All` (tested on the Apache in XAMPP)
 - A modern browser (Chrome, Firefox or Edge)
 
 ## Install on XAMPP (Windows)
@@ -45,9 +46,25 @@ All data in the demonstration database is synthetic (made up). No real patient i
    for a real installation. The installer refuses to run over an existing database unless you add `--force`.
 4. Browse to <http://localhost/ub-hms/> and sign in.
 
-If the database is not on the default settings, copy `config/config.php` to `config/config.local.php`,
-keep only the values you want to change, or set the environment variables `UBHMS_DB_HOST`,
-`UBHMS_DB_PORT`, `UBHMS_DB_NAME`, `UBHMS_DB_USER` and `UBHMS_DB_PASS`.
+If the database is not on the default settings, create `config/config.local.php` containing only the values
+you want to change (for example `<?php return ['db' => ['port' => '3307']];`), or set the environment variables
+`UBHMS_DB_HOST`, `UBHMS_DB_PORT`, `UBHMS_DB_NAME`, `UBHMS_DB_USER` and `UBHMS_DB_PASS`.
+
+**Before real use**, stop the application connecting as `root`:
+
+```
+C:\xampp\php\php.exe database\create_app_user.php --password="A-long-random-password"
+```
+
+then put `['db' => ['user' => 'ubhms_app', 'pass' => 'A-long-random-password']]` in `config/config.local.php`.
+That account can read and write the data it needs, can only add rows to the audit trail, payments and stock ledger,
+and cannot change the database structure.
+
+### Backups
+
+`powershell -ExecutionPolicy Bypass -File scripts\backup.ps1` writes a dated, verified, compressed copy of the database to
+`storage\backups` and deletes copies older than 30 days; `scripts\restore.ps1` restores one (after making a safety backup).
+Schedule the backup every night with Windows Task Scheduler (the command is in the script's header).
 
 ### Demonstration accounts (only with `--demo`)
 
