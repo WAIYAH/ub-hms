@@ -21,6 +21,7 @@ TEXT_WIDTH_CM = 15.29  # A4 portrait less the proposal's margins (3.175 cm left,
 LANDSCAPE_WIDTH_CM = 23.98  # A4 landscape: 29.69 - 3.175 - 2.54
 PORTRAIT_FIG_HEIGHT_CM = 21.0
 LANDSCAPE_FIG_HEIGHT_CM = 14.2
+MERGED = False  # set to True when the chapters are built for insertion into the full report
 _INLINE = re.compile(r'(\*\*.+?\*\*|`.+?`|\*[^*\s][^*]*?\*)')
 
 
@@ -154,7 +155,11 @@ class Doc:
         return self.refs.get(label, '[' + label + ']')
 
     def _expand(self, text):
-        return re.sub(r'\{(?:ref):([A-Za-z0-9_.:-]+)\}', lambda m: self.ref(m.group(1)), text)
+        text = re.sub(r'\{(?:ref):([A-Za-z0-9_.:-]+)\}', lambda m: self.ref(m.group(1)), text)
+        if MERGED:
+            # in the merged report the proposal is Chapters 1 to 3 of the same document
+            text = text.replace('Waweru, 2026', 'Chapters 1 to 3')
+        return text
 
     def h1(self, text):
         return self.d.add_paragraph(text, style='Heading 1')

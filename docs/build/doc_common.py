@@ -14,6 +14,12 @@ SUPERVISOR = 'DAVID OLOO OUMA'
 DATE = 'DECEMBER 2026'
 
 
+def ref_keys(keys):
+    """Reference keys to print; the proposal itself is left out when the chapters are merged into the report."""
+    import docx_lib
+    return [k for k in keys if not (docx_lib.MERGED and k == 'proposal')]
+
+
 def fig(name):
     return os.path.join(FIG, name + '.png')
 

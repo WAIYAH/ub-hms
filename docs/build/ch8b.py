@@ -1,5 +1,5 @@
 """Chapter 8, part 2: advanced features, maintenance, troubleshooting, FAQ, glossary and index (8.4 to 8.8)."""
-from doc_common import REFERENCES, GLOSSARY
+from doc_common import REFERENCES, GLOSSARY, ref_keys
 from ch8a import task, pic
 
 
@@ -236,7 +236,7 @@ def build_faq_glossary(d):
         rows.append([a[0], a[1], b[0], b[1]])
     d.table(['Topic', 'Where', 'Topic', 'Where'], rows, widths=[3.9, 3.7, 3.9, 3.8], size=8.5, caption='Index of Topics', label='tab_index')
     d.h3('8.8.3 References')
-    for key in sorted(['proposal'], key=lambda k: REFERENCES[k].lower()):
+    for key in sorted(ref_keys(['proposal']), key=lambda k: REFERENCES[k].lower()):
         p = d.p(REFERENCES[key], align='left')
         from docx.shared import Cm
         p.paragraph_format.left_indent = Cm(1.0)

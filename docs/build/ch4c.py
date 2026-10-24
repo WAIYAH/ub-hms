@@ -1,5 +1,5 @@
 """Chapter 4, part 3: interfaces, non-functional and other requirements, references, glossary (4.4 to 4.7, Appendix A)."""
-from doc_common import GLOSSARY, REFERENCES
+from doc_common import GLOSSARY, REFERENCES, ref_keys
 from nfr_data import PERFORMANCE, SAFETY, SECURITY, QUALITY
 
 
@@ -100,7 +100,7 @@ def build_other(d):
 def build_references_and_glossary(d, cited):
     d.h2('4.7 References')
     d.p('The references for Chapter 4 follow in APA 7th edition style.')
-    for key in sorted(cited, key=lambda k: REFERENCES[k].lower()):
+    for key in sorted(ref_keys(cited), key=lambda k: REFERENCES[k].lower()):
         p = d.p(REFERENCES[key], align='left')
         p.paragraph_format.left_indent = d.d.styles['Normal'].paragraph_format.left_indent
         _hanging(p)

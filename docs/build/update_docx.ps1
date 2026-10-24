@@ -8,7 +8,8 @@
 #>
 param(
     [Parameter(Mandatory = $true)][string]$Path,
-    [string]$Pdf = ''
+    [string]$Pdf = '',
+    [int]$Passes = 3
 )
 $ErrorActionPreference = 'Stop'
 $full = (Resolve-Path $Path).Path
@@ -18,7 +19,7 @@ $word.Visible = $false
 $word.DisplayAlerts = 0
 try {
     $doc = $word.Documents.Open($full, $false, $false)
-    for ($pass = 1; $pass -le 3; $pass++) {
+    for ($pass = 1; $pass -le $Passes; $pass++) {
         $doc.Repaginate()
         foreach ($toc in $doc.TablesOfContents) { $toc.Update() }
         [void]$doc.Fields.Update()

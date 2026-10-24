@@ -16,12 +16,13 @@ OUT_NAME = 'UB-HMS_Chapters_4-5_Requirements_and_Design.docx'
 CH4_CITED = ['proposal', 'ieee830', 'wiegers', 'kenya2017', 'kenya2019', 'kenya2023', 'owasp', 'owaspcheat', 'provos', 'php', 'nielsen', 'shneiderman', 'dennis', 'schwaber']
 
 
-def build(d):
-    d.cover(cover_lines(['CHAPTER 4: SYSTEM REQUIREMENTS SPECIFICATION', 'CHAPTER 5: SYSTEM DESIGN SPECIFICATION']))
-    d.toc()
-    d.list_of('LIST OF FIGURES', 'FigureCaption')
-    d.page_break()
-    d.list_of('LIST OF TABLES', 'TableCaption')
+def build(d, bare=False):
+    if not bare:
+        d.cover(cover_lines(['CHAPTER 4: SYSTEM REQUIREMENTS SPECIFICATION', 'CHAPTER 5: SYSTEM DESIGN SPECIFICATION']))
+        d.toc()
+        d.list_of('LIST OF FIGURES', 'FigureCaption')
+        d.page_break()
+        d.list_of('LIST OF TABLES', 'TableCaption')
     # chapter 4
     ch4a.build_intro(d)
     ch4a.build_overall(d)

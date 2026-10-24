@@ -12,12 +12,13 @@ import ch8b
 OUT_NAME = 'UB-HMS_Chapter_8_User_Manual.docx'
 
 
-def build(d):
-    d.cover(cover_lines(['CHAPTER 8: SYSTEM USER MANUAL']))
-    d.toc()
-    d.list_of('LIST OF FIGURES', 'FigureCaption')
-    d.page_break()
-    d.list_of('LIST OF TABLES', 'TableCaption')
+def build(d, bare=False):
+    if not bare:
+        d.cover(cover_lines(['CHAPTER 8: SYSTEM USER MANUAL']))
+        d.toc()
+        d.list_of('LIST OF FIGURES', 'FigureCaption')
+        d.page_break()
+        d.list_of('LIST OF TABLES', 'TableCaption')
     ch8a.build_intro(d)
     ch8a.build_getting_started(d)
     ch8a.build_navigation(d)

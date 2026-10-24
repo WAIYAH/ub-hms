@@ -2,7 +2,7 @@
 import json
 import os
 
-from doc_common import HERE, GLOSSARY, REFERENCES, shot, shot_main, landscape_figure
+from doc_common import HERE, GLOSSARY, REFERENCES, ref_keys, shot, shot_main, landscape_figure
 
 PERMS = json.load(open(os.path.join(HERE, 'permissions.json'), encoding='utf-8'))
 ROLE_ORDER = ['admin', 'manager', 'receptionist', 'nurse', 'doctor', 'lab', 'pharmacist', 'cashier']
@@ -202,7 +202,7 @@ def build_references_glossary(d, cited):
     d.h2('5.8 Project References')
     d.p('This chapter rests on the following project documents, which were produced before it: the approved project proposal (Waweru, 2026), which gives the problem, objectives, scope and plan, and Chapter 4 of this report, the System Requirements Specification, which gives the requirements this design answers. '
         'The system itself, its tests and its security review are described in Chapters 6 and 7. The sources cited in this chapter follow in APA 7th edition style.')
-    for key in sorted(cited, key=lambda k: REFERENCES[k].lower()):
+    for key in sorted(ref_keys(cited), key=lambda k: REFERENCES[k].lower()):
         p = d.p(REFERENCES[key], align='left')
         _hanging(p)
     d.h2('5.9 Glossary')

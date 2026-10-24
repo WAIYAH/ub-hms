@@ -1,7 +1,7 @@
 """Chapter 6, part 2: user interface, development process, security, deployment, appendices (6.5 to 6.9)."""
 import os
 
-from doc_common import HERE, GLOSSARY, REFERENCES, fig, shot, shot_main, landscape_figure
+from doc_common import HERE, GLOSSARY, REFERENCES, ref_keys, fig, shot, shot_main, landscape_figure
 
 SNIPPETS = [
     ('Permission check at the start of every page (includes/auth.php)', '''function require_permission(string $permission): array
@@ -267,7 +267,7 @@ def build_appendices(d):
         d.code(code)
     d.h3('6.9.2 References')
     keys = ['proposal', 'owasp', 'kenya2019', 'schwaber', 'sommerville']
-    for key in sorted(keys, key=lambda k: REFERENCES[k].lower()):
+    for key in sorted(ref_keys(keys), key=lambda k: REFERENCES[k].lower()):
         p = d.p(REFERENCES[key], align='left')
         _hanging(p)
     d.h3('6.9.3 Glossary')

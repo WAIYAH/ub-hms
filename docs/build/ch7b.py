@@ -3,7 +3,7 @@ import os
 
 from PIL import Image, ImageDraw, ImageFont
 
-from doc_common import HERE, FIG, REFERENCES, shot, shot_main
+from doc_common import HERE, FIG, REFERENCES, ref_keys, shot, shot_main
 from trace_lib import load_results, EVIDENCE
 
 RES = load_results()
@@ -167,7 +167,7 @@ def build_appendices(d):
         d.figure(shot_main(name) if crop else shot(name), cap, label=label, width_cm=13.0, max_height_cm=9.5)
     d.h3('7.6.2 References')
     keys = ['proposal', 'brooke', 'kenya2019', 'owasp', 'schwaber', 'sommerville', 'w3c']
-    for key in sorted(keys, key=lambda k: REFERENCES[k].lower()):
+    for key in sorted(ref_keys(keys), key=lambda k: REFERENCES[k].lower()):
         p = d.p(REFERENCES[key], align='left')
         from docx.shared import Cm
         p.paragraph_format.left_indent = Cm(1.0)

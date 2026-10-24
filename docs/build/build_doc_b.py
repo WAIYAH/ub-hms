@@ -14,12 +14,13 @@ import ch7b
 OUT_NAME = 'UB-HMS_Chapters_6-7_Implementation_and_Test_Plan.docx'
 
 
-def build(d):
-    d.cover(cover_lines(['CHAPTER 6: SYSTEM IMPLEMENTATION', 'CHAPTER 7: SYSTEM TEST PLAN']))
-    d.toc()
-    d.list_of('LIST OF FIGURES', 'FigureCaption')
-    d.page_break()
-    d.list_of('LIST OF TABLES', 'TableCaption')
+def build(d, bare=False):
+    if not bare:
+        d.cover(cover_lines(['CHAPTER 6: SYSTEM IMPLEMENTATION', 'CHAPTER 7: SYSTEM TEST PLAN']))
+        d.toc()
+        d.list_of('LIST OF FIGURES', 'FigureCaption')
+        d.page_break()
+        d.list_of('LIST OF TABLES', 'TableCaption')
     ch6a.build_intro(d)
     ch6a.build_architecture(d)
     ch6a.build_modules(d)
