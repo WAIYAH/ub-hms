@@ -275,6 +275,12 @@ class Doc:
             cs = OxmlElement('w:cantSplit')
             cs.set(qn('w:val'), 'true')
             trpr.append(cs)
+        # a short table should stay on one page: keep every row with the next one
+        if len(rows) <= 14:
+            for r in t.rows[:-1]:
+                for cell in r.cells:
+                    for para in cell.paragraphs:
+                        para.paragraph_format.keep_with_next = True
         # fixed layout so the column widths hold
         tblpr = t._tbl.tblPr
         layout = OxmlElement('w:tblLayout')

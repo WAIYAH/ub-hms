@@ -8,7 +8,7 @@ inspection of the design or code (no automated test exists for it).
 
 PERFORMANCE = [
     ('PER-01', 'With ten staff working at the same time, 95% of ordinary pages (every page except the reports) shall be served in 2 seconds or less.', 'High',
-     'Response-time measurement through Apache with 10 separate sessions', 'PERF-01 to PERF-10'),
+     'Response-time measurement through Apache with 10 separate sessions', 'PERF-01 to PERF-10, PERF-16'),
     ('PER-02', 'Searching for a patient shall return in 1 second or less (95% of searches) when 20,000 patients are registered.', 'High',
      'Response-time measurement on a database of 20,000 patients, 30,000 visits and 100,000 audit entries', 'PERF-02, PERF-03'),
     ('PER-03', 'A report for any period up to 12 months shall be shown in 5 seconds or less (95% of requests).', 'Medium',
