@@ -1,0 +1,58 @@
+{
+    "admin": [
+        "users.manage",
+        "audit.view",
+        "settings.manage",
+        "system.health"
+    ],
+    "manager": [
+        "audit.view",
+        "reports.attendance",
+        "reports.revenue",
+        "reports.stock",
+        "reports.lab",
+        "pharmacy.stock"
+    ],
+    "receptionist": [
+        "patients.view",
+        "patients.register",
+        "patients.edit",
+        "patients.import",
+        "appointments.view",
+        "appointments.book",
+        "appointments.update",
+        "visits.checkin",
+        "visits.view"
+    ],
+    "nurse": [
+        "patients.view",
+        "appointments.view",
+        "visits.view",
+        "triage.record",
+        "services.record"
+    ],
+    "doctor": [
+        "patients.view",
+        "appointments.view",
+        "visits.view",
+        "consult.record",
+        "services.record",
+        "lab.request",
+        "pharmacy.prescribe",
+        "pharmacy.stock"
+    ],
+    "lab": [
+        "lab.worklist",
+        "lab.result"
+    ],
+    "pharmacist": [
+        "pharmacy.dispense",
+        "pharmacy.stock",
+        "pharmacy.manage",
+        "reports.stock"
+    ],
+    "cashier": [
+        "billing.view",
+        "billing.pay"
+    ]
+}

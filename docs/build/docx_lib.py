@@ -93,9 +93,16 @@ class Doc:
         p.alignment = WD_ALIGN_PARAGRAPH.CENTER
         _field(p, 'PAGE', '1')
 
+    @staticmethod
+    def _continue_numbering(sec):
+        """A new section copies the first section's 'start at page 1'; remove it so the numbers carry on."""
+        for el in sec._sectPr.findall(qn('w:pgNumType')):
+            sec._sectPr.remove(el)
+
     def landscape(self):
         """Start a new page in landscape (for wide figures and tables). Page numbering continues."""
         sec = self.d.add_section(WD_SECTION.NEW_PAGE)
+        self._continue_numbering(sec)
         sec.orientation = WD_ORIENT.LANDSCAPE
         sec.page_width, sec.page_height = sec.page_height, sec.page_width
         sec.different_first_page_header_footer = False
@@ -104,6 +111,7 @@ class Doc:
 
     def portrait(self):
         sec = self.d.add_section(WD_SECTION.NEW_PAGE)
+        self._continue_numbering(sec)
         sec.orientation = WD_ORIENT.PORTRAIT
         if sec.page_width > sec.page_height:
             sec.page_width, sec.page_height = sec.page_height, sec.page_width
@@ -198,6 +206,7 @@ class Doc:
         for i, line in enumerate(lines):
             para = self.d.add_paragraph(style='CodeBlock')
             r = para.add_run(line if line else ' ')
+            r.font.size = Pt(9)
             if i < len(lines) - 1:
                 para.paragraph_format.keep_with_next = True
         self.d.add_paragraph(style='Normal').paragraph_format.space_after = Pt(2)
