@@ -48,8 +48,8 @@ if (strlen($pass) < 12) {
 
 /** Tables the application only ever adds to. */
 $appendOnly = ['audit_log', 'payments', 'stock_movements'];
-/** Tables the application removes rows from. */
-$mayDelete = ['invoice_items'];
+/** Tables the application removes rows from (an invoice's lines; a doctor's weekly hours are replaced, and leave can be removed). */
+$mayDelete = ['invoice_items', 'doctor_schedules', 'doctor_leave'];
 
 $pdo = db();
 $q = static fn (string $s): string => $pdo->quote($s);

@@ -36,9 +36,14 @@ function permission_catalogue(): array
         'patients.register'   => 'Register new patients',
         'patients.edit'       => 'Correct patient details',
         'patients.import'     => 'Import patients from a CSV file',
+        'patients.export'     => 'Give a patient a copy of their record',
+        'patients.erase.request' => 'Ask for a patient record to be erased',
+        'patients.erase.approve' => 'Approve or refuse the erasure of a patient record',
+        'privacy.view'        => 'See patient data requests (copies and erasures)',
         'appointments.view'   => 'See the appointment diary',
         'appointments.book'   => 'Book appointments',
         'appointments.update' => 'Mark appointments attended, missed or cancelled',
+        'schedules.manage'    => 'Set the working hours of doctors and record their leave',
         'visits.checkin'      => 'Check patients in and open visits',
         'visits.view'         => 'See visit queues and visit records',
         'triage.record'       => 'Record triage and vital signs',
@@ -53,6 +58,9 @@ function permission_catalogue(): array
         'pharmacy.manage'     => 'Receive batches, adjust stock and edit the medicine list',
         'billing.view'        => 'See invoices and receipts',
         'billing.pay'         => 'Record payments',
+        'refunds.view'        => 'See refund requests',
+        'refunds.request'     => 'Ask for a payment to be refunded',
+        'refunds.approve'     => 'Approve or reject refund requests',
         'reports.attendance'  => 'View the attendance report',
         'reports.revenue'     => 'View the revenue report',
         'reports.stock'       => 'View the stock report',
@@ -72,12 +80,14 @@ function permission_matrix(): array
         'admin' => ['users.manage', 'requests.manage', 'audit.view', 'settings.manage', 'system.health'],
         'manager' => [
             'audit.view', 'reports.attendance', 'reports.revenue', 'reports.stock', 'reports.lab',
-            'pharmacy.stock',
+            'pharmacy.stock', 'schedules.manage', 'refunds.view', 'refunds.approve',
+            'patients.erase.approve', 'privacy.view',
         ],
         'receptionist' => [
             'patients.view', 'patients.register', 'patients.edit', 'patients.import',
             'appointments.view', 'appointments.book', 'appointments.update',
             'visits.checkin', 'visits.view',
+            'patients.export', 'patients.erase.request', 'privacy.view',
         ],
         'nurse' => [
             'patients.view', 'appointments.view', 'visits.view', 'triage.record', 'services.record',
@@ -88,7 +98,7 @@ function permission_matrix(): array
         ],
         'lab' => ['lab.worklist', 'lab.result'],
         'pharmacist' => ['pharmacy.dispense', 'pharmacy.stock', 'pharmacy.manage', 'reports.stock'],
-        'cashier' => ['billing.view', 'billing.pay'],
+        'cashier' => ['billing.view', 'billing.pay', 'refunds.view', 'refunds.request'],
     ];
 }
 

@@ -261,7 +261,7 @@ h1.page-title { font: 800 1.75rem/1.2 Cambria, Georgia, "Times New Roman", serif
 .spark { overflow: visible; }
 
 /* ===== Compact tables ===== */
-.mini-wrap { overflow-x: auto; }
+.mini-wrap { position: relative; overflow-x: auto; }
 .mini { width: 100%; border-collapse: collapse; font-size: .92rem; }
 .mini th { padding: .5rem .55rem; border-bottom: 2px solid #e1ecea; text-align: left; font-size: .72rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: #4b5f5d; white-space: nowrap; }
 .mini td { padding: .65rem .55rem; border-bottom: 1px solid #edf3f2; vertical-align: middle; }

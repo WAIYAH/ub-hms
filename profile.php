@@ -51,6 +51,25 @@ page_start('Your profile', '', ['no_title' => true]);
         </div>
     </section>
 
+    <?php if ($me['role'] === 'doctor'): ?>
+    <section class="panel w-6" aria-labelledby="pf-hours">
+        <header class="panel-head"><div><h2 id="pf-hours">Your working hours</h2><p>Set by the Hospital Manager. Appointments can only be booked in these hours.</p></div></header>
+        <div class="panel-body"><?= render_week_hours(doctor_schedule((int) $me['id'])) ?></div>
+    </section>
+    <section class="panel w-6" aria-labelledby="pf-leave">
+        <header class="panel-head"><div><h2 id="pf-leave">Your leave</h2><p>Current and coming leave. Nothing can be booked on these days.</p></div></header>
+        <div class="panel-body">
+            <?php
+            $leaveRows = [];
+            foreach (doctor_leave_list((int) $me['id']) as $l) {
+                $leaveRows[] = [fmt_date($l['start_date']) . ($l['end_date'] !== $l['start_date'] ? ' to ' . fmt_date($l['end_date']) : ''), $l['type'], (string) $l['reason']];
+            }
+            echo dash_table(['Dates', 'Type', 'Note'], $leaveRows, 'No leave recorded.', [0]);
+            ?>
+        </div>
+    </section>
+    <?php endif; ?>
+
     <section class="panel w-12" aria-labelledby="pf-activity">
         <header class="panel-head"><div><h2 id="pf-activity">Your recent activity</h2><p>The last ten things recorded under your name. If you see something you did not do, tell the administrator.</p></div></header>
         <div class="panel-body">

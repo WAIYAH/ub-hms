@@ -187,6 +187,9 @@ function update_patient(int $id, array $input, int $userId): array
     if (!$old) {
         return ['ok' => false, 'errors' => ['first_name' => 'Patient not found.']];
     }
+    if ($old['erased_at'] !== null) {
+        return ['ok' => false, 'errors' => ['first_name' => 'This patient record has been erased and cannot be changed.']];
+    }
     [$c, $errors] = validate_patient_input($input);
     if (!$errors) {
         $dups = find_patient_duplicates($c, $id);
@@ -256,6 +259,8 @@ function patient_search_clause(string $q): array
 function search_patients(string $q, int $limit = 25, int $offset = 0): array
 {
     [$where, $params] = patient_search_clause($q);
+    // Erased records no longer identify anyone, so they are not offered in a search.
+    $where = "($where) AND p.erased_at IS NULL";
     $total = (int) db_value("SELECT COUNT(*) FROM patients p WHERE $where", $params);
     $rows = db_all(
         "SELECT p.id, p.op_number, p.first_name, p.middle_name, p.last_name, p.sex, p.date_of_birth, p.phone, p.national_id

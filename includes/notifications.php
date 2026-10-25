@@ -70,6 +70,15 @@ function shell_counts(array $user): array
         $c['expired'] = count($a['expired']);
         $c['expiring'] = count($a['expiring']);
     }
+    if ($can('appointments.update') || $can('schedules.manage')) {
+        $c['sched_conflicts'] = schedule_conflict_count();
+    }
+    if ($can('refunds.approve')) {
+        $c['refunds_pending'] = (int) db_value("SELECT COUNT(*) FROM refund_requests WHERE status = 'Pending'");
+    }
+    if ($can('patients.erase.approve')) {
+        $c['erasures_open'] = (int) db_value("SELECT COUNT(*) FROM data_requests WHERE kind = 'Erasure' AND status = 'Open'");
+    }
     if ($can('billing.pay')) {
         $c['unpaid'] = (int) db_value("SELECT COUNT(*) FROM invoices WHERE status IN ('Unpaid', 'Partially paid')");
     }
@@ -111,6 +120,16 @@ function notifications_for(array $user, ?array $counts = null): array
     if (($c['expiring'] ?? 0) > 0) {
         $add('warn', 'clock', plural($c['expiring'], 'batch', 'batches') . ' expiring soon', 'Use them first.', 'pharmacy/batches.php');
     }
+    if (($c['refunds_pending'] ?? 0) > 0) {
+        $add('warn', 'undo', plural($c['refunds_pending'], 'refund request') . ' waiting for your decision', 'Approve or reject them.', 'billing/refunds.php?status=Pending');
+    }
+    if (($c['erasures_open'] ?? 0) > 0) {
+        $add('warn', 'shield', plural($c['erasures_open'], 'record erasure request') . ' waiting for your decision', 'Check the blockers, then approve or refuse.', 'privacy/index.php?status=Open');
+    }
+    if (($c['sched_conflicts'] ?? 0) > 0) {
+        $add('warn', 'calendar-x', plural($c['sched_conflicts'], 'booked appointment') . ' to move', 'The doctor is away or no longer works then.',
+            role_can((string) $user['role'], 'appointments.update') ? 'appointments/conflicts.php' : 'admin/schedules.php');
+    }
     if (($c['triage_wait'] ?? 0) > 0) {
         $add('warn', 'thermometer', plural($c['triage_wait'], 'patient') . ' waiting for triage', 'Record their vital signs.', 'visits/queue.php?stage=triage');
     }
@@ -151,6 +170,10 @@ function nav_badges(array $user, ?array $counts = null): array
         'lab'        => ($c['lab_wait'] ?? 0),
         'pharmacy'   => $c['rx_wait'] ?? 0,
         'billing'    => $c['unpaid'] ?? 0,
+        'refunds'    => $c['refunds_pending'] ?? 0,
+        'privacy'    => $c['erasures_open'] ?? 0,
+        'conflicts'  => $c['sched_conflicts'] ?? 0,
+        'schedules'  => $c['sched_conflicts'] ?? 0,
         'checkin'    => $c['booked_today'] ?? 0,
         'stock'      => ($c['stock_out'] ?? 0) + ($c['stock_low'] ?? 0),
         'batches'    => ($c['expired'] ?? 0) + ($c['expiring'] ?? 0),

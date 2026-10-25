@@ -9,7 +9,7 @@ echo site_banner('services', 'Services', 'Everything a hospital day needs, in on
 $detail = [
     'registration' => [
         'A patient is registered once, with a unique outpatient number, and every later visit, test, medicine and payment is attached to that number.',
-        ['Duplicate check by name, date of birth and phone number before saving', 'Search by name, number or phone, and correct records with a recorded reason', 'Import of old registers from a CSV file for the move from paper', 'Appointment diary with clash-free slots and attended, missed and cancelled marks'],
+        ['Duplicate check by name, date of birth and phone number before saving', 'Search by name, number or phone, and correct records with a recorded reason', 'Import of old registers from a CSV file for the move from paper', 'Appointment diary with clash-free slots that follow each doctor\'s hours and leave, and attended, missed and cancelled marks'],
         'img/site/laptop-register.webp', 'The patient registration form of UB-HMS on a laptop', 'mock', ['Reception', 'Records'],
     ],
     'consultation' => [
@@ -29,12 +29,12 @@ $detail = [
     ],
     'billing' => [
         'The invoice is built from the services, tests and medicines already recorded, so no charge is missed and no total is added by hand.',
-        ['Itemised invoices with a balance that updates itself', 'Full and part payments by cash, M-Pesa, card or insurance', 'A printable receipt for every payment', 'Attendance, revenue, stock and laboratory reports, with CSV download'],
+        ['Itemised invoices with a balance that updates itself', 'Full and part payments by cash, M-Pesa, card or insurance', 'A printable receipt for every payment, and refunds that a second person must approve', 'Attendance, revenue, stock and laboratory reports, with CSV download'],
         'img/site/laptop-billing.webp', 'An itemised UB-HMS invoice with a part payment on a laptop', 'mock', ['Cashiers', 'Managers'],
     ],
     'security' => [
         'Every person has a personal account and sees only the screens their role needs. Every sign-in and change is recorded.',
-        ['Eight roles with permissions defined in one place', 'Lockout after five wrong passwords and automatic sign-out when idle', 'Passwords stored as bcrypt hashes; forms protected against forgery', 'An audit trail the manager and administrator can search and read'],
+        ['Eight roles with permissions defined in one place', 'Lockout after five wrong passwords and automatic sign-out when idle', 'Passwords stored as bcrypt hashes; forms protected against forgery', 'An audit trail the manager and administrator can search and read, and a recorded process for a patient\'s copy or erasure request'],
         'img/site/laptop-audit.webp', 'The UB-HMS audit trail listing sign-ins and changes on a laptop', 'mock', ['Administrators', 'Managers'],
     ],
 ];

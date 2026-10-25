@@ -16,7 +16,7 @@ function nav_icon(string $key): string
         'triage' => 'thermometer', 'consult' => 'stethoscope', 'visits' => 'activity',
         'lab' => 'flask', 'labresults' => 'file-check',
         'pharmacy' => 'pill', 'stock' => 'box', 'batches' => 'layers', 'receive' => 'package-plus', 'medicines' => 'list',
-        'billing' => 'receipt',
+        'billing' => 'receipt', 'refunds' => 'undo', 'privacy' => 'shield', 'conflicts' => 'calendar-x', 'schedules' => 'clock',
         'r-attendance' => 'users', 'r-revenue' => 'trending-up', 'r-stock' => 'pie', 'r-lab' => 'droplet',
         'users' => 'users', 'requests' => 'inbox', 'prices' => 'tag', 'audit' => 'history', 'health' => 'server',
     ];

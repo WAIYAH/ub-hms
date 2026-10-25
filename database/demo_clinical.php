@@ -300,10 +300,13 @@ function seed_demo_appointments_and_visits(): array
     }
     // a booked patient who has not yet arrived today
     $p = $pool[count($stages) % count($pool)];
-    db_insert(
-        "INSERT INTO appointments (patient_id, doctor_id, appointment_date, start_time, end_time, reason, booked_by) VALUES (?, ?, ?, '15:00:00', '15:20:00', 'Review', ?)",
-        [$p['id'], demo_user_id('doctor1'), $today, $rec]
-    );
+    // only when Dr Kamau works at that time today (he does not on a Saturday afternoon), so no booking is left for someone to move
+    if (slot_within_blocks('15:00', doctor_blocks_on(demo_user_id('doctor1'), $today))) {
+        db_insert(
+            "INSERT INTO appointments (patient_id, doctor_id, appointment_date, start_time, end_time, reason, booked_by) VALUES (?, ?, ?, '15:00:00', '15:20:00', 'Review', ?)",
+            [$p['id'], demo_user_id('doctor1'), $today, $rec]
+        );
+    }
 
     // ---- the days ahead ----
     $n = 0;

@@ -351,13 +351,13 @@ test('UT-DSH-022', 'each role is told only about the work it can act on', functi
     $a = make_user('admin');
     $m = make_user('manager');
     $key = static fn (int $id, string $role) => array_keys(shell_counts(['id' => $id, 'role' => $role]));
-    assert_same(['booked_today'], $key($r, 'receptionist'));
+    assert_same(['booked_today', 'sched_conflicts'], $key($r, 'receptionist'));
     assert_same(['triage_wait'], $key($n, 'nurse'));
     assert_same(['consult_wait', 'results_ready'], $key($d, 'doctor'));
     assert_same(['lab_wait', 'lab_progress'], $key($l, 'lab'));
     assert_same(['rx_wait', 'stock_out', 'stock_low', 'expired', 'expiring'], $key($p, 'pharmacist'));
     assert_same(['unpaid'], $key($c, 'cashier'));
-    assert_same(['stock_out', 'stock_low', 'expired', 'expiring'], $key($m, 'manager'));
+    assert_same(['stock_out', 'stock_low', 'expired', 'expiring', 'sched_conflicts', 'refunds_pending', 'erasures_open'], $key($m, 'manager'));
     $adminKeys = $key($a, 'admin');
     foreach (['requests_new', 'locked', 'backup', 'failed_24h'] as $k) {
         assert_true(in_array($k, $adminKeys, true), "the administrator is told about $k");

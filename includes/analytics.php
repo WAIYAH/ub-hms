@@ -96,10 +96,14 @@ function an_series_dispensed(array $days): array
 /** Money collected per day, for one cashier or for everyone (in whole shillings and cents). */
 function an_series_collections(array $days, ?int $userId = null): array
 {
-    return an_per_day(
-        $days,
-        'SELECT DATE(paid_at) AS d, SUM(amount) AS n FROM payments WHERE paid_at >= ? AND paid_at < ?' . ($userId !== null ? ' AND received_by = ?' : '') . ' GROUP BY DATE(paid_at)',
-        $userId !== null ? [$userId] : []
+    // Net of refunds; a day with more refunded than taken would be negative, and a bar chart shows it as zero.
+    return array_map(
+        static fn ($v) => max(0.0, (float) $v),
+        an_per_day(
+            $days,
+            'SELECT DATE(paid_at) AS d, SUM(amount) AS n FROM payments WHERE paid_at >= ? AND paid_at < ?' . ($userId !== null ? ' AND received_by = ?' : '') . ' GROUP BY DATE(paid_at)',
+            $userId !== null ? [$userId] : []
+        )
     );
 }
 

@@ -38,8 +38,9 @@ function slot_end_time(string $start): string
 }
 
 /**
- * State of every slot for one doctor on one date.
- * Returns start => ['state' => 'free'|'taken'|'past', 'appointment' => row|null].
+ * State of every clinic slot for one doctor on one date.
+ * Returns start => ['state' => 'free'|'taken'|'past'|'off', 'appointment' => row|null].
+ * 'off' means the clinic is open but the doctor does not work then (outside their hours, or on leave).
  */
 function doctor_day_slots(int $doctorId, string $date): array
 {
@@ -52,12 +53,18 @@ function doctor_day_slots(int $doctorId, string $date): array
         $taken[substr($row['start_time'], 0, 5)] = $row;
     }
     $now = app_now();
+    $away = doctor_leave_on($doctorId, $date) !== null;
+    $blocks = $away ? [] : doctor_blocks_on($doctorId, $date);
     $out = [];
     foreach (clinic_slots($date) as $start) {
         $isPast = new DateTimeImmutable("$date $start") <= $now;
-        $out[$start] = isset($taken[$start])
-            ? ['state' => 'taken', 'appointment' => $taken[$start]]
-            : ['state' => $isPast ? 'past' : 'free', 'appointment' => null];
+        if (isset($taken[$start])) {
+            $out[$start] = ['state' => 'taken', 'appointment' => $taken[$start]];
+        } elseif (!slot_within_blocks($start, $blocks)) {
+            $out[$start] = ['state' => 'off', 'appointment' => null];
+        } else {
+            $out[$start] = ['state' => $isPast ? 'past' : 'free', 'appointment' => null];
+        }
     }
     return $out;
 }
@@ -75,10 +82,13 @@ function book_appointment(array $in, int $userId): array
     $start = clean_text($in['start_time'] ?? '', 5);
     $reason = clean_text($in['reason'] ?? '', 255);
 
-    if (!db_value('SELECT id FROM patients WHERE id = ?', [$patientId])) {
+    $patientRow = db_one('SELECT id, erased_at FROM patients WHERE id = ?', [$patientId]);
+    if (!$patientRow) {
         $errors['patient_id'] = 'Choose a registered patient.';
+    } elseif ($patientRow['erased_at'] !== null) {
+        $errors['patient_id'] = 'This patient record has been erased and cannot be used.';
     }
-    if (!db_value("SELECT u.id FROM users u JOIN roles r ON r.id = u.role_id WHERE u.id = ? AND r.code = 'doctor' AND u.is_active = 1", [$doctorId])) {
+    if (!is_active_doctor($doctorId)) {
         $errors['doctor_id'] = 'Choose a doctor.';
     }
     if (!is_valid_date($date)) {
@@ -90,11 +100,21 @@ function book_appointment(array $in, int $userId): array
     } elseif (!clinic_slots($date)) {
         $errors['date'] = 'The clinic is closed on that day.';
     }
+    $blocks = null;
+    if (!isset($errors['date']) && !isset($errors['doctor_id'])) {
+        $availability = doctor_availability($doctorId, $date);
+        if (!$availability['available']) {
+            $errors['date'] = $availability['message'];
+        }
+        $blocks = $availability['blocks'];
+    }
     if (!isset($errors['date'])) {
         if (!in_array($start, clinic_slots($date), true)) {
             $errors['start_time'] = 'Choose a time from the list of slots within clinic hours.';
         } elseif (new DateTimeImmutable("$date $start") <= app_now()) {
             $errors['start_time'] = 'That time has already passed.';
+        } elseif (!isset($errors['doctor_id']) && !slot_within_blocks($start, $blocks)) {
+            $errors['start_time'] = 'The doctor does not work at that time. Choose a time from the free slots.';
         }
     } elseif (!isset($errors['start_time']) && $start === '') {
         $errors['start_time'] = 'Choose a time.';
@@ -108,6 +128,15 @@ function book_appointment(array $in, int $userId): array
         $id = db_tx(function () use ($patientId, $doctorId, $date, $start, $end, $reason, $userId): int {
             // Lock the doctor's row so two receptionists booking at once are handled one after the other.
             db_value('SELECT id FROM users WHERE id = ? FOR UPDATE', [$doctorId]);
+            // An erasure of the patient locks their row too; a booking made at the same moment waits and then sees the result.
+            if (db_value('SELECT erased_at FROM patients WHERE id = ? FOR UPDATE', [$patientId]) !== null) {
+                throw new RuntimeException('patient_erased');
+            }
+            // The manager may have changed the doctor's hours or recorded leave a moment ago; saving them locks the same row.
+            $now = doctor_availability($doctorId, $date);
+            if (!$now['available'] || !slot_within_blocks($start, $now['blocks'])) {
+                throw new RuntimeException('doctor_unavailable');
+            }
             if (db_value("SELECT id FROM appointments WHERE doctor_id = ? AND appointment_date = ? AND start_time = ? AND status IN ('Booked','Attended')", [$doctorId, $date, $start . ':00'])) {
                 throw new RuntimeException('slot_taken');
             }
@@ -124,6 +153,12 @@ function book_appointment(array $in, int $userId): array
     } catch (RuntimeException $e) {
         if ($e->getMessage() === 'slot_taken') {
             return ['ok' => false, 'errors' => ['start_time' => 'That time is already booked for this doctor. Choose another slot.']];
+        }
+        if ($e->getMessage() === 'doctor_unavailable') {
+            return ['ok' => false, 'errors' => ['start_time' => 'The hours of this doctor have just changed and they no longer work at that time. Choose another slot.']];
+        }
+        if ($e->getMessage() === 'patient_erased') {
+            return ['ok' => false, 'errors' => ['patient_id' => 'This patient record has been erased and cannot be used.']];
         }
         if ($e->getMessage() === 'patient_busy') {
             return ['ok' => false, 'errors' => ['start_time' => 'This patient already has an appointment at that time with another doctor.']];

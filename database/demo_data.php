@@ -101,8 +101,36 @@ function seed_demo_data(bool $full = true): array
         return $summary;
     }
     // stock first, then two weeks of clinic history that uses it, then the summary
-    foreach (['seed_demo_pharmacy', 'seed_demo_appointments_and_visits', 'seed_demo_billing'] as $fn) {
+    foreach (['seed_demo_pharmacy', 'seed_demo_schedules', 'seed_demo_appointments_and_visits', 'seed_demo_billing'] as $fn) {
         $summary += $fn();
     }
     return $summary;
+}
+
+/**
+ * Working hours for the three demonstration doctors, and one coming leave, so the Doctor schedules page has something to show.
+ * This runs before the appointments are booked ahead, so those bookings follow the hours like any other.
+ */
+function seed_demo_schedules(): array
+{
+    $manager = demo_user_id('manager1');
+    $day = static fn (string $from, string $to): array => [['from' => $from, 'to' => $to]];
+    $plan = [
+        // Dr Kamau: all day Monday to Friday, Saturday morning
+        'doctor1' => [1 => $day('08:00', '17:00'), 2 => $day('08:00', '17:00'), 3 => $day('08:00', '17:00'), 4 => $day('08:00', '17:00'), 5 => $day('08:00', '17:00'), 6 => $day('08:00', '13:00')],
+        // Dr Chebet: all day Monday to Saturday
+        'doctor2' => [1 => $day('08:00', '17:00'), 2 => $day('08:00', '17:00'), 3 => $day('08:00', '17:00'), 4 => $day('08:00', '17:00'), 5 => $day('08:00', '17:00'), 6 => $day('08:00', '17:00')],
+        // Dr Barasa: Monday to Friday, with a break at lunch time
+        'doctor3' => [1 => [['from' => '08:00', 'to' => '13:00'], ['from' => '14:00', 'to' => '17:00']], 2 => [['from' => '08:00', 'to' => '13:00'], ['from' => '14:00', 'to' => '17:00']],
+                      3 => [['from' => '08:00', 'to' => '13:00'], ['from' => '14:00', 'to' => '17:00']], 4 => [['from' => '08:00', 'to' => '13:00'], ['from' => '14:00', 'to' => '17:00']],
+                      5 => [['from' => '08:00', 'to' => '13:00'], ['from' => '14:00', 'to' => '17:00']]],
+    ];
+    $n = 0;
+    foreach ($plan as $username => $days) {
+        $r = save_doctor_schedule(demo_user_id($username), ['sch' => $days], $manager);
+        $n += $r['ok'] ? 1 : 0;
+    }
+    $from = (new DateTimeImmutable('today'))->modify('+10 days');
+    add_doctor_leave(demo_user_id('doctor3'), ['start_date' => $from->format('Y-m-d'), 'end_date' => $from->modify('+2 days')->format('Y-m-d'), 'type' => 'Annual leave', 'reason' => 'Demonstration'], $manager);
+    return ['doctor schedules' => $n];
 }

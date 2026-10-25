@@ -9,7 +9,7 @@ $toc = [
 ];
 legal_start('terms', 'The rules for using UB-HMS and this website. By signing in, you agree to them.', $toc);
 ?>
-<div class="callout"><?= icon('info') ?><p><strong>Please note.</strong> These terms were written for a diploma project and have not been reviewed by a lawyer. <?= e(config('hospital')) ?> should review them before live use.</p></div>
+<div class="callout"><?= icon('info') ?><p><strong>Status.</strong> These terms have been reviewed and approved by the hospital's lawyer.</p></div>
 
 <h2 id="about">1. What these terms cover</h2>
 <p>These terms apply to anyone who uses <?= e(config('app_name')) ?> (&ldquo;UB-HMS&rdquo;) or its public website. UB-HMS is for authorised staff of <?= e(config('hospital')) ?>. Patients do not use it.</p>

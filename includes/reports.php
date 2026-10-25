@@ -87,30 +87,46 @@ function report_revenue(string $from, string $to): array
 {
     $days = [];
     foreach (date_list($from, $to) as $d) {
-        $days[$d] = ['date' => $d, 'billed' => '0.00', 'collected' => '0.00', 'payments' => 0];
+        $days[$d] = ['date' => $d, 'billed' => '0.00', 'collected' => '0.00', 'refunded' => '0.00', 'payments' => 0];
     }
     foreach (db_all('SELECT DATE(created_at) AS d, SUM(total) AS t FROM invoices WHERE DATE(created_at) BETWEEN ? AND ? GROUP BY DATE(created_at)', [$from, $to]) as $r) {
         $days[$r['d']]['billed'] = number_format((float) $r['t'], 2, '.', '');
     }
-    // Money is added up in whole cents so totals never drift.
+    // Money is added up in whole cents so totals never drift. "Collected" is net: refunds paid out are taken off it,
+    // and shown separately as "refunded" so the manager can see both.
     $dayCents = [];
+    $dayRefunded = [];
     $methodCents = array_fill_keys(PAYMENT_METHODS, 0);
     $methodCount = array_fill_keys(PAYMENT_METHODS, 0);
+    $methodRefunded = array_fill_keys(PAYMENT_METHODS, 0);
+    $refundCount = 0;
     $collected = 0;
-    foreach (db_all('SELECT DATE(paid_at) AS d, method, SUM(amount) AS a, COUNT(*) AS n FROM payments WHERE DATE(paid_at) BETWEEN ? AND ? GROUP BY DATE(paid_at), method', [$from, $to]) as $r) {
+    $refunded = 0;
+    foreach (db_all('SELECT DATE(paid_at) AS d, method, kind, SUM(amount) AS a, COUNT(*) AS n FROM payments WHERE DATE(paid_at) BETWEEN ? AND ? GROUP BY DATE(paid_at), method, kind', [$from, $to]) as $r) {
         $c = to_cents($r['a']);
         $dayCents[$r['d']] = ($dayCents[$r['d']] ?? 0) + $c;
-        $days[$r['d']]['payments'] += (int) $r['n'];
         $methodCents[$r['method']] += $c;
-        $methodCount[$r['method']] += (int) $r['n'];
         $collected += $c;
+        if ($r['kind'] === 'Refund') {
+            $dayRefunded[$r['d']] = ($dayRefunded[$r['d']] ?? 0) - $c;
+            $methodRefunded[$r['method']] -= $c;
+            $refunded -= $c;
+            $refundCount += (int) $r['n'];
+        } else {
+            $days[$r['d']]['payments'] += (int) $r['n'];
+            $methodCount[$r['method']] += (int) $r['n'];
+        }
     }
     foreach ($dayCents as $d => $c) {
         $days[$d]['collected'] = number_format($c / 100, 2, '.', '');
+        $days[$d]['refunded'] = number_format(($dayRefunded[$d] ?? 0) / 100, 2, '.', '');
     }
     $methods = [];
     foreach (PAYMENT_METHODS as $m) {
-        $methods[$m] = ['amount' => number_format($methodCents[$m] / 100, 2, '.', ''), 'count' => $methodCount[$m]];
+        $methods[$m] = [
+            'amount' => number_format($methodCents[$m] / 100, 2, '.', ''), 'count' => $methodCount[$m],
+            'refunded' => number_format($methodRefunded[$m] / 100, 2, '.', ''),
+        ];
     }
     $categories = array_fill_keys(['Consultation', 'Laboratory', 'Pharmacy', 'Service'], '0.00');
     foreach (db_all(
@@ -124,6 +140,7 @@ function report_revenue(string $from, string $to): array
     return [
         'days' => array_values($days), 'methods' => $methods, 'categories' => $categories,
         'billed' => number_format((float) $billed, 2, '.', ''), 'collected' => number_format($collected / 100, 2, '.', ''),
+        'refunded' => number_format($refunded / 100, 2, '.', ''), 'refund_count' => $refundCount,
         'outstanding' => number_format((float) $outstanding, 2, '.', ''),
         'invoices' => (int) db_value('SELECT COUNT(*) FROM invoices WHERE DATE(created_at) BETWEEN ? AND ?', [$from, $to]),
     ];

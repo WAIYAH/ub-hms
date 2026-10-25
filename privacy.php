@@ -9,7 +9,7 @@ $toc = [
 ];
 legal_start('privacy', 'What information UB-HMS keeps, why, who can see it, and the rights you have over it.', $toc);
 ?>
-<div class="callout"><?= icon('info') ?><p><strong>Please note.</strong> This policy was written for a diploma project and describes what the system does today. It has not been reviewed by a lawyer. Before live use, <?= e(config('hospital')) ?> must have it reviewed, register with the Office of the Data Protection Commissioner and complete its data protection impact assessment.</p></div>
+<div class="callout"><?= icon('info') ?><p><strong>Status.</strong> This policy has been reviewed and approved by the hospital's lawyer. Before live use, <?= e(config('hospital')) ?> also registers with the Office of the Data Protection Commissioner and completes its data protection impact assessment.</p></div>
 
 <h2 id="who">1. Who we are</h2>
 <p><?= e(config('hospital')) ?> (&ldquo;the hospital&rdquo;) is the data controller for the information in <?= e(config('app_name')) ?> (&ldquo;UB-HMS&rdquo;). UB-HMS was developed as a KCA University diploma project by Susan Wanjiku Waweru. You can reach the hospital's data protection contact at <a href="mailto:<?= e($c['privacy_email']) ?>"><?= e($c['privacy_email']) ?></a>.</p>
@@ -20,7 +20,8 @@ legal_start('privacy', 'What information UB-HMS keeps, why, who can see it, and 
 <ul>
     <li><strong>Identity and contact:</strong> name, sex, date of birth, identity or birth certificate number, phone number, residence, next of kin.</li>
     <li><strong>Health:</strong> allergies, triage measurements, consultations, diagnoses, laboratory requests and results, prescriptions and medicines dispensed.</li>
-    <li><strong>Money:</strong> invoices, payments and receipts.</li>
+    <li><strong>Money:</strong> invoices, payments, refunds and receipts.</li>
+    <li><strong>Requests about your data:</strong> when you ask for a copy of your record or for it to be erased, we record who asked, how their identity was checked, and what was decided.</li>
 </ul>
 <h3>Staff</h3>
 <ul>
@@ -61,11 +62,17 @@ legal_start('privacy', 'What information UB-HMS keeps, why, who can see it, and 
 <p><strong>Still to do before live use:</strong> HTTPS has not yet been set up or tested, and the database version supplied with XAMPP is past its support period. Both must be dealt with before real patient data is stored.</p>
 
 <h2 id="keep">6. How long we keep it</h2>
-<p>Patient records are kept for as long as the hospital's retention rules and the law require. UB-HMS does <strong>not yet</strong> apply retention periods automatically, so the hospital manages this by its own procedure. Contact messages and access requests are kept until the administrator has dealt with them and the hospital no longer needs them.</p>
+<p>Patient records are kept for as long as the hospital's retention rules and the law require. UB-HMS can hold a record for a retention period that the hospital sets (a number of years after the patient's last visit), and a record inside that period cannot be erased. Where the hospital has not set a period in the system, it manages retention by its own procedure. Contact messages and access requests are kept until the administrator has dealt with them and the hospital no longer needs them.</p>
 
 <h2 id="rights">7. Your rights</h2>
 <p>Under the Data Protection Act, 2019 you have the right to be informed about how your data is used; to see it; to object to its use; to have wrong information corrected; and to ask for it to be deleted where the law allows. Medical records may have to be kept by law even if you ask for deletion, and we will explain if that applies.</p>
-<p>To use any of these rights, send the <a href="<?= e(url('contact.php', ['topic' => 'Data protection request']) . '#form') ?>">contact form</a> and choose <em>Data protection request</em>, or write to <a href="mailto:<?= e($c['privacy_email']) ?>"><?= e($c['privacy_email']) ?></a>. UB-HMS does not yet have a button to print or erase a patient's record, so the hospital handles these requests by hand.</p>
+<p>To use any of these rights, send the <a href="<?= e(url('contact.php', ['topic' => 'Data protection request']) . '#form') ?>">contact form</a> and choose <em>Data protection request</em>, or write to <a href="mailto:<?= e($c['privacy_email']) ?>"><?= e($c['privacy_email']) ?></a>. Hospital records staff first check who is asking.</p>
+<ul>
+    <li><strong>A copy of your record.</strong> Records staff can print it or give it to you as a file straight from UB-HMS. It is available to you, to a parent or guardian, or to a legal representative. Each copy is recorded.</li>
+    <li><strong>Erasure.</strong> Records staff record your request and the Hospital Manager decides it. Erasure in UB-HMS means <strong>anonymising</strong> the record: your name, identity number, phone number, address, next of kin, allergies and exact date of birth are removed, and the notes written during your visits are replaced. Invoices, payments and anonymous counts remain, because the hospital must keep its accounts.</li>
+    <li><strong>When erasure is delayed or refused.</strong> It cannot go ahead while you have an open visit, a booked appointment or money still owing, or while the law or the hospital's retention period requires the record to be kept. The hospital will tell you why.</li>
+    <li><strong>What erasure does not reach.</strong> Backups taken before the erasure still hold the original record until they are replaced under the backup schedule, and earlier entries in the audit trail still show your old outpatient number (never your name or any clinical detail).</li>
+</ul>
 <p>If you are not satisfied, you may complain to the Office of the Data Protection Commissioner of Kenya (<a href="https://www.odpc.go.ke" rel="noopener noreferrer">odpc.go.ke</a>).</p>
 
 <h2 id="website">8. This website</h2>

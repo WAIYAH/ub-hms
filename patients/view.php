@@ -17,14 +17,27 @@ page_start('Patient record', 'patients', ['no_title' => true]);
     <span class="op-number"><?= e($p['op_number']) ?></span>
 </div>
 
+<?php if ($p['erased_at'] !== null): ?>
+    <?php $erasedRef = db_value("SELECT reference FROM data_requests WHERE patient_id = ? AND kind = 'Erasure' AND status = 'Completed' ORDER BY id DESC LIMIT 1", [(int) $p['id']]); ?>
+    <div class="flash flash-info" role="note">
+        <strong>This record was erased on <?= e(fmt_date(substr((string) $p['erased_at'], 0, 10))) ?></strong><?= $erasedRef ? ' (request ' . e($erasedRef) . ')' : '' ?>.
+        Nothing here identifies the person any more. The visits, invoices and payments remain so that the hospital&#39;s accounts and statistics stay correct.
+    </div>
+<?php endif; ?>
+
 <?php if ($p['allergies']): ?>
     <div class="allergy" role="note"><strong>Allergies:</strong> <?= e($p['allergies']) ?></div>
 <?php endif; ?>
 
 <div class="actions no-print">
+    <?php if ($p['erased_at'] !== null): ?>
+        <?php if (user_can('privacy.view')): ?><a class="btn btn-secondary" href="<?= e(url('privacy/index.php', ['q' => $p['op_number']])) ?>">See the erasure request</a><?php endif; ?>
+    <?php else: ?>
     <?php if (user_can('patients.edit')): ?><a class="btn btn-secondary" href="<?= e(url('patients/edit.php', ['id' => $p['id']])) ?>">Correct details</a><?php endif; ?>
     <?php if (user_can('appointments.book')): ?><a class="btn btn-secondary" href="<?= e(url('appointments/book.php', ['patient_id' => $p['id']])) ?>">Book appointment</a><?php endif; ?>
     <?php if (user_can('visits.checkin')): ?><a class="btn" href="<?= e(url('visits/checkin.php', ['patient_id' => $p['id']])) ?>">Check in for a visit</a><?php endif; ?>
+    <?php if (user_can('patients.export')): ?><a class="btn btn-info" href="<?= e(url('patients/data.php', ['id' => $p['id']])) ?>">Data requests</a><?php endif; ?>
+    <?php endif; ?>
 </div>
 
 <div class="cols mt">

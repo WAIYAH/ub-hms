@@ -23,8 +23,8 @@ $faq = [
 $next = [
     ['User acceptance testing', 'Staff from every department use the system and tell us what to change.'],
     ['HTTPS and a current database', 'Set up encryption on the network and move to a supported MariaDB before real patient data is stored.'],
-    ['Patient data rights', 'A printable copy of a patient\'s data, retention periods and archiving of old audit entries.'],
-    ['Refunds and doctor schedules', 'A manager-approved refund, and clinic hours and leave for each doctor.'],
+    ['Archiving old audit entries', 'The audit trail only grows. Moving old entries to an archive keeps the system quick without losing the record.'],
+    ['Email and text messages', 'Reminders for appointments, and replies to messages sent from the Contact page, need an agreed sending service.'],
 ];
 ?>
 <section class="sec">

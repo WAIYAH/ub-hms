@@ -19,6 +19,7 @@ function nav_items(): array
             ['Appointment diary', 'appointments/index.php', 'appointments.view', 'appointments'],
             ['Book appointment',  'appointments/book.php',  'appointments.book', 'book'],
             ['Check-in',          'visits/checkin.php',     'visits.checkin',    'checkin'],
+            ['Appointments to move', 'appointments/conflicts.php', 'appointments.update', 'conflicts'],
         ]],
         ['Clinic', [
             ['Triage queue',       'visits/queue.php?stage=triage',  'triage.record',  'triage'],
@@ -38,6 +39,10 @@ function nav_items(): array
         ]],
         ['Billing', [
             ['Invoices', 'billing/index.php', 'billing.view', 'billing'],
+            ['Refunds',  'billing/refunds.php', 'refunds.view', 'refunds'],
+        ]],
+        ['Data protection', [
+            ['Patient data requests', 'privacy/index.php', 'privacy.view', 'privacy'],
         ]],
         ['Reports', [
             ['Attendance',         'reports/attendance.php', 'reports.attendance', 'r-attendance'],
@@ -48,6 +53,7 @@ function nav_items(): array
         ['Administration', [
             ['User accounts', 'admin/users.php',   'users.manage',    'users'],
             ['Access requests', 'admin/requests.php', 'requests.manage', 'requests'],
+            ['Doctor schedules', 'admin/schedules.php', 'schedules.manage', 'schedules'],
             ['Price list',    'admin/prices.php',  'settings.manage', 'prices'],
             ['Audit trail',   'admin/audit.php',   'audit.view',      'audit'],
             ['System health', 'admin/health.php',  'system.health',   'health'],
@@ -217,6 +223,11 @@ function icon(string $name, string $class = 'icon'): string
         'clipboard-check' => '<path d="M9 4h6v3H9z"/><path d="M15 5.5h2a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V6.5a1 1 0 0 1 1-1h2"/><path d="M9 14l2 2 4-4"/>',
         'zap' => '<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>',
         'sun' => '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+        'undo' => '<path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>',
+        'download' => '<path d="M12 4v12M7 11l5 5 5-5M4 20h16"/>',
+        'trash' => '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13M9 7V4h6v3"/>',
+        'calendar-x' => '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M10 14l4 4M14 14l-4 4"/>',
+        'user-x' => '<circle cx="9" cy="8" r="4"/><path d="M2 21v-1a6 6 0 0 1 6-6h2a6 6 0 0 1 6 6v1M17 9l5 5M22 9l-5 5"/>',
         'settings'    => '<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/>',
     ];
     if (!isset($paths[$name])) {

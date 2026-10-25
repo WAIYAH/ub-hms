@@ -45,8 +45,12 @@ function visit_stage(array $v): string
  */
 function check_in_patient(int $patientId, ?int $appointmentId, ?int $doctorId, string $reason, int $userId): array
 {
-    if (!db_value('SELECT id FROM patients WHERE id = ?', [$patientId])) {
+    $patientRow = db_one('SELECT id, erased_at FROM patients WHERE id = ?', [$patientId]);
+    if (!$patientRow) {
         return ['ok' => false, 'error' => 'Patient not found.'];
+    }
+    if ($patientRow['erased_at'] !== null) {
+        return ['ok' => false, 'error' => 'This patient record has been erased and cannot be used for a new visit.'];
     }
     $open = db_one("SELECT id FROM visits WHERE patient_id = ? AND status = 'Open'", [$patientId]);
     if ($open) {
@@ -55,6 +59,11 @@ function check_in_patient(int $patientId, ?int $appointmentId, ?int $doctorId, s
     $reason = clean_text($reason, 255);
 
     return db_tx(function () use ($patientId, $appointmentId, $doctorId, $reason, $userId): array {
+        // An erasure locks the same row, so a check-in made at the same moment waits for it and then sees the result.
+        $locked = db_one('SELECT erased_at FROM patients WHERE id = ? FOR UPDATE', [$patientId]);
+        if (!$locked || $locked['erased_at'] !== null) {
+            return ['ok' => false, 'error' => 'This patient record has been erased and cannot be used for a new visit.'];
+        }
         if ($appointmentId !== null) {
             $a = db_one('SELECT * FROM appointments WHERE id = ? FOR UPDATE', [$appointmentId]);
             if (!$a || (int) $a['patient_id'] !== $patientId) {
@@ -71,6 +80,8 @@ function check_in_patient(int $patientId, ?int $appointmentId, ?int $doctorId, s
             $reason = $reason !== '' ? $reason : (string) $a['reason'];
         } elseif ($doctorId !== null && !db_value("SELECT u.id FROM users u JOIN roles r ON r.id = u.role_id WHERE u.id = ? AND r.code = 'doctor' AND u.is_active = 1", [$doctorId])) {
             return ['ok' => false, 'error' => 'Choose a valid doctor, or leave it blank for the next available doctor.'];
+        } elseif ($doctorId !== null && doctor_leave_on($doctorId, app_today()) !== null) {
+            return ['ok' => false, 'error' => 'That doctor is away today. Choose another doctor, or leave it blank for the next available doctor.'];
         }
         $id = db_insert(
             'INSERT INTO visits (patient_id, appointment_id, doctor_id, reason, opened_by) VALUES (?, ?, ?, ?, ?)',

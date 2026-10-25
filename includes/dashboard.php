@@ -475,7 +475,7 @@ function dash_cashier(array $user): array
     }
     $slices = [];
     foreach ($today['methods'] as $m => $amt) {
-        $slices[] = ['label' => $m, 'value' => (float) $amt, 'colour' => PAYMENT_COLOURS[$m] ?? 0];
+        $slices[] = ['label' => $m, 'value' => max(0.0, (float) $amt), 'colour' => PAYMENT_COLOURS[$m] ?? 0];
     }
     $panels = [
         dash_panel('Money I collected, last 14 days', chart_bars($labels, [['name' => 'Collected (KSh)', 'values' => $mine, 'colour' => 6]], ['prefix' => 'KSh ', 'summary' => 'Money you collected per day for the last 14 days']), ['span' => 8]),

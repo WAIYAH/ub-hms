@@ -173,6 +173,21 @@ try {
     $profilePage = (& curl.exe -s -b $jar "http://127.0.0.1:$Port/ub-hms/profile.php") -join "`n"
     Record (($profilePage -match 'Your recent activity') -and ($profilePage -match 'Doctor / Clinical Officer')) 'APA-033' 'A signed-in doctor can open their own profile through Apache'
 
+    # doctor schedules, refunds and patient data rights through Apache
+    $newBad = @()
+    foreach ($pg in 'admin/schedules.php', 'appointments/conflicts.php', 'billing/refunds.php', 'privacy/index.php', 'privacy/request.php?id=1', 'patients/data.php?id=1', 'patients/export.php?request=1', 'patients/export.php?request=1&format=json') {
+        if ((Status "/ub-hms/$pg") -ne '303') { $newBad += $pg }
+    }
+    Record ($newBad.Count -eq 0) 'APA-034' ('The schedule, refund and patient-data pages (and the JSON download) send a visitor who is not signed in to the sign-in page' + $(if ($newBad.Count) { ' (not 303: ' + ($newBad -join ', ') + ')' } else { '' }))
+    Record ((Status '/ub-hms/database/migrations/2026-10-25_schedules_refunds_data_rights.sql') -eq '403') 'APA-035' 'The schedules, refunds and data-rights migration file is refused (403)'
+    $newDenied = @()
+    foreach ($pg in 'admin/schedules.php', 'billing/refunds.php', 'privacy/index.php', 'patients/data.php?id=1', 'patients/export.php?request=1&format=json') {
+        $c = & curl.exe -s -o NUL -w '%{http_code}' -b $jar "http://127.0.0.1:$Port/ub-hms/$pg"
+        if ($c -ne '403') { $newDenied += "$pg ($c)" }
+    }
+    Record ($newDenied.Count -eq 0) 'APA-036' ('A doctor is refused the schedule, refund, privacy and patient-data pages, and the JSON download (403)' + $(if ($newDenied.Count) { ': ' + ($newDenied -join ', ') } else { '' }))
+    Record (($profilePage -match 'Your working hours') -and ($profilePage -match 'Your leave')) 'APA-037' 'A signed-in doctor sees their own working hours and leave on their profile through Apache'
+
     if ($Perf) {
         $ab = Join-Path $XamppDir 'apache\bin\ab.exe'
         if (-not (Test-Path $ab)) { throw "ab.exe not found at $ab" }

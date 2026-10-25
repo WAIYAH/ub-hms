@@ -20,7 +20,7 @@ function system_health(): array
         $ms = (int) round((microtime(true) - $t0) * 1000);
         $add('Database connection', $ms > 500 ? 'warn' : 'ok', "Connected to $version in $ms ms");
         $tables = (int) db_value('SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE()');
-        $add('Database tables', $tables >= 23 ? 'ok' : 'fail', "$tables tables present (23 expected)");
+        $add('Database tables', $tables >= 27 ? 'ok' : 'fail', "$tables tables present (27 expected)");
         $size = (float) db_value('SELECT COALESCE(SUM(data_length + index_length), 0) FROM information_schema.tables WHERE table_schema = DATABASE()');
         $add('Database size', 'ok', number_format($size / 1048576, 1) . ' MB');
     } catch (Throwable $e) {
@@ -122,6 +122,40 @@ function data_integrity_problems(): array
                  WHEN (SELECT SUM(i.dispensed_qty) FROM prescription_items i WHERE i.prescription_id = rx.id) > 0 THEN 'Partially dispensed'
                  ELSE 'Pending' END"
     ), 'id'));
+
+    // Refunds are negative rows in the payments ledger; each must be backed by an approved request and stay within its payment.
+    $add('A refund is larger than the payment it reverses', array_column(db_all(
+        "SELECT pay.id FROM payments pay WHERE pay.kind = 'Payment'
+            AND -(SELECT COALESCE(SUM(r.amount), 0) FROM payments r WHERE r.refund_of = pay.id) > pay.amount"
+    ), 'id'));
+
+    $add('A refund is recorded on a different invoice from its payment', array_column(db_all(
+        "SELECT r.id FROM payments r JOIN payments o ON o.id = r.refund_of WHERE r.kind = 'Refund' AND r.invoice_id <> o.invoice_id"
+    ), 'id'));
+
+    $add('A refund has no matching approved request', array_column(db_all(
+        "SELECT r.id FROM payments r WHERE r.kind = 'Refund'
+            AND NOT EXISTS (SELECT 1 FROM refund_requests q WHERE q.refund_payment_id = r.id AND q.status = 'Approved' AND q.amount = -r.amount AND q.payment_id = r.refund_of)"
+    ), 'id'));
+
+    $add('An approved refund request has no matching refund', array_column(db_all(
+        "SELECT q.reference FROM refund_requests q LEFT JOIN payments r ON r.id = q.refund_payment_id
+          WHERE q.status = 'Approved' AND (r.id IS NULL OR r.amount <> -q.amount OR r.refund_of <> q.payment_id)"
+    ), 'reference'));
+
+    // An erased record must really be blank: nothing identifying may remain on it.
+    $add('An erased patient record still holds personal details', array_column(db_all(
+        "SELECT op_number FROM patients WHERE erased_at IS NOT NULL
+            AND (national_id IS NOT NULL OR phone IS NOT NULL OR residence IS NOT NULL OR middle_name IS NOT NULL OR allergies IS NOT NULL
+                 OR next_of_kin_name IS NOT NULL OR next_of_kin_phone IS NOT NULL OR next_of_kin_relation IS NOT NULL
+                 OR first_name <> 'Erased' OR last_name <> 'Patient')"
+    ), 'op_number'));
+
+    $add('An erased patient has an open visit or a booked appointment', array_column(db_all(
+        "SELECT p.op_number FROM patients p WHERE p.erased_at IS NOT NULL
+            AND (EXISTS (SELECT 1 FROM visits v WHERE v.patient_id = p.id AND v.status = 'Open')
+                 OR EXISTS (SELECT 1 FROM appointments a WHERE a.patient_id = p.id AND a.status = 'Booked'))"
+    ), 'op_number'));
 
     $add('Patient has more than one open visit', array_column(db_all("SELECT patient_id FROM visits WHERE status = 'Open' GROUP BY patient_id HAVING COUNT(*) > 1"), 'patient_id'));
 

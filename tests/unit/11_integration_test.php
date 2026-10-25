@@ -153,7 +153,7 @@ test('UT-INT-006', 'every table has a primary key and every foreign key column i
             AND NOT EXISTS (SELECT 1 FROM information_schema.statistics s WHERE s.table_schema = k.table_schema AND s.table_name = k.table_name AND s.column_name = k.column_name AND s.seq_in_index = 1)"
     );
     assert_same([], $unindexed);
-    assert_eq(23, db_value("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_type = 'BASE TABLE'"));
+    assert_eq(27, db_value("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_type = 'BASE TABLE'"));
 });
 
 test('UT-INT-007', 'sessions expire after 30 idle minutes or 8 hours in total', function () {

@@ -24,6 +24,8 @@ if (!is_valid_date($date)) {
     $date = app_now()->modify('+1 day')->format('Y-m-d');
 }
 $slots = ($patient && $doctorId) ? doctor_day_slots($doctorId, $date) : [];
+// Why a doctor cannot be booked on this date (on leave, or not a working day), in words the receptionist can pass on.
+$availability = ($patient && $doctorId && $slots) ? doctor_availability($doctorId, $date) : ['available' => true, 'message' => ''];
 $q = get_str('q', 60);
 [$found] = (!$patient && $q !== '') ? search_patients($q, 15, 0) : [[]];
 
@@ -64,8 +66,11 @@ page_start('Book an appointment', 'book');
     </form>
 
     <?php if ($doctorId): ?>
+        <p class="muted small">Working hours: <?= e(schedule_summary($doctorId)) ?>.</p>
         <?php if (!$slots): ?>
             <div class="flash flash-warning">The clinic is closed on <?= e(fmt_date($date)) ?>. Choose another date.</div>
+        <?php elseif (!$availability['available']): ?>
+            <div class="flash flash-warning" role="alert"><?= e($availability['message']) ?></div>
         <?php else: ?>
             <form method="post" novalidate>
                 <?= csrf_field() ?>
@@ -76,6 +81,7 @@ page_start('Book an appointment', 'book');
                     <legend>Step 3: choose a time on <?= e((new DateTimeImmutable($date))->format('l, d F Y')) ?></legend>
                     <div class="slots">
                     <?php foreach ($slots as $start => $s): ?>
+                        <?php if ($s['state'] === 'off') { continue; } ?>
                         <div class="slot<?= $s['state'] !== 'free' ? ' taken' : '' ?>">
                             <input type="radio" name="start_time" id="slot_<?= e(str_replace(':', '', $start)) ?>" value="<?= e($start) ?>"<?= $s['state'] !== 'free' ? ' disabled' : '' ?>>
                             <label for="slot_<?= e(str_replace(':', '', $start)) ?>"><?= e($start) ?></label>

@@ -771,7 +771,7 @@ sec_public() {
   r=$(curl -s -o /dev/null -w '%{http_code}' "$B/admin/requests.php")
   chk "A visitor who is not signed in cannot open the requests page" '[ "$r" = 303 ]'
   h=$(get admin admin/health.php)
-  chk "The system health page expects the 23rd table and finds it" '[[ "$h" == *"23 tables present"* ]]'
+  chk "The system health page counts the tables of the schema (27) and finds them all" '[[ "$h" == *"27 tables present"* ]]'
 
   # --- the hourly limit (last, because it uses up this computer's allowance) ---
   local i
@@ -954,8 +954,281 @@ sec_dashboards() {
   chk "Older pages use the new header and sidebar too (patient search)" '[[ "$h" == *"class=\"app-top\""* && "$h" == *"class=\"sidebar\""* && "$h" == *"Search patients"* ]]'
 }
 
+# =====================================================================
+# DOCTOR SCHEDULES, REFUNDS AND PATIENT DATA RIGHTS
+# =====================================================================
+sec_rights() {
+  echo; echo "== Doctor schedules and leave, refunds, and patient data export and erasure"
+  local r h n=399
+  chk() { n=$((n+1)); check "E2E-$n" "$@"; }
+  declare -A jar=( [admin]=admin [manager]=mgr [receptionist]=rec [nurse]=nurse [doctor]=doc [lab]=lab [pharmacist]=pharm [cashier]=cash )
+  local roles=(admin manager receptionist nurse doctor lab pharmacist cashier)
+  login admin "$ADMIN_USER" "$ADMIN_PW2" >/dev/null
+  login rec reception1 "$DEMO_PW" >/dev/null; login doc doctor1 "$DEMO_PW" >/dev/null; login cash cashier1 "$DEMO_PW" >/dev/null
+  login mgr manager1 "$DEMO_PW" >/dev/null; login nurse nurse1 "$DEMO_PW" >/dev/null
+
+  local docid; docid=$(php_eval x 'echo db_value("SELECT id FROM users WHERE username = ?", ["doctor1"]);')
+  # one paid visit for a patient with a surname that is easy to search for; prints "patientId visitId paymentId invoiceNo"
+  mkvisit() {
+    php_eval x '
+      $rec = (int) db_value("SELECT id FROM users WHERE username = ?", ["reception1"]);
+      $doc = (int) db_value("SELECT id FROM users WHERE username = ?", ["doctor1"]);
+      $cash = (int) db_value("SELECT id FROM users WHERE username = ?", ["cashier1"]);
+      $p = register_patient(["first_name" => "Pat", "last_name" => "'"$1"'", "sex" => "Female", "date_of_birth" => "1991-03-03", "national_id" => (string) random_int(10000000, 99999999), "phone" => "0712 000 000", "residence" => "Ruaka", "allergies" => "None known"], $rec, true);
+      $v = check_in_patient($p["id"], null, $doc, "Cough and fever", $rec)["visit_id"];
+      save_consultation($v, ["service_id" => (int) db_value("SELECT id FROM services WHERE name = ?", ["General consultation"]), "complaint" => "Cough for three days", "examination" => "Chest clear", "diagnosis" => "Upper respiratory infection", "icd10_code" => "J06.9", "plan" => "Rest and fluids"], $doc);
+      $inv = get_invoice_for_visit($v);
+      $pay = '"$2"' ? record_payment((int) $inv["id"], ["method" => "Cash", "amount" => $inv["total"], "reference" => ""], $cash) : ["payment_id" => 0];
+      echo $p["id"], " ", $v, " ", $pay["payment_id"], " ", $inv["invoice_no"];'
+  }
+
+  # ---------------------------------------------------------------- schedules
+  h=$(get mgr admin/schedules.php)
+  chk "The Hospital Manager sees every doctor with their hours, today's status and a button for hours and leave" '[[ "$h" == *"Doctor schedules"* && "$h" == *"Dr. Samuel Kamau"* && "$h" == *"Clinic hours (no personal schedule set)"* && "$h" == *"Hours and leave"* ]]'
+  local bad=""
+  for role in admin receptionist nurse doctor lab pharmacist cashier; do
+    [ "$(code "${jar[$role]}" admin/schedules.php)" = 403 ] || bad="$bad $role"
+    [ "$(code "${jar[$role]}" "admin/schedule.php?doctor=$docid")" = 403 ] || bad="$bad $role(edit)"
+  done
+  chk "Nobody but the Hospital Manager can open the schedule pages (403 for the other seven roles)" '[ -z "$bad" ]' || echo "      problem roles:$bad"
+  chk "An unknown doctor number is a 404, not an error page" '[[ "$(code mgr "admin/schedule.php?doctor=999999")" == 404 && "$(code mgr "admin/schedule.php?doctor=abc")" == 404 ]]'
+
+  local D; D=$(next_workday 3)
+  local sch=() wd
+  for wd in 1 2 3 4 5 6; do
+    sch+=(--data-urlencode "sch[$wd][0][from]=09:00" --data-urlencode "sch[$wd][0][to]=12:00" --data-urlencode "sch[$wd][1][from]=14:00" --data-urlencode "sch[$wd][1][to]=17:00")
+  done
+  r=$(form mgr "admin/schedule.php?doctor=$docid" admin/schedule.php --data-urlencode "doctor=$docid" --data-urlencode "action=save_hours" "${sch[@]}")
+  h=$(get mgr "admin/schedule.php?doctor=$docid")
+  chk "Saving weekly hours works and the page shows them back" '[[ "$r" == 303* && "$h" == *"Working hours saved for Dr. Samuel Kamau"* ]]'
+  h=$(get mgr admin/schedules.php)
+  chk "The overview now shows the hours in words" '[[ "$h" == *"Mon-Sat 09:00-12:00 and 14:00-17:00"* ]]'
+
+  r=$(form mgr "admin/schedule.php?doctor=$docid" admin/schedule.php --data-urlencode "doctor=$docid" --data-urlencode "action=save_hours" --data-urlencode "sch[1][0][from]=12:00" --data-urlencode "sch[1][0][to]=09:00")
+  h=$(body)
+  chk "Hours that end before they start are refused with a message on that day, and the saved hours stay" '[[ "$h" == *"The end time must be after the start time"* ]] && [[ "$(get mgr admin/schedules.php)" == *"Mon-Sat 09:00-12:00 and 14:00-17:00"* ]]'
+  r=$(form mgr "admin/schedule.php?doctor=$docid" admin/schedule.php --data-urlencode "doctor=$docid" --data-urlencode "action=save_hours")
+  chk "A form with no hours at all is refused" 'body | grep -q "Enter working hours for at least one day"'
+
+  local sp; sp=$(mkvisit Schedwell 0); local spid=${sp%% *}
+  h=$(get rec "appointments/book.php?patient_id=$spid&doctor_id=$docid&date=$D")
+  chk "The booking page offers only the times inside the doctor's hours and states them" '[[ "$h" == *"value=\"09:00\""* && "$h" == *"value=\"11:40\""* && "$h" == *"value=\"14:00\""* && "$h" != *"value=\"08:00\""* && "$h" != *"value=\"12:00\""* && "$h" != *"value=\"13:40\""* && "$h" == *"Mon-Sat 09:00-12:00 and 14:00-17:00"* ]]'
+  r=$(form rec "appointments/book.php?patient_id=$spid&doctor_id=$docid&date=$D" "appointments/book.php?patient_id=$spid" --data-urlencode "patient_id=$spid" --data-urlencode "doctor_id=$docid" --data-urlencode "date=$D" --data-urlencode "start_time=12:20")
+  chk "Forcing a time outside the hours (a hand-made request) is refused by the server" 'body | grep -q "does not work at that time"'
+  r=$(form rec "appointments/book.php?patient_id=$spid&doctor_id=$docid&date=$D" "appointments/book.php?patient_id=$spid" --data-urlencode "patient_id=$spid" --data-urlencode "doctor_id=$docid" --data-urlencode "date=$D" --data-urlencode "start_time=10:00" --data-urlencode "reason=Review")
+  chk "A time inside the hours books normally" '[[ "$r" == 303* ]]'
+
+  # leave over the booked day: the booking stays, becomes a conflict, and everyone who must act is told
+  local L2; L2=$(date -d "$D +1 day" +%F)
+  r=$(form mgr "admin/schedule.php?doctor=$docid" admin/schedule.php --data-urlencode "doctor=$docid" --data-urlencode "action=add_leave" --data-urlencode "start_date=$D" --data-urlencode "end_date=$L2" --data-urlencode "type=Sick leave" --data-urlencode "reason=Private medical reason")
+  h=$(get mgr "admin/schedule.php?doctor=$docid")
+  chk "Recording leave over a booked day warns that 1 appointment must be moved, and lists it by outpatient number, not by name" '[[ "$r" == 303* && "$h" == *"1 booked appointment"* && "$h" == *"inside recorded leave"* && "$h" != *"Schedwell"* ]]'
+  h=$(get rec appointments/conflicts.php)
+  chk "The receptionist sees the appointment on the 'Appointments to move' page with the patient's name and the problem" '[[ "$h" == *"Schedwell"* && "$h" == *"Doctor away"* && "$h" == *"Book new time"* ]]'
+  h=$(get rec index.php)
+  chk "The receptionist's bell and sidebar show the appointment to move" '[[ "$h" == *"booked appointment to move"* && "$h" == *"Appointments to move"* ]]'
+  h=$(get doc profile.php)
+  chk "The doctor sees their own hours and leave on their profile" '[[ "$h" == *"Your working hours"* && "$h" == *"09:00 to 12:00"* && "$h" == *"Your leave"* && "$h" == *"Sick leave"* ]]'
+  h=$(get nurse profile.php)
+  chk "A nurse's profile has no hours or leave panels" '[[ "$h" != *"Your working hours"* && "$h" != *"Your leave"* ]]'
+  h=$(get rec "appointments/book.php?patient_id=$spid&doctor_id=$docid&date=$D")
+  chk "On a day of leave the booking page says the doctor is away, offers no times and does not say why" '[[ "$h" == *"is away on that date"* && "$h" != *"name=\"start_time\""* && "$h" != *"Sick leave"* && "$h" != *"Private medical"* ]]'
+  r=$(form rec "appointments/book.php?patient_id=$spid&doctor_id=$docid&date=$D" "appointments/book.php?patient_id=$spid" --data-urlencode "patient_id=$spid" --data-urlencode "doctor_id=$docid" --data-urlencode "date=$D" --data-urlencode "start_time=10:20")
+  chk "A hand-made booking on a day of leave is refused" 'body | grep -q "is away on that date"'
+
+  local aid; aid=$(php_eval x 'echo db_value("SELECT id FROM appointments WHERE patient_id = ? AND status = ?", ['"$spid"', "Booked"]);')
+  r=$(form rec appointments/conflicts.php appointments/action.php --data-urlencode "id=$aid" --data-urlencode "status=Cancelled" --data-urlencode "reason=Doctor not available at that time" --data-urlencode "return=conflicts")
+  h=$(get rec appointments/conflicts.php)
+  chk "Cancelling from the list returns to the list, which is now empty" '[[ "$r" == 303* && "$r" == *conflicts.php* && "$h" == *"Every booked appointment fits"* ]]'
+
+  r=$(form mgr "admin/schedule.php?doctor=$docid" admin/schedule.php --data-urlencode "doctor=$docid" --data-urlencode "action=add_leave" --data-urlencode "start_date=$D" --data-urlencode "end_date=$D" --data-urlencode "type=Training")
+  chk "Leave that overlaps leave already recorded is refused" 'body | grep -q "overlaps leave that is already recorded"'
+  local lid; lid=$(php_eval x 'echo db_value("SELECT id FROM doctor_leave WHERE doctor_id = ? ORDER BY id LIMIT 1", ['"$docid"']);')
+  r=$(form mgr "admin/schedule.php?doctor=$docid" admin/schedule.php --data-urlencode "doctor=$docid" --data-urlencode "action=remove_leave" --data-urlencode "leave_id=$lid")
+  r=$(form rec "appointments/book.php?patient_id=$spid&doctor_id=$docid&date=$D" "appointments/book.php?patient_id=$spid" --data-urlencode "patient_id=$spid" --data-urlencode "doctor_id=$docid" --data-urlencode "date=$D" --data-urlencode "start_time=10:00")
+  chk "After the leave is removed the same day can be booked again" '[[ "$r" == 303* ]]'
+  r=$(post mgr admin/schedule.php --data-urlencode "doctor=$docid" --data-urlencode "action=remove_leave" --data-urlencode "leave_id=1")
+  chk "A schedule change sent without the security token is refused (419)" '[[ "$r" == 419* ]]'
+  r=$(form mgr "admin/schedule.php?doctor=$docid" admin/schedule.php --data-urlencode "doctor=$docid" --data-urlencode "action=clear_hours")
+  h=$(get mgr admin/schedules.php)
+  chk "Removing the personal schedule returns the doctor to clinic hours" '[[ "$h" == *"Clinic hours (no personal schedule set)"* ]]'
+  h=$(get admin "admin/audit.php?entity=schedule"); h2=$(get admin "admin/audit.php?entity=leave")
+  chk "Schedule and leave changes are in the audit trail, and the reason for leave is not" '[[ "$h" == *"Weekly hours set"* && "$h2" == *"Leave recorded for doctor"* && "$h$h2" != *"Private medical reason"* ]]'
+
+  # ---------------------------------------------------------------- refunds
+  local pv; pv=$(mkvisit Refunder 1); local rpid vid rpay rinv; read -r rpid vid rpay rinv <<< "$pv"
+  h=$(get cash "billing/invoice.php?visit=$vid")
+  chk "The cashier sees a Refund button next to the payment" '[[ "$h" == *"refund_request.php?payment=$rpay"* ]]'
+  chk "The manager cannot open an invoice (so cannot see patient names through billing)" '[[ "$(code mgr "billing/invoice.php?visit=$vid")" == 403 ]]'
+  chk "Only a cashier can ask for a refund (the manager and the other six roles get 403 on the request form)" 'bad=""; for role in admin manager receptionist nurse doctor lab pharmacist; do [ "$(code "${jar[$role]}" "billing/refund_request.php?payment=$rpay")" = 403 ] || bad="$bad $role"; done; [ -z "$bad" ] && [ "$(code cash "billing/refund_request.php?payment=$rpay")" = 200 ]'
+  h=$(get cash "billing/refund_request.php?payment=$rpay")
+  chk "The request form shows the payment and how much can still be refunded" '[[ "$h" == *"Can still be refunded"* && "$h" == *"500.00"* ]]'
+  r=$(form cash "billing/refund_request.php?payment=$rpay" billing/refund_request.php --data-urlencode "payment=$rpay" --data-urlencode "amount=200" --data-urlencode "reason=no")
+  chk "A refund with no proper reason is refused and nothing is created" 'body | grep -q "Say why the money is being refunded" && [ "$(php_eval x "echo db_value(\"SELECT COUNT(*) FROM refund_requests\");")" = 0 ]'
+  r=$(form cash "billing/refund_request.php?payment=$rpay" billing/refund_request.php --data-urlencode "payment=$rpay" --data-urlencode "amount=900" --data-urlencode "reason=Paid twice at the desk")
+  chk "More than the payment is refused with the most that can be given back" 'body | grep -q "most that can still be refunded on this payment is KSh 500.00"'
+  r=$(form cash "billing/refund_request.php?payment=$rpay" billing/refund_request.php --data-urlencode "payment=$rpay" --data-urlencode "amount=200" --data-urlencode "reason=Paid twice at the desk")
+  local rrid; rrid=$(echo "$r" | grep -o 'id=[0-9]*' | cut -d= -f2)
+  h=$(get cash "billing/refund.php?id=$rrid")
+  chk "A valid request is recorded as Pending and sent for approval; the invoice is unchanged" '[[ "$r" == 303* && "$h" == *"Pending"* && "$h" == *"RF-"* && "$(php_eval x "echo db_value(\"SELECT amount_paid FROM invoices WHERE invoice_no = ?\", [\"$rinv\"]);")" == "500.00" ]]'
+  r=$(form cash "billing/refund.php?id=$rrid" "billing/refund.php?id=$rrid" --data-urlencode "id=$rrid" --data-urlencode "action=approve")
+  chk "A cashier cannot approve a refund, even with a hand-made request, and it is recorded as refused" '[ "$(php_eval x "echo db_value(\"SELECT status FROM refund_requests WHERE id = $rrid\");")" = Pending ] && get admin "admin/audit.php?action=access_denied" | grep -q "Refused a refund action"'
+
+  h=$(get mgr index.php)
+  chk "The manager's bell and sidebar show the refund waiting for a decision" '[[ "$h" == *"refund request waiting for your decision"* ]] && get mgr billing/refunds.php | grep -q "Decide"'
+  h=$(get mgr "billing/refund.php?id=$rrid")
+  chk "The manager sees the invoice number, amount and reason but never the patient (no name, no outpatient number, no link to the invoice)" '[[ "$h" == *"$rinv"* && "$h" == *"200.00"* && "$h" == *"Paid twice at the desk"* && "$h" != *"Refunder"* && "$h" != *"Pat Refunder"* && "$h" != *"billing/invoice.php"* && "$h" == *"Approve refund"* ]]'
+  r=$(post mgr "billing/refund.php?id=$rrid" --data-urlencode "id=$rrid" --data-urlencode "action=approve")
+  chk "A decision sent without the security token is refused (419)" '[[ "$r" == 419* ]]'
+  r=$(form mgr "billing/refund.php?id=$rrid" "billing/refund.php?id=$rrid" --data-urlencode "id=$rrid" --data-urlencode "action=reject" --data-urlencode "note=")
+  chk "A rejection without a reason is refused" '[ "$(php_eval x "echo db_value(\"SELECT status FROM refund_requests WHERE id = $rrid\");")" = Pending ]'
+  r=$(form mgr "billing/refund.php?id=$rrid" "billing/refund.php?id=$rrid" --data-urlencode "id=$rrid" --data-urlencode "action=reject" --data-urlencode "note=The receipt shows one payment only")
+  h=$(get cash "billing/refund.php?id=$rrid")
+  chk "A rejected request shows the manager's reason to the cashier and moves no money" '[[ "$h" == *"Rejected"* && "$h" == *"The receipt shows one payment only"* ]] && [ "$(php_eval x "echo db_value(\"SELECT COUNT(*) FROM payments WHERE kind = ?\", [\"Refund\"]);")" = 0 ]'
+
+  r=$(form cash "billing/refund_request.php?payment=$rpay" billing/refund_request.php --data-urlencode "payment=$rpay" --data-urlencode "amount=200" --data-urlencode "refund_reference=rev-2026" --data-urlencode "reason=Duplicate charge for the consultation")
+  rrid=$(echo "$r" | grep -o 'id=[0-9]*' | cut -d= -f2)
+  r=$(form mgr "billing/refund.php?id=$rrid" "billing/refund.php?id=$rrid" --data-urlencode "id=$rrid" --data-urlencode "action=approve" --data-urlencode "note=Checked against the till")
+  h=$(get cash "billing/invoice.php?visit=$vid")
+  chk "An approved refund appears on the invoice as a negative REF line and the amount paid goes down" '[[ "$r" == 303* && "$h" == *"REF-"* && "$h" == *"KSh -200.00"* ]] && [ "$(php_eval x "echo db_value(\"SELECT amount_paid FROM invoices WHERE invoice_no = ?\", [\"$rinv\"]);")" = "300.00" ]'
+  local refpay; refpay=$(php_eval x 'echo db_value("SELECT id FROM payments WHERE kind = ?", ["Refund"]);')
+  h=$(get cash "billing/receipt.php?id=$refpay")
+  chk "The refund has a printable voucher with the reason, the approver and the balance" '[[ "$h" == *"Refund voucher"* && "$h" == *"Duplicate charge for the consultation"* && "$h" == *"Grace Njoroge"* && "$h" == *"REV-2026"* ]]'
+  h=$(get cash "billing/invoice.php?visit=$vid")
+  chk "The invoice now shows it is partly paid, and the paid payment no longer offers more than is left" '[[ "$h" == *"Partially paid"* && "$h" == *"refund_request.php?payment=$rpay"* ]]'
+  r=$(form cash "billing/refund_request.php?payment=$rpay" billing/refund_request.php --data-urlencode "payment=$rpay" --data-urlencode "amount=400" --data-urlencode "reason=Trying for too much")
+  chk "After a part-refund only the rest can be asked for" 'body | grep -q "most that can still be refunded on this payment is KSh 300.00"'
+
+  r=$(form cash "billing/refund_request.php?payment=$rpay" billing/refund_request.php --data-urlencode "payment=$rpay" --data-urlencode "amount=50" --data-urlencode "reason=Asked by mistake")
+  rrid=$(echo "$r" | grep -o 'id=[0-9]*' | cut -d= -f2)
+  r=$(form cash "billing/refund.php?id=$rrid" "billing/refund.php?id=$rrid" --data-urlencode "id=$rrid" --data-urlencode "action=withdraw")
+  chk "The cashier can withdraw their own waiting request" '[ "$(php_eval x "echo db_value(\"SELECT status FROM refund_requests WHERE id = $rrid\");")" = Cancelled ]'
+
+  h=$(get mgr reports/revenue.php)
+  chk "The revenue report shows the refunded amount and collected net of refunds" '[[ "$h" == *"Refunded"* && "$h" == *"net of refunds"* ]]'
+  h=$(curl -s -D - -o /dev/null -b "$J/mgr" "$B/reports/revenue.php?format=csv")
+  chk "The revenue CSV carries a Refunded column" '[[ "$h" == *"text/csv"* ]] && get mgr "reports/revenue.php?format=csv" | head -1 | grep -q "Refunded"'
+  h=$(get admin "admin/audit.php?action=refund_request"); h2=$(get admin "admin/audit.php?action=refund_approve"); local h3; h3=$(get admin "admin/audit.php?action=refund_reject")
+  chk "Refund requests and decisions are in the audit trail with the reference and amount, never the reason" '[[ "$h" == *"RF-"*"KSh 200.00 on INV-"* && "$h2" == *"RF-"*"KSh 200.00 on INV-"* && "$h3" == *"rejected"* && "$h$h2$h3" != *"Duplicate charge for the consultation"* && "$h$h2$h3" != *"Paid twice at the desk"* ]]'
+  h=$(get admin admin/health.php)
+  chk "The health page reports 27 tables and a reconciled database after refunds" '[[ "$h" == *"27 tables present"* && "$h" == *"All records reconcile"* ]]'
+
+  # ---------------------------------------------------------------- patient data: copy
+  chk "Only Records can open the data-request page of a patient (the other seven roles get 403)" 'bad=""; for role in admin manager nurse doctor lab pharmacist cashier; do [ "$(code "${jar[$role]}" "patients/data.php?id=$rpid")" = 403 ] || bad="$bad $role"; done; [ -z "$bad" ] && [ "$(code rec "patients/data.php?id=$rpid")" = 200 ]'
+  h=$(get rec "patients/view.php?id=$rpid")
+  chk "The patient's page offers a Data requests button to Records only" '[[ "$h" == *"patients/data.php?id=$rpid"* && "$(get doc "patients/view.php?id=$rpid")" != *"patients/data.php"* ]]'
+  r=$(form rec "patients/data.php?id=$rpid" patients/data.php --data-urlencode "id=$rpid" --data-urlencode "action=export" --data-urlencode "ex_requester_name=Pat Refunder" --data-urlencode "ex_requester_relation=The patient" --data-urlencode "ex_identity_note=ID seen")
+  chk "A copy cannot be given until the identity check box is ticked" 'body | grep -q "Tick the box to confirm"'
+  r=$(form rec "patients/data.php?id=$rpid" patients/data.php --data-urlencode "id=$rpid" --data-urlencode "action=export" --data-urlencode "ex_requester_name=Pat Refunder" --data-urlencode "ex_requester_relation=The patient" --data-urlencode "ex_identity_checked=1" --data-urlencode "ex_identity_note=National ID card seen")
+  local exid; exid=$(echo "$r" | grep -o 'request=[0-9]*' | cut -d= -f2)
+  h=$(get rec "patients/export.php?request=$exid")
+  chk "The copy shows the details, visit, diagnosis, invoice, payments and the refund of that patient" '[[ "$r" == 303* && "$h" == *"Copy of a patient record"* && "$h" == *"Pat Refunder"* && "$h" == *"Upper respiratory infection"* && "$h" == *"$rinv"* && "$h" == *"REF-"* && "$h" == *"Duplicate charge for the consultation"* ]]'
+  h=$(get rec "patients/export.php?request=$exid")
+  chk "The copy page has a print button and a download link, and says the security log is not included" '[[ "$h" == *"data-print"* && "$h" == *"format=json"* && "$h" == *"does not include the hospital"* ]]'
+  h=$(curl -s -D "$J/hdr" -b "$J/rec" "$B/patients/export.php?request=$exid&format=json")
+  chk "The same copy downloads as a JSON file with the reference in its name" 'grep -qi "content-disposition: attachment; filename=\"DR-" "$J/hdr" && grep -qi "application/json" "$J/hdr" && echo "$h" | grep -q "\"outpatient_number\"" && echo "$h" | grep -q "Upper respiratory infection"'
+  chk "The JSON file is valid JSON" 'echo "$h" | "$PHP_BIN" -r "json_decode(stream_get_contents(STDIN), false, 512, JSON_THROW_ON_ERROR); echo 1;" | grep -q 1'
+  chk "Opening and downloading the copy are written to the audit trail" '[ "$(php_eval x "echo db_value(\"SELECT COUNT(*) FROM audit_log WHERE action = ? AND entity_id = $exid\", [\"data_export\"]);")" -ge 2 ]'
+  chk "Other roles cannot open the copy or the file (403)" 'bad=""; for role in admin manager nurse doctor cashier; do [ "$(code "${jar[$role]}" "patients/export.php?request=$exid&format=json")" = 403 ] || bad="$bad $role"; done; [ -z "$bad" ]'
+  chk "An unknown copy request is a 404" '[ "$(code rec "patients/export.php?request=999999")" = 404 ] && [ "$(code rec "patients/export.php?request=abc")" = 404 ]'
+  h=$(get admin "admin/audit.php?action=data_request")
+  chk "The audit trail records the request by reference and outpatient number, without the requester's name or the identity note" '[[ "$h" == *"export request for OP"* && "$h" != *"National ID card seen"* && "$h" != *"Pat Refunder"* ]]'
+
+  # ---------------------------------------------------------------- patient data: erasure
+  local ev; ev=$(mkvisit Erasable 0); local epid evid epay einv; read -r epid evid epay einv <<< "$ev"
+  r=$(form rec "patients/data.php?id=$epid" patients/data.php --data-urlencode "id=$epid" --data-urlencode "action=erase" --data-urlencode "er_requester_name=Pat Erasable" --data-urlencode "er_requester_relation=The patient" --data-urlencode "er_identity_checked=1" --data-urlencode "er_identity_note=Passport seen" --data-urlencode "er_reason=Does not want the record kept")
+  local erid; erid=$(echo "$r" | grep -o 'id=[0-9]*' | tail -1 | cut -d= -f2)
+  h=$(get rec "patients/data.php?id=$epid")
+  chk "An erasure request is recorded (not carried out) and the blockers are explained: an open visit and money still owed" '[[ "$r" == 303* && "$h" == *"open visit"* && "$h" == *"balance of KSh 500.00"* ]] && [ "$(php_eval x "echo db_value(\"SELECT status FROM data_requests WHERE id = $erid\");")" = Open ] && [[ "$(get rec "patients/view.php?id=$epid")" == *"Pat Erasable"* ]]'
+  r=$(form rec "privacy/request.php?id=$erid" "privacy/request.php?id=$erid" --data-urlencode "id=$erid" --data-urlencode "action=approve")
+  chk "Records cannot decide the request (a hand-made approval is refused and nothing is erased)" '[ "$(php_eval x "echo db_value(\"SELECT status FROM data_requests WHERE id = $erid\");")" = Open ] && [[ "$(get rec "patients/view.php?id=$epid")" == *"Pat Erasable"* ]]'
+  h=$(get mgr index.php)
+  chk "The manager is told that an erasure waits for a decision" '[[ "$h" == *"record erasure request waiting for your decision"* ]]'
+  h=$(get mgr "privacy/request.php?id=$erid")
+  chk "The manager sees the outpatient number, the blockers and what is kept, and never the patient's name, the requester's name or the identity note" '[[ "$h" == *"Not yet."* && "$h" == *"open visit"* && "$h" != *"Erasable"* && "$h" != *"Passport seen"* && "$h" == *"What is kept and what is removed"* && "$h" == *"Does not want the record kept"* && "$h" != *"Approve and erase the record"* ]]'
+  h=$(get mgr privacy/index.php)
+  chk "The manager's list of requests shows outpatient numbers only" '[[ "$h" == *"Patient data requests"* && "$h" == *"$erid"* || "$h" == *"DR-"* ]] && [[ "$h" != *"Erasable"* && "$h" != *"Refunder"* ]]'
+  r=$(form mgr "privacy/request.php?id=$erid" "privacy/request.php?id=$erid" --data-urlencode "id=$erid" --data-urlencode "action=approve" --data-urlencode "note=")
+  chk "Even a hand-made approval is refused while something blocks it, and the record is untouched" '[ "$(php_eval x "echo db_value(\"SELECT status FROM data_requests WHERE id = $erid\");")" = Open ] && [[ "$(get rec "patients/view.php?id=$epid")" == *"Pat Erasable"* ]]'
+
+  # clear the blockers (finish the visit, nothing is owed), then the manager can decide
+  php_eval x '$doc = (int) db_value("SELECT id FROM users WHERE username = ?", ["doctor1"]); $cash = (int) db_value("SELECT id FROM users WHERE username = ?", ["cashier1"]); close_visit('"$evid"', $doc); $inv = get_invoice_for_visit('"$evid"'); record_payment((int) $inv["id"], ["method" => "Cash", "amount" => $inv["total"], "reference" => ""], $cash);' >/dev/null
+  h=$(get mgr "privacy/request.php?id=$erid")
+  chk "Once nothing blocks it the manager is offered the erasure" '[[ "$h" == *"Nothing stops it."* && "$h" == *"Approve and erase the record"* && "$h" == *"Refuse the request"* ]]'
+  local collected_before; collected_before=$(php_eval x 'echo db_value("SELECT COALESCE(SUM(amount), 0) FROM payments");')
+  local invoices_before; invoices_before=$(php_eval x 'echo db_value("SELECT COUNT(*) FROM invoices");')
+  r=$(post mgr "privacy/request.php?id=$erid" --data-urlencode "id=$erid" --data-urlencode "action=approve")
+  chk "An approval without the security token is refused (419) and erases nothing" '[[ "$r" == 419* ]] && [[ "$(get rec "patients/view.php?id=$epid")" == *"Pat Erasable"* ]]'
+  r=$(form mgr "privacy/request.php?id=$erid" "privacy/request.php?id=$erid" --data-urlencode "id=$erid" --data-urlencode "action=approve" --data-urlencode "note=Checked")
+  h=$(get rec "patients/view.php?id=$epid")
+  chk "Approving erases the record: the name and details are gone and the page says so" '[[ "$r" == 303* && "$h" == *"This record was erased"* && "$h" == *"Erased Patient"* && "$h" != *"Erasable"* && "$h" != *"Ruaka"* && "$h" != *"None known"* && "$h" != *"Check in for a visit"* && "$h" != *"Correct details"* ]]'
+  chk "The money and the invoices are unchanged by the erasure" '[ "$(php_eval x "echo db_value(\"SELECT COALESCE(SUM(amount), 0) FROM payments\");")" = "$collected_before" ] && [ "$(php_eval x "echo db_value(\"SELECT COUNT(*) FROM invoices\");")" = "$invoices_before" ]'
+  h=$(get rec "patients/index.php?q=Erasable")
+  chk "The erased patient can no longer be found by their old name (the search box repeats what was typed, but no result is listed)" '[[ "$h" != *"patients/view.php?id=$epid"* && "$h" != *"Pat Erasable"* ]]'
+  h=$(get rec "patients/data.php?id=$epid")
+  chk "The data page of an erased record offers no forms" '[[ "$h" == *"has been erased"* && "$h" != *"Record the erasure request"* && "$h" != *"Record the request and show the copy"* ]]'
+  r=$(form rec "visits/checkin.php?patient_id=$epid" "visits/checkin.php?patient_id=$epid" --data-urlencode "patient_id=$epid" --data-urlencode "appointment_id=" --data-urlencode "reason=Cough")
+  chk "An erased record cannot be checked in again, even with a hand-made request" 'body | grep -q "has been erased"'
+  r=$(form rec "appointments/book.php?patient_id=$epid&doctor_id=$docid&date=$D" "appointments/book.php?patient_id=$epid" --data-urlencode "patient_id=$epid" --data-urlencode "doctor_id=$docid" --data-urlencode "date=$D" --data-urlencode "start_time=10:00")
+  chk "An erased record cannot be booked, even with a hand-made request" 'body | grep -q "has been erased"'
+  h=$(get rec "privacy/request.php?id=$erid")
+  chk "Records sees the completed request with the requester's details blanked" '[[ "$h" == *"Completed"* && "$h" == *"[erased]"* && "$h" != *"Pat Erasable"* && "$h" != *"Passport seen"* ]]'
+  h=$(get mgr "privacy/request.php?id=$erid")
+  chk "The manager sees the completed request and still no name" '[[ "$h" == *"Completed"* && "$h" != *"Erasable"* ]]'
+  h=$(get admin "admin/audit.php?action=erase")
+  chk "The audit trail records the erasure by reference and carries no name" '[[ "$h" == *"Record anonymised (DR-"* && "$h" != *"Erasable"* ]]'
+  h=$(get admin admin/health.php)
+  chk "The health check still reconciles after an erasure and finds no personal details left on an erased record" '[[ "$h" == *"All records reconcile"* ]]'
+
+  # a second request is refused by the manager with a reason
+  local rv; rv=$(mkvisit Retained 1); local rtpid; rtpid=${rv%% *}
+  r=$(form rec "patients/data.php?id=$rtpid" patients/data.php --data-urlencode "id=$rtpid" --data-urlencode "action=erase" --data-urlencode "er_requester_name=Pat Retained" --data-urlencode "er_requester_relation=Parent or guardian" --data-urlencode "er_identity_checked=1" --data-urlencode "er_identity_note=ID seen")
+  local rtid; rtid=$(echo "$r" | grep -o 'id=[0-9]*' | tail -1 | cut -d= -f2)
+  r=$(form mgr "privacy/request.php?id=$rtid" "privacy/request.php?id=$rtid" --data-urlencode "id=$rtid" --data-urlencode "action=refuse" --data-urlencode "note=")
+  chk "A refusal without a reason is rejected" '[ "$(php_eval x "echo db_value(\"SELECT status FROM data_requests WHERE id = $rtid\");")" = Open ]'
+  r=$(form mgr "privacy/request.php?id=$rtid" "privacy/request.php?id=$rtid" --data-urlencode "id=$rtid" --data-urlencode "action=refuse" --data-urlencode "note=Records must be kept for the insurer")
+  h=$(get rec "privacy/request.php?id=$rtid")
+  chk "A refused request keeps the record and shows Records the reason" '[[ "$h" == *"Refused"* && "$h" == *"Records must be kept for the insurer"* && "$(get rec "patients/view.php?id=$rtpid")" == *"Pat Retained"* ]]'
+
+  # ---------------------------------------------------------------- shared checks
+  bad=""
+  for p in "mgr admin/schedules.php" "mgr admin/schedule.php?doctor=$docid" "rec appointments/conflicts.php" "cash billing/refunds.php" "cash billing/refund_request.php?payment=$rpay" "mgr billing/refunds.php" "mgr privacy/index.php" "rec privacy/index.php" "rec patients/data.php?id=$rpid" "rec privacy/request.php?id=$erid" "mgr privacy/request.php?id=$erid" "rec patients/export.php?request=$exid" "cash billing/refund.php?id=$rrid" "doc profile.php"; do
+    set -- $p
+    h=$(get "$1" "$2")
+    [ "$(code "$1" "$2")" = 200 ] || bad="$bad $2(status)"
+    echo "$h" | grep -Eq 'Warning:|Notice:|Fatal error|Deprecated:|Stack trace' && bad="$bad $2(php)"
+    echo "$h" | grep -Eq '<script>|<script [^>]*[^>]>[^<]|[[:space:]]on(click|load|error|submit|mouseover)=|[[:space:]]style="' && bad="$bad $2(inline)"
+    [ "$(echo "$h" | grep -o '<h1' | wc -l)" = 1 ] || bad="$bad $2(h1)"
+  done
+  chk "Every new page opens, shows no PHP message, has one main heading and no inline script, handler or style (strict CSP)" '[ -z "$bad" ]' || echo "      problems:$bad"
+
+  # the access matrix for the new pages, driven by the permission table
+  local pages=(
+    "admin/schedules.php:schedules.manage" "admin/schedule.php?doctor=$docid:schedules.manage" "appointments/conflicts.php:appointments.update"
+    "billing/refunds.php:refunds.view" "billing/refund_request.php?payment=$rpay:refunds.request" "billing/refund.php?id=$rrid:refunds.view"
+    "privacy/index.php:privacy.view" "privacy/request.php?id=$erid:privacy.view" "patients/data.php?id=$rpid:patients.export" "patients/export.php?request=$exid:patients.export"
+  )
+  local combos=0 wrong=0 page perm expected pair role want got
+  for entry in "${pages[@]}"; do
+    page=${entry%:*}; perm=${entry##*:}
+    expected=$(php_eval x 'foreach (permission_matrix() as $r => $p) { echo $r, ":", in_array("'"$perm"'", $p, true) ? "200" : "403", " "; }')
+    bad=""
+    for pair in $expected; do
+      role=${pair%%:*}; want=${pair##*:}
+      got=$(code "${jar[$role]}" "$page"); combos=$((combos+1))
+      [ "$got" = "$want" ] || { bad="$bad $role(got $got, expected $want)"; wrong=$((wrong+1)); }
+    done
+    [ -z "$bad" ] || echo "      $page mismatch:$bad"
+  done
+  chk "All $combos role-and-page combinations for the new pages behave exactly as the permission table says" '[ "$wrong" -eq 0 ]'
+  h=$(get rec privacy.php); h2=$(get rec terms.php)
+  chk "The legal pages no longer carry the 'not reviewed by a lawyer' notice" '[[ "$(curl -s "$B/privacy.php")" != *"not been reviewed by a lawyer"* && "$(curl -s "$B/terms.php")" != *"not been reviewed by a lawyer"* ]]'
+  h=$(curl -s "$B/privacy.php")
+  chk "The privacy policy describes the copy and erasure process that now exists" '[[ "$h" == *"copy of your record"* && "$h" == *"anonymis"* && "$h" != *"does not yet have a button"* && "$h" != *"does not yet apply retention"* ]]'
+}
+
 # Later sprints add their own sec_* functions above this line.
-for fn in sec_sprint1 sec_sprint2 sec_sprint3 sec_sprint4 sec_sprint5 sec_public sec_dashboards; do
+for fn in sec_sprint1 sec_sprint2 sec_sprint3 sec_sprint4 sec_sprint5 sec_public sec_dashboards sec_rights; do
   if declare -F "$fn" > /dev/null; then "$fn"; fi
 done
 

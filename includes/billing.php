@@ -115,7 +115,7 @@ function billing_sync_visit(int $visitId, int $userId): void
 
         $total = (string) db_value('SELECT COALESCE(SUM(line_total), 0) FROM invoice_items WHERE invoice_id = ?', [$invoiceId]);
         if (to_cents($total) < to_cents($inv['amount_paid'])) {
-            throw new RuntimeException('billing:This charge cannot be removed because the invoice has already been paid beyond the new total. Ask the manager to refund first.');
+            throw new RuntimeException('billing:This charge cannot be removed because the invoice has already been paid beyond the new total. Ask the cashier to request a refund, which the manager must approve, then try again.');
         }
         db_exec('UPDATE invoices SET total = ?, status = ? WHERE id = ?', [$total, invoice_status_for($total, $inv['amount_paid']), $invoiceId]);
     });
@@ -153,9 +153,10 @@ function invoice_balance(array $inv): string
     return number_format((to_cents($inv['total']) - to_cents($inv['amount_paid'])) / 100, 2, '.', '');
 }
 
+/** RCT-year-number for a payment; REF-year-number for the voucher of a refund. */
 function receipt_number(array $payment): string
 {
-    return sprintf('RCT-%s-%06d', (new DateTimeImmutable($payment['paid_at']))->format('Y'), $payment['id']);
+    return sprintf(($payment['kind'] ?? 'Payment') === 'Refund' ? 'REF-%s-%06d' : 'RCT-%s-%06d', (new DateTimeImmutable($payment['paid_at']))->format('Y'), $payment['id']);
 }
 
 function get_payment(int $id): ?array
@@ -235,7 +236,7 @@ function validate_payment_input(array $inv, array $in): array
         if ($method === 'M-Pesa') {
             if (!preg_match('/^[A-Z0-9]{10}$/', $reference)) {
                 $errors['reference'] = 'Enter the 10-character M-Pesa confirmation code, for example QJK4H2M9XP.';
-            } elseif (db_value("SELECT id FROM payments WHERE method = 'M-Pesa' AND reference = ?", [$reference])) {
+            } elseif (db_value("SELECT id FROM payments WHERE kind = 'Payment' AND method = 'M-Pesa' AND reference = ?", [$reference])) {
                 $errors['reference'] = 'This M-Pesa code has already been used for a payment.';
             }
         } elseif ($method === 'Card') {
@@ -281,23 +282,37 @@ function record_payment(int $invoiceId, array $in, int $userId): array
     });
 }
 
-/** Money taken on one day, by method, optionally for one cashier. Returns [method => cents-free decimal string] plus 'total'. */
+/**
+ * Money taken on one day, by method, optionally for one cashier. The amounts are net of refunds paid out that day.
+ * Returns ['total' => net, 'count' => payments taken, 'refunds' => refunds paid out, 'refunded' => their sum, 'methods' => [method => net]].
+ */
 function collections_for_day(string $date, ?int $userId = null): array
 {
-    $sql = 'SELECT method, COALESCE(SUM(amount), 0) AS amount, COUNT(*) AS n FROM payments WHERE DATE(paid_at) = ?';
+    $sql = 'SELECT method, kind, COALESCE(SUM(amount), 0) AS amount, COUNT(*) AS n FROM payments WHERE DATE(paid_at) = ?';
     $params = [$date];
     if ($userId !== null) {
         $sql .= ' AND received_by = ?';
         $params[] = $userId;
     }
-    $out = ['total' => '0.00', 'count' => 0, 'methods' => array_fill_keys(PAYMENT_METHODS, '0.00')];
+    $out = ['total' => '0.00', 'count' => 0, 'refunds' => 0, 'refunded' => '0.00', 'methods' => array_fill_keys(PAYMENT_METHODS, '0.00')];
+    $byMethod = array_fill_keys(PAYMENT_METHODS, 0);
     $cents = 0;
-    foreach (db_all($sql . ' GROUP BY method', $params) as $r) {
-        $out['methods'][$r['method']] = number_format((float) $r['amount'], 2, '.', '');
+    $refundedCents = 0;
+    foreach (db_all($sql . ' GROUP BY method, kind', $params) as $r) {
+        $byMethod[$r['method']] += to_cents($r['amount']);
         $cents += to_cents($r['amount']);
-        $out['count'] += (int) $r['n'];
+        if ($r['kind'] === 'Refund') {
+            $out['refunds'] += (int) $r['n'];
+            $refundedCents -= to_cents($r['amount']);
+        } else {
+            $out['count'] += (int) $r['n'];
+        }
+    }
+    foreach ($byMethod as $m => $c) {
+        $out['methods'][$m] = number_format($c / 100, 2, '.', '');
     }
     $out['total'] = number_format($cents / 100, 2, '.', '');
+    $out['refunded'] = number_format($refundedCents / 100, 2, '.', '');
     return $out;
 }
 

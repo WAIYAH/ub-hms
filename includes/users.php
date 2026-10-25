@@ -202,6 +202,10 @@ function audit_action_label(string $action): string
         'view' => 'Opened a record', 'payment' => 'Recorded a payment', 'dispense' => 'Dispensed medicines',
         'access_denied' => 'A page was refused (no permission)', 'csrf_rejected' => 'A form was refused (wrong security token)',
         'password_reset' => 'Password reset by the administrator', 'submit' => 'Sent a request or message',
+        'refund_request' => 'Asked for a refund', 'refund_approve' => 'Approved a refund', 'refund_reject' => 'Rejected a refund',
+        'refund_cancel' => 'Withdrew a refund request', 'refund' => 'Recorded a refund',
+        'data_request' => 'Recorded a patient data request', 'data_request_cancel' => 'Withdrew a patient data request',
+        'data_export' => 'Gave a patient a copy of their record', 'erase' => 'Erased a patient record', 'erase_refused' => 'Refused an erasure request',
     ];
     return $known[$action] ?? ucfirst(str_replace('_', ' ', $action));
 }

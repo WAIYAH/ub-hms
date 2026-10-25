@@ -87,7 +87,11 @@ Business rules are enforced on the server and again by the database, so a bug or
 | Stock never negative | `UPDATE ... WHERE quantity >= ?` inside a transaction (UT-PHA-016) | `CHECK (quantity >= 0)` (UT-PHA-019) |
 | Never dispense expired stock | First-expiry-first batch selection (UT-PHA-014) | None (policy rule) |
 | A charge cannot be billed twice | Idempotent invoice sync (UT-BIL-006) | Unique key on invoice item source (UT-BIL-006) |
-| Never pay more than the balance | Row-locked check (UT-BIL-009) | `CHECK (amount > 0)` and the invoice paid-at-most rule (UT-BIL-019) |
+| Never pay more than the balance | Row-locked check (UT-BIL-009) | `CHECK (chk_pay_kind)`: a payment is positive, a refund is negative and points at a payment (UT-RFD-001), and the invoice paid-at-most rule (UT-BIL-019) |
+| Never refund more than was paid | Payment and invoice rows locked, waiting requests reserve their amount (UT-RFD-004, UT-RFD-010) | Integrity check on the health page (UT-RFD-016) |
+| Nobody decides what they asked for | Refusal in `decide_refund()` and `decide_erasure()` (UT-RFD-007, UT-PRV-008) | `CHECK (chk_rr_two_person)` and `CHECK (chk_dr_two_person)` (UT-RFD-007, UT-PRV-016) |
+| No booking outside a doctor's hours or leave | `book_appointment()` checks twice, the second time under the doctor's row lock (UT-SCH-005 to UT-SCH-007) | `CHECK` on schedule times and leave dates (UT-SCH-015) |
+| A record is erased only when nothing needs it | `erasure_blockers()` re-checked under the patient's row lock at approval (UT-PRV-007, UT-PRV-008) | Integrity check for personal details left on an erased record (UT-PRV-009) |
 | One invoice per visit | Locked sync | Unique key on `invoices.visit_id` (UT-BIL-019) |
 | One open visit per patient | Check at check-in (UT-VIS-003) | Integrity check on the health page (UT-INT-004) |
 | Records cannot be orphaned | Foreign keys with no cascading deletes (UT-INT-005) | Foreign keys |
@@ -157,6 +161,25 @@ which detects corrupted records (UT-INT-003, UT-INT-004).
 
 Not applicable. UB-HMS makes no outgoing network requests and fetches no URLs supplied by users.
 
+## Features added after the first review: schedules, refunds, patient data rights
+
+Reviewed on 25 October 2026 in the same way (read every new page and function, then write tests that try to break the control).
+
+| Threat | Control | Evidence |
+| --- | --- | --- |
+| A cashier approves their own refund, or a refund is invented to take cash | The cashier only asks; only the Hospital Manager holds `refunds.approve`; the decider cannot be the asker; the refund is a new ledger line backed by an approved request; the health page finds a refund line with no approved request | UT-RFD-007, UT-RFD-016, UT-RFD-017, E2E-430 |
+| The same money is refunded twice | Waiting requests reserve their amount; approval re-checks under row locks | UT-RFD-004, UT-RFD-010 |
+| The money ledger is rewritten to hide a refund | `payments` stays append-only for the restricted database account; a refund is an INSERT, never an UPDATE or DELETE; `chk_pay_kind` fixes the sign | UT-RFD-001, `create_app_user.php`, E2E least-privilege run |
+| The manager learns patient names while deciding | Refund and erasure pages show invoice or outpatient numbers only; the manager has neither `billing.view` nor `patients.view` | UT-RFD-017, UT-RFD-018, UT-PRV-017, E2E-432, E2E-459, E2E-460 |
+| Someone obtains a record that is not theirs | A copy needs `patients.export` (Records only), a ticked identity check and a note on how; each request is numbered; each opening and download is audited; the copy holds only that patient | UT-PRV-001 to UT-PRV-005, E2E-445 to E2E-455 |
+| A record is erased by mistake or to hide something | A second person decides; blockers (open visit, booked appointment, money owed, waiting refund, retention period) are checked again at approval under a lock; refusal needs a reason; the request, the decision and the erasure are audited | UT-PRV-007 to UT-PRV-011, E2E-456 to E2E-475 |
+| Erasure leaves identifying data behind | Name, numbers, contacts, next of kin, allergies and exact birth date are cleared; free text of visits, appointments, consultations, nurse and laboratory notes and refund reasons becomes "[erased]"; the requester details of its requests are blanked; the health page tests for leftovers | UT-PRV-009, UT-PRV-015 |
+| An erased patient is used again, or two staff race | Check-in, booking, correction and a new request all refuse an erased record; check-in and booking lock the patient row, as erasure does | UT-PRV-010, E2E-468, E2E-469 |
+| Doctor leave reasons leak | Staff other than the manager are told only that a doctor is away; the reason is not in the audit trail | UT-SCH-007, E2E-415, E2E-422 |
+| Hours changed while a booking is made | Both lock the doctor's row; the booking re-checks inside the lock | UT-SCH-005, `book_appointment()` |
+
+Known limits of erasure, stated in the privacy policy and the README: entries in the append-only audit trail written before an erasure still carry the old outpatient number (never a name or clinical detail); backups taken earlier still hold the original record until they are replaced; paper files are outside the system. The hospital must set `privacy.retention_years` from its own legal advice (the default of 0 means the system applies no period of its own).
+
 ## Residual risks and recommendations
 
 1. Enable TLS on the production server and keep the server patched (A02, A06).
@@ -171,3 +194,5 @@ Not applicable. UB-HMS makes no outgoing network requests and fetches no URLs su
    administrator resets passwords in person.
 8. A full independent penetration test was out of scope for a diploma project and is recommended before the
    system holds real patient information.
+9. Decide how paper files and old backups are handled after a patient record is erased, and set the retention period
+   (`privacy.retention_years`). The system anonymises the database record; it cannot reach either.

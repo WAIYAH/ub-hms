@@ -18,7 +18,8 @@
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
-DROP TABLE IF EXISTS public_requests, audit_log, payments, invoice_items, invoices, stock_movements,
+DROP TABLE IF EXISTS data_requests, refund_requests, doctor_leave, doctor_schedules, public_requests, audit_log,
+    payments, invoice_items, invoices, stock_movements,
     prescription_items, prescriptions, medicine_batches, medicines, lab_requests, lab_tests,
     visit_services, consultations, triage, visits, appointments, patients, op_sequences,
     users, roles, icd10_codes, services;
@@ -119,13 +120,17 @@ CREATE TABLE patients (
     registered_by        INT UNSIGNED NOT NULL,
     created_at           DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at           DATETIME     NULL ON UPDATE CURRENT_TIMESTAMP,
+    erased_at            DATETIME     NULL,
+    erased_by            INT UNSIGNED NULL,
     PRIMARY KEY (id),
     UNIQUE KEY uq_patients_op (op_number),
     UNIQUE KEY uq_patients_national_id (national_id),
     KEY ix_patients_name (last_name, first_name),
     KEY ix_patients_phone (phone),
     KEY fk_patients_user (registered_by),
-    CONSTRAINT fk_patients_user FOREIGN KEY (registered_by) REFERENCES users (id)
+    KEY fk_patients_eraser (erased_by),
+    CONSTRAINT fk_patients_user   FOREIGN KEY (registered_by) REFERENCES users (id),
+    CONSTRAINT fk_patients_eraser FOREIGN KEY (erased_by)     REFERENCES users (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- slot_key is filled only while an appointment holds its slot (Booked or Attended).
@@ -157,6 +162,43 @@ CREATE TABLE appointments (
     CONSTRAINT fk_appt_doctor  FOREIGN KEY (doctor_id)  REFERENCES users (id),
     CONSTRAINT fk_appt_patient FOREIGN KEY (patient_id) REFERENCES patients (id),
     CONSTRAINT fk_appt_user    FOREIGN KEY (booked_by)  REFERENCES users (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- A doctor's usual weekly hours: up to two blocks a day (for example morning and afternoon); weekday 1 = Monday
+-- to 7 = Sunday. A doctor with NO rows here keeps the clinic's opening hours, so a new doctor can be booked at once.
+CREATE TABLE doctor_schedules (
+    id         INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    doctor_id  INT UNSIGNED NOT NULL,
+    weekday    TINYINT UNSIGNED NOT NULL,
+    start_time TIME NOT NULL,
+    end_time   TIME NOT NULL,
+    created_by INT UNSIGNED NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_sched_block (doctor_id, weekday, start_time),
+    KEY fk_sched_user (created_by),
+    CONSTRAINT fk_sched_doctor FOREIGN KEY (doctor_id)  REFERENCES users (id),
+    CONSTRAINT fk_sched_user   FOREIGN KEY (created_by) REFERENCES users (id),
+    CONSTRAINT chk_sched_day   CHECK (weekday BETWEEN 1 AND 7),
+    CONSTRAINT chk_sched_times CHECK (start_time < end_time)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Days a doctor is away (whole days, both ends included). Nothing can be booked inside a leave period.
+CREATE TABLE doctor_leave (
+    id         INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    doctor_id  INT UNSIGNED NOT NULL,
+    start_date DATE NOT NULL,
+    end_date   DATE NOT NULL,
+    type       ENUM('Annual leave','Sick leave','Training','Other') NOT NULL DEFAULT 'Annual leave',
+    reason     VARCHAR(255) NULL,
+    created_by INT UNSIGNED NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    KEY ix_leave_doctor (doctor_id, start_date, end_date),
+    KEY fk_leave_user (created_by),
+    CONSTRAINT fk_leave_doctor FOREIGN KEY (doctor_id)  REFERENCES users (id),
+    CONSTRAINT fk_leave_user   FOREIGN KEY (created_by) REFERENCES users (id),
+    CONSTRAINT chk_leave_dates CHECK (end_date >= start_date)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------------------------------------------------------------------------
@@ -431,9 +473,14 @@ CREATE TABLE invoice_items (
     CONSTRAINT chk_invi_amounts CHECK (quantity > 0 AND unit_price >= 0 AND line_total >= 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- The money ledger. It only ever grows: a payment is a row of kind 'Payment' with a positive amount; a refund is a
+-- NEW row of kind 'Refund' with a negative amount and refund_of pointing at the payment it reverses. Nothing is edited
+-- or deleted, so the cash-up and the revenue report always add up.
 CREATE TABLE payments (
     id          INT UNSIGNED NOT NULL AUTO_INCREMENT,
     invoice_id  INT UNSIGNED NOT NULL,
+    kind        ENUM('Payment','Refund') NOT NULL DEFAULT 'Payment',
+    refund_of   INT UNSIGNED NULL,
     amount      DECIMAL(12,2) NOT NULL,
     method      ENUM('Cash','M-Pesa','Card','Insurance') NOT NULL,
     reference   VARCHAR(40) NULL,
@@ -443,9 +490,49 @@ CREATE TABLE payments (
     KEY ix_pay_paid_at (paid_at),
     KEY fk_pay_invoice (invoice_id),
     KEY fk_pay_user (received_by),
-    CONSTRAINT fk_pay_invoice FOREIGN KEY (invoice_id)  REFERENCES invoices (id),
-    CONSTRAINT fk_pay_user    FOREIGN KEY (received_by) REFERENCES users (id),
-    CONSTRAINT chk_pay_amount CHECK (amount > 0)
+    KEY fk_pay_refund_of (refund_of),
+    CONSTRAINT fk_pay_invoice   FOREIGN KEY (invoice_id)  REFERENCES invoices (id),
+    CONSTRAINT fk_pay_refund_of FOREIGN KEY (refund_of)   REFERENCES payments (id),
+    CONSTRAINT fk_pay_user      FOREIGN KEY (received_by) REFERENCES users (id),
+    CONSTRAINT chk_pay_kind CHECK ((kind = 'Payment' AND amount > 0 AND refund_of IS NULL)
+                                OR (kind = 'Refund'  AND amount < 0 AND refund_of IS NOT NULL))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- A request to give money back. The cashier asks (with a reason); a different person, the Hospital Manager, approves
+-- or rejects. Approving writes the negative 'Refund' row in payments (refund_payment_id) and lowers the invoice's
+-- amount_paid. The reference (RF-year-number) is filled in right after the row is created.
+CREATE TABLE refund_requests (
+    id                INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    reference         VARCHAR(20)  NULL,
+    payment_id        INT UNSIGNED NOT NULL,
+    invoice_id        INT UNSIGNED NOT NULL,
+    amount            DECIMAL(12,2) NOT NULL,
+    reason            VARCHAR(255) NOT NULL,
+    refund_reference  VARCHAR(40)  NULL,
+    status            ENUM('Pending','Approved','Rejected','Cancelled') NOT NULL DEFAULT 'Pending',
+    requested_by      INT UNSIGNED NOT NULL,
+    requested_at      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    decided_by        INT UNSIGNED NULL,
+    decided_at        DATETIME NULL,
+    decision_note     VARCHAR(255) NULL,
+    refund_payment_id INT UNSIGNED NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_rr_reference (reference),
+    UNIQUE KEY uq_rr_refund_payment (refund_payment_id),
+    KEY ix_rr_status (status, requested_at),
+    KEY fk_rr_payment (payment_id),
+    KEY fk_rr_invoice (invoice_id),
+    KEY fk_rr_requester (requested_by),
+    KEY fk_rr_decider (decided_by),
+    CONSTRAINT fk_rr_payment   FOREIGN KEY (payment_id)        REFERENCES payments (id),
+    CONSTRAINT fk_rr_invoice   FOREIGN KEY (invoice_id)        REFERENCES invoices (id),
+    CONSTRAINT fk_rr_requester FOREIGN KEY (requested_by)      REFERENCES users (id),
+    CONSTRAINT fk_rr_decider   FOREIGN KEY (decided_by)        REFERENCES users (id),
+    CONSTRAINT fk_rr_refund    FOREIGN KEY (refund_payment_id) REFERENCES payments (id),
+    CONSTRAINT chk_rr_amount   CHECK (amount > 0),
+    CONSTRAINT chk_rr_decided  CHECK (status = 'Pending' OR (decided_by IS NOT NULL AND decided_at IS NOT NULL)),
+    CONSTRAINT chk_rr_approved CHECK (status <> 'Approved' OR refund_payment_id IS NOT NULL),
+    CONSTRAINT chk_rr_two_person CHECK (status = 'Cancelled' OR decided_by IS NULL OR decided_by <> requested_by)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------------------------------------------------------------------------
@@ -467,6 +554,44 @@ CREATE TABLE audit_log (
     KEY ix_audit_action_ip (action, ip_address, created_at),
     KEY fk_audit_user (user_id),
     CONSTRAINT fk_audit_user FOREIGN KEY (user_id) REFERENCES users (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------------
+-- Patient data rights (Data Protection Act, 2019): a copy of a record (Export) or its erasure (Erasure)
+-- ---------------------------------------------------------------------------
+
+-- Records staff open the request after checking who is asking. An Export is completed on the spot. An Erasure stays
+-- Open until the Hospital Manager decides; approving it anonymises the record in the same step (the patient row keeps
+-- its number but loses every identifying detail and the free text of the clinical records is replaced), so invoices,
+-- payments and statistics stay correct. These rows name the person asking, so when a record is erased the requester
+-- details of its requests are blanked too.
+CREATE TABLE data_requests (
+    id                 INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    reference          VARCHAR(20)  NULL,
+    patient_id         INT UNSIGNED NOT NULL,
+    kind               ENUM('Export','Erasure') NOT NULL,
+    requester_name     VARCHAR(120) NOT NULL,
+    requester_relation VARCHAR(40)  NOT NULL,
+    identity_checked   TINYINT(1)   NOT NULL DEFAULT 0,
+    identity_note      VARCHAR(255) NULL,
+    reason             VARCHAR(255) NULL,
+    status             ENUM('Open','Completed','Refused','Cancelled') NOT NULL DEFAULT 'Open',
+    decision_note      VARCHAR(255) NULL,
+    created_by         INT UNSIGNED NOT NULL,
+    created_at         DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    decided_by         INT UNSIGNED NULL,
+    decided_at         DATETIME NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_dr_reference (reference),
+    KEY ix_dr_status (kind, status, created_at),
+    KEY fk_dr_patient (patient_id),
+    KEY fk_dr_creator (created_by),
+    KEY fk_dr_decider (decided_by),
+    CONSTRAINT fk_dr_patient FOREIGN KEY (patient_id)  REFERENCES patients (id),
+    CONSTRAINT fk_dr_creator FOREIGN KEY (created_by)  REFERENCES users (id),
+    CONSTRAINT fk_dr_decider FOREIGN KEY (decided_by)  REFERENCES users (id),
+    CONSTRAINT chk_dr_identity CHECK (identity_checked = 1),
+    CONSTRAINT chk_dr_two_person CHECK (status IN ('Open', 'Cancelled') OR decided_by IS NULL OR decided_by <> created_by)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------------------------------------------------------------------------

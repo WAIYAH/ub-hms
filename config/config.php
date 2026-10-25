@@ -56,6 +56,13 @@ return [
         'currency' => 'KSh',
     ],
 
+    // Patient data rights. retention_years is how many years after a patient's last visit the hospital must keep the
+    // record (set it from the hospital's own legal advice). While a record is inside that period it cannot be erased.
+    // 0 means the system applies no retention period of its own.
+    'privacy' => [
+        'retention_years' => 0,
+    ],
+
     // Public website (welcome, services, about, contact and legal pages). These contact details are placeholders
     // for demonstration: put the hospital's real details in config/config.local.php before live use.
     'site' => [
@@ -63,7 +70,7 @@ return [
         'phone'          => '+254 20 000 0000',
         'email'          => 'info@uhaibora.example',
         'privacy_email'  => 'dataprotection@uhaibora.example',
-        'legal_updated'  => '24 October 2026',
+        'legal_updated'  => '25 October 2026',
         'form_limit'     => 5,   // contact messages or access requests accepted from one computer in an hour
     ],
 

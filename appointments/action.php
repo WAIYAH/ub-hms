@@ -13,4 +13,7 @@ if ($error) {
 } else {
     flash('success', 'Appointment marked ' . strtolower($status) . '.');
 }
+if (post_str('return', 10) === 'conflicts') {
+    redirect('appointments/conflicts.php');
+}
 redirect('appointments/index.php', is_valid_date($back) ? ['date' => $back, 'doctor_id' => ''] : []);

@@ -16,6 +16,8 @@ audit('view', 'invoice', (int) $inv['id'], 'Opened ' . $inv['invoice_no']);
 $form = take_form();
 $items = invoice_items((int) $inv['id']);
 $payments = invoice_payments((int) $inv['id']);
+$refundRequests = user_can('refunds.view') ? invoice_refund_requests((int) $inv['id']) : [];
+$canRefund = user_can('refunds.request');
 $balance = invoice_balance($inv);
 $f = ['values' => $form['values'] ?: ['method' => 'Cash', 'amount' => $balance], 'errors' => $form['errors']];
 $canPay = user_can('billing.pay') && to_cents($balance) > 0;
@@ -29,7 +31,7 @@ page_start('Invoice ' . $inv['invoice_no'], 'billing', ['no_title' => true]);
             <div class="muted"><?= e(config('location')) ?></div>
         </div>
         <div class="right">
-            <h2>Invoice <?= e($inv['invoice_no']) ?></h2>
+            <h1>Invoice <?= e($inv['invoice_no']) ?></h1>
             <div><?= e(fmt_date($inv['created_at'])) ?></div>
             <div><?= badge($inv['status']) ?></div>
         </div>
@@ -37,7 +39,7 @@ page_start('Invoice ' . $inv['invoice_no'], 'billing', ['no_title' => true]);
     <p><strong><?= e(patient_full_name($inv)) ?></strong> &middot; <span class="op-number"><?= e($inv['op_number']) ?></span><br>
        <span class="muted">Visit of <?= e(fmt_date($inv['visit_date'])) ?></span></p>
 
-    <table class="data">
+    <div class="table-wrap" tabindex="0" role="group" aria-label="Table: scroll sideways if it does not fit"><table class="data">
         <thead><tr><th>Description</th><th>Type</th><th class="num">Qty</th><th class="num">Unit price</th><th class="num">Amount</th></tr></thead>
         <tbody>
         <?php foreach ($items as $it): ?>
@@ -45,7 +47,7 @@ page_start('Invoice ' . $inv['invoice_no'], 'billing', ['no_title' => true]);
         <?php endforeach; ?>
         <?php if (!$items): ?><tr><td colspan="5" class="empty">No charges yet.</td></tr><?php endif; ?>
         </tbody>
-    </table>
+    </table></div>
     <div class="totals mt">
         <div><span>Total</span><span><?= e(fmt_money($inv['total'])) ?></span></div>
         <div><span>Paid</span><span><?= e(fmt_money($inv['amount_paid'])) ?></span></div>
@@ -53,17 +55,34 @@ page_start('Invoice ' . $inv['invoice_no'], 'billing', ['no_title' => true]);
     </div>
 
     <?php if ($payments): ?>
-    <h3>Payments received</h3>
-    <table class="data">
-        <thead><tr><th>Receipt</th><th>Date</th><th>Method</th><th>Reference</th><th class="num">Amount</th><th>Received by</th><th class="no-print"></th></tr></thead>
+    <h2>Payments and refunds</h2>
+    <div class="table-wrap" tabindex="0" role="group" aria-label="Table: scroll sideways if it does not fit"><table class="data">
+        <thead><tr><th>Receipt or voucher</th><th>Date</th><th>Method</th><th>Reference</th><th class="num">Amount</th><th>Handled by</th><th class="no-print"><span class="sr-only">Actions</span></th></tr></thead>
         <tbody>
-        <?php foreach ($payments as $p): ?>
-            <tr><td><?= e(receipt_number($p)) ?></td><td class="nowrap"><?= e(fmt_datetime($p['paid_at'])) ?></td><td><?= e($p['method']) ?></td><td><?= e($p['reference']) ?></td>
+        <?php foreach ($payments as $p): $isRefund = $p['kind'] === 'Refund'; ?>
+            <tr><td><?= e(receipt_number($p)) ?><?= $isRefund ? ' ' . badge('Refund') : '' ?></td><td class="nowrap"><?= e(fmt_datetime($p['paid_at'])) ?></td><td><?= e($p['method']) ?></td><td><?= e($p['reference']) ?></td>
                 <td class="num"><?= e(fmt_money($p['amount'])) ?></td><td><?= e($p['received_by_name']) ?></td>
-                <td class="no-print"><a class="btn btn-small btn-secondary" href="<?= e(url('billing/receipt.php', ['id' => $p['id']])) ?>">Receipt</a></td></tr>
+                <td class="no-print"><div class="cell-actions"><a class="btn btn-small btn-secondary" href="<?= e(url('billing/receipt.php', ['id' => $p['id']])) ?>"><?= $isRefund ? 'Voucher' : 'Receipt' ?></a>
+                    <?php if ($canRefund && !$isRefund && to_cents(payment_refundable((int) $p['id'])) > 0): ?>
+                        <a class="btn btn-small btn-warning" href="<?= e(url('billing/refund_request.php', ['payment' => $p['id']])) ?>">Refund</a>
+                    <?php endif; ?></div></td></tr>
         <?php endforeach; ?>
         </tbody>
-    </table>
+    </table></div>
+    <?php endif; ?>
+
+    <?php if ($refundRequests): ?>
+    <h2 class="no-print">Refund requests on this invoice</h2>
+    <div class="table-wrap no-print" tabindex="0" role="group" aria-label="Table: scroll sideways if it does not fit"><table class="data">
+        <thead><tr><th>Reference</th><th>Asked</th><th class="num">Amount</th><th>Reason</th><th>Status</th><th><span class="sr-only">Actions</span></th></tr></thead>
+        <tbody>
+        <?php foreach ($refundRequests as $rr): ?>
+            <tr><td class="nowrap"><?= e($rr['reference']) ?></td><td class="nowrap"><?= e(fmt_datetime($rr['requested_at'])) ?> by <?= e($rr['requested_by_name']) ?></td><td class="num"><?= e(fmt_money($rr['amount'])) ?></td>
+                <td><?= e($rr['reason']) ?></td><td><?= badge($rr['status']) ?></td>
+                <td><a class="btn btn-small btn-secondary" href="<?= e(url('billing/refund.php', ['id' => $rr['id']])) ?>">Open</a></td></tr>
+        <?php endforeach; ?>
+        </tbody>
+    </table></div>
     <?php endif; ?>
 </div>
 
