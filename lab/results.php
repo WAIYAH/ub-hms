@@ -18,9 +18,9 @@ page_start('My test results', 'labresults');
         </select></div>
     <button class="btn btn-secondary" type="submit">Show</button>
 </form>
-<div class="table-wrap">
+<div class="table-wrap" tabindex="0" role="group" aria-label="Table: scroll sideways if it does not fit">
 <table class="data">
-    <thead><tr><th>Patient</th><th>Test</th><th>Status</th><th>Result</th><th>Entered</th><th></th></tr></thead>
+    <thead><tr><th>Patient</th><th>Test</th><th>Status</th><th>Result</th><th>Entered</th><th><span class="sr-only">Actions</span></th></tr></thead>
     <tbody>
     <?php foreach ($rows as $r): ?>
         <tr>

@@ -27,7 +27,7 @@ page_start('Attendance report', 'r-attendance');
     <?= dashboard_tile('Total visits', $r['totals']['visits']) ?>
     <?= dashboard_tile('New patients', $r['totals']['new_patients']) ?>
 </div>
-<div class="table-wrap">
+<div class="table-wrap" tabindex="0" role="group" aria-label="Table: scroll sideways if it does not fit">
 <table class="data">
     <thead><tr><th>Date</th><th class="num">Still booked</th><th class="num">Attended</th><th class="num">Missed</th><th class="num">Cancelled</th><th class="num">Walk-ins</th><th class="num">Total visits</th><th class="num">New patients</th></tr></thead>
     <tbody>
@@ -40,7 +40,7 @@ page_start('Attendance report', 'r-attendance');
 </table>
 </div>
 <h2>Patients seen by each doctor</h2>
-<div class="table-wrap">
+<div class="table-wrap" tabindex="0" role="group" aria-label="Table: scroll sideways if it does not fit">
 <table class="data">
     <thead><tr><th>Doctor</th><th class="num">Visits</th><th class="num">From appointments</th></tr></thead>
     <tbody>

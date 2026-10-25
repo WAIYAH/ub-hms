@@ -13,7 +13,7 @@ $active = ['triage' => 'triage', 'consult' => 'consult', '' => 'visits'][$stage]
 page_start($titles[$stage], $active);
 ?>
 <p class="muted">Patients are listed in the order they arrived. <?= $stage === 'consult' && $user['role'] === 'doctor' ? 'You see patients assigned to you and patients not yet assigned.' : '' ?></p>
-<div class="table-wrap">
+<div class="table-wrap" tabindex="0" role="group" aria-label="Table: scroll sideways if it does not fit">
 <table class="data">
     <thead><tr><th>Arrived</th><th>Waiting</th><th>Patient</th><th>Doctor</th><th>Reason</th><th>Stage</th><th>Actions</th></tr></thead>
     <tbody>

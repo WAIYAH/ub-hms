@@ -6,9 +6,9 @@ $rows = pharmacy_queue();
 page_start('Prescriptions waiting', 'pharmacy');
 ?>
 <p class="muted">Oldest prescriptions are first. Open one to dispense; stock is deducted automatically when you confirm.</p>
-<div class="table-wrap">
+<div class="table-wrap" tabindex="0" role="group" aria-label="Table: scroll sideways if it does not fit">
 <table class="data">
-    <thead><tr><th>Written</th><th>Patient</th><th>Doctor</th><th class="num">Items</th><th>Status</th><th></th></tr></thead>
+    <thead><tr><th>Written</th><th>Patient</th><th>Doctor</th><th class="num">Items</th><th>Status</th><th><span class="sr-only">Actions</span></th></tr></thead>
     <tbody>
     <?php foreach ($rows as $rx): ?>
         <tr>

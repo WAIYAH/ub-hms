@@ -19,9 +19,9 @@ page_start('Medicine stock', 'stock');
     <button class="btn btn-secondary" type="submit">Search</button>
     <?php if (user_can('pharmacy.manage')): ?><a class="btn" href="<?= e(url('pharmacy/receive.php')) ?>">Receive stock</a><?php endif; ?>
 </form>
-<div class="table-wrap">
+<div class="table-wrap" tabindex="0" role="group" aria-label="Table: scroll sideways if it does not fit">
 <table class="data">
-    <thead><tr><th>Medicine</th><th class="num">Usable stock</th><th class="num">Reorder level</th><th>Status</th><th>Nearest expiry</th><th class="num">Expired (remove)</th><th class="num">Price</th><th></th></tr></thead>
+    <thead><tr><th>Medicine</th><th class="num">Usable stock</th><th class="num">Reorder level</th><th>Status</th><th>Nearest expiry</th><th class="num">Expired (remove)</th><th class="num">Price</th><th><span class="sr-only">Actions</span></th></tr></thead>
     <tbody>
     <?php foreach ($rows as $m): ?>
         <tr>

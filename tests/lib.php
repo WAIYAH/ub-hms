@@ -135,7 +135,7 @@ function reset_state(): void
 {
     $pdo = db();
     $pdo->exec('SET FOREIGN_KEY_CHECKS = 0');
-    foreach (['audit_log', 'payments', 'invoice_items', 'invoices', 'stock_movements', 'prescription_items', 'prescriptions',
+    foreach (['public_requests', 'audit_log', 'payments', 'invoice_items', 'invoices', 'stock_movements', 'prescription_items', 'prescriptions',
               'medicine_batches', 'medicines', 'lab_requests', 'visit_services', 'consultations', 'triage', 'visits',
               'appointments', 'patients', 'op_sequences', 'users', 'services', 'lab_tests'] as $t) {
         // DELETE is far faster than TRUNCATE (which rebuilds the table) for the small tables used in tests.

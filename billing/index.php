@@ -42,9 +42,9 @@ page_start('Invoices', 'billing');
     <button class="btn btn-secondary" type="submit">Show</button>
 </form>
 
-<div class="table-wrap">
+<div class="table-wrap" tabindex="0" role="group" aria-label="Table: scroll sideways if it does not fit">
 <table class="data">
-    <thead><tr><th>Invoice</th><th>Date</th><th>Patient</th><th class="num">Total</th><th class="num">Paid</th><th class="num">Balance</th><th>Status</th><th></th></tr></thead>
+    <thead><tr><th>Invoice</th><th>Date</th><th>Patient</th><th class="num">Total</th><th class="num">Paid</th><th class="num">Balance</th><th>Status</th><th><span class="sr-only">Actions</span></th></tr></thead>
     <tbody>
     <?php foreach ($rows as $i): ?>
         <tr>

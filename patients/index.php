@@ -26,9 +26,9 @@ page_start('Search patients', 'patients');
     <div class="card"><p class="muted">Type at least part of a name, an outpatient number, an ID number or a phone number to find a patient.</p></div>
 <?php else: ?>
     <p class="muted"><?= plural($total, 'patient') ?> found.</p>
-    <div class="table-wrap">
+    <div class="table-wrap" tabindex="0" role="group" aria-label="Table: scroll sideways if it does not fit">
     <table class="data">
-        <thead><tr><th>OP number</th><th>Name</th><th>Sex</th><th>Age</th><th>Phone</th><th>ID number</th><th></th></tr></thead>
+        <thead><tr><th>OP number</th><th>Name</th><th>Sex</th><th>Age</th><th>Phone</th><th>ID number</th><th><span class="sr-only">Actions</span></th></tr></thead>
         <tbody>
         <?php foreach ($rows as $p): ?>
             <tr>

@@ -38,7 +38,7 @@ page_start('Dispense medicines', 'pharmacy');
 
 <form method="post" novalidate>
     <?= csrf_field() ?><input type="hidden" name="id" value="<?= (int) $rx['id'] ?>">
-    <div class="table-wrap">
+    <div class="table-wrap" tabindex="0" role="group" aria-label="Table: scroll sideways if it does not fit">
     <table class="data">
         <thead><tr><th>Medicine</th><th>Directions</th><th class="num">Prescribed</th><th class="num">Given</th><th class="num">In stock</th><th>Dispense now</th></tr></thead>
         <tbody>

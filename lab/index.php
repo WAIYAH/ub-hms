@@ -20,7 +20,7 @@ page_start('Laboratory worklist', 'lab');
     <a class="btn <?= $view === 'done' ? 'btn-secondary' : '' ?>" href="<?= e(url('lab/index.php')) ?>">Waiting and in progress</a>
     <a class="btn <?= $view === 'done' ? '' : 'btn-secondary' ?>" href="<?= e(url('lab/index.php', ['view' => 'done'])) ?>">Completed</a>
 </p>
-<div class="table-wrap">
+<div class="table-wrap" tabindex="0" role="group" aria-label="Table: scroll sideways if it does not fit">
 <table class="data">
     <thead><tr><th>Requested</th><th>Patient</th><th>Test</th><th>Requested by</th><th>Status</th><th>Actions</th></tr></thead>
     <tbody>

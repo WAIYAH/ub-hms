@@ -34,7 +34,7 @@ page_start('Revenue report', 'r-revenue');
 <div class="cols">
     <div class="card">
         <h2>Collected by payment method</h2>
-        <div class="table-wrap"><table class="data"><thead><tr><th>Method</th><th class="num">Payments</th><th class="num">Amount</th></tr></thead><tbody>
+        <div class="table-wrap" tabindex="0" role="group" aria-label="Table: scroll sideways if it does not fit"><table class="data"><thead><tr><th>Method</th><th class="num">Payments</th><th class="num">Amount</th></tr></thead><tbody>
         <?php foreach ($r['methods'] as $method => $v): ?><tr><td><?= e($method) ?></td><td class="num"><?= (int) $v['count'] ?></td><td class="num"><?= e(fmt_money($v['amount'])) ?></td></tr><?php endforeach; ?>
         </tbody><tfoot><tr><td>Total</td><td class="num"><?= array_sum(array_column($r['methods'], 'count')) ?></td><td class="num"><?= e(fmt_money($r['collected'])) ?></td></tr></tfoot></table></div>
     </div>
@@ -47,7 +47,7 @@ page_start('Revenue report', 'r-revenue');
 </div>
 
 <h2>Day by day</h2>
-<div class="table-wrap">
+<div class="table-wrap" tabindex="0" role="group" aria-label="Table: scroll sideways if it does not fit">
 <table class="data">
     <thead><tr><th>Date</th><th class="num">Billed</th><th class="num">Collected</th><th class="num">Payments</th></tr></thead>
     <tbody>

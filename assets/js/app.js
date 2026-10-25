@@ -61,4 +61,35 @@
         method.addEventListener('change', sync);
         sync();
     }
+
+    // Sign-in page: a button to show or hide the password, and a warning when Caps Lock is on.
+    // The button is hidden in the page and appears only when this script runs.
+    var pwToggle = document.querySelector('[data-toggle-password]');
+    var pwInput = pwToggle ? document.getElementById(pwToggle.getAttribute('aria-controls')) : null;
+    if (pwToggle && pwInput) {
+        pwToggle.hidden = false;
+        pwToggle.addEventListener('click', function () {
+            var show = pwInput.type === 'password';
+            pwInput.type = show ? 'text' : 'password';
+            pwToggle.setAttribute('aria-pressed', show ? 'true' : 'false');
+            pwToggle.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+            pwInput.focus();
+        });
+        // Never leave the password readable once the form is sent
+        if (pwInput.form) {
+            pwInput.form.addEventListener('submit', function () {
+                pwInput.type = 'password';
+                pwToggle.setAttribute('aria-pressed', 'false');
+            });
+        }
+    }
+    var capsNote = document.getElementById('caps-warning');
+    if (capsNote && pwInput) {
+        var checkCaps = function (event) {
+            if (event.getModifierState) { capsNote.hidden = !event.getModifierState('CapsLock'); }
+        };
+        pwInput.addEventListener('keydown', checkCaps);
+        pwInput.addEventListener('keyup', checkCaps);
+        pwInput.addEventListener('blur', function () { capsNote.hidden = true; });
+    }
 })();

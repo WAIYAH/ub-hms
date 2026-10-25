@@ -63,7 +63,7 @@ function render_consult_orders(array $v, array $user, bool $canOrder): string
     $items = visit_prescription_items((int) $v['id']);
     $out = '<div class="card"><h2>Laboratory tests</h2>';
     if ($labs) {
-        $out .= '<div class="table-wrap"><table class="data"><thead><tr><th>Test</th><th>Status</th><th>Result</th><th></th></tr></thead><tbody>';
+        $out .= '<div class="table-wrap" tabindex="0" role="group" aria-label="Table: scroll sideways if it does not fit"><table class="data"><thead><tr><th>Test</th><th>Status</th><th>Result</th><th><span class="sr-only">Actions</span></th></tr></thead><tbody>';
         foreach ($labs as $r) {
             $out .= '<tr><td>' . e($r['test_name']) . '<br><span class="muted small">Requested by ' . e($r['requested_by_name']) . ', ' . e(fmt_datetime($r['requested_at'])) . '</span></td>'
                 . '<td>' . lab_status_text($r) . '</td>'
@@ -90,7 +90,7 @@ function render_consult_orders(array $v, array $user, bool $canOrder): string
 
     $out .= '<div class="card"><h2>Prescriptions</h2>';
     if ($items) {
-        $out .= '<div class="table-wrap"><table class="data"><thead><tr><th>Medicine</th><th>Dose</th><th>Frequency</th><th>Duration</th><th class="num">Qty</th><th>Status</th></tr></thead><tbody>';
+        $out .= '<div class="table-wrap" tabindex="0" role="group" aria-label="Table: scroll sideways if it does not fit"><table class="data"><thead><tr><th>Medicine</th><th>Dose</th><th>Frequency</th><th>Duration</th><th class="num">Qty</th><th>Status</th></tr></thead><tbody>';
         foreach ($items as $i) {
             $out .= '<tr><td>' . e(medicine_label(['name' => $i['medicine_name'], 'strength' => $i['strength'], 'form' => $i['form']])) . '</td><td>' . e($i['dosage']) . '</td><td>' . e($i['frequency']) . '</td><td>' . e($i['duration']) . '</td>'
                 . '<td class="num">' . (int) $i['quantity'] . '</td><td>' . badge($i['prescription_status']) . ' <span class="muted small">' . (int) $i['dispensed_qty'] . ' given</span></td></tr>';

@@ -24,7 +24,7 @@ page_start('Stock report', 'r-stock');
     <?= dashboard_tile('Expired batches with stock', count($a['expired']), '', count($a['expired']) ? 'danger' : '') ?>
     <?= dashboard_tile('Value of usable stock', fmt_money($r['value'])) ?>
 </div>
-<div class="table-wrap">
+<div class="table-wrap" tabindex="0" role="group" aria-label="Table: scroll sideways if it does not fit">
 <table class="data">
     <thead><tr><th>Medicine</th><th class="num">Usable</th><th class="num">Reorder at</th><th>Status</th><th>Nearest expiry</th><th class="num">Expired</th><th class="num">Received</th><th class="num">Dispensed</th><th class="num">Adjusted</th><th class="num">Value</th></tr></thead>
     <tbody>

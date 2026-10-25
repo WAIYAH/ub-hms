@@ -56,6 +56,17 @@ return [
         'currency' => 'KSh',
     ],
 
+    // Public website (welcome, services, about, contact and legal pages). These contact details are placeholders
+    // for demonstration: put the hospital's real details in config/config.local.php before live use.
+    'site' => [
+        'address'        => 'Uhai Bora Hospital, Nairobi County, Kenya',
+        'phone'          => '+254 20 000 0000',
+        'email'          => 'info@uhaibora.example',
+        'privacy_email'  => 'dataprotection@uhaibora.example',
+        'legal_updated'  => '24 October 2026',
+        'form_limit'     => 5,   // contact messages or access requests accepted from one computer in an hour
+    ],
+
     'paths' => [
         'logs'    => APP_ROOT . '/storage/logs',
         'backups' => APP_ROOT . '/storage/backups',

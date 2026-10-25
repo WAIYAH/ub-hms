@@ -32,7 +32,7 @@ page_start('Laboratory workload report', 'r-lab');
     <?= dashboard_tile('Still pending', $r['totals']['pending'], '', $r['totals']['pending'] ? 'warn' : '') ?>
     <?= dashboard_tile('Average time to result', minutes_text($r['avg_minutes']) ?: 'n/a') ?>
 </div>
-<div class="table-wrap">
+<div class="table-wrap" tabindex="0" role="group" aria-label="Table: scroll sideways if it does not fit">
 <table class="data">
     <thead><tr><th>Test</th><th class="num">Requested</th><th class="num">Completed</th><th class="num">Pending</th><th class="num">Cancelled</th><th class="num">Outside usual range</th><th class="num">Average time</th></tr></thead>
     <tbody>
@@ -45,7 +45,7 @@ page_start('Laboratory workload report', 'r-lab');
 </table>
 </div>
 <h2>Requests by doctor</h2>
-<div class="table-wrap">
+<div class="table-wrap" tabindex="0" role="group" aria-label="Table: scroll sideways if it does not fit">
 <table class="data">
     <thead><tr><th>Doctor</th><th class="num">Requested</th><th class="num">Completed</th></tr></thead>
     <tbody>

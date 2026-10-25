@@ -41,7 +41,7 @@ page_start('Audit trail', 'audit');
 </form>
 
 <p class="muted">The audit trail records who did what, from which computer and when. It holds identifiers and short descriptions only, never clinical details.</p>
-<div class="table-wrap">
+<div class="table-wrap" tabindex="0" role="group" aria-label="Table: scroll sideways if it does not fit">
 <table class="data">
     <thead><tr><th>Date and time</th><th>User</th><th>Action</th><th>Record</th><th>Details</th><th>Computer (IP)</th></tr></thead>
     <tbody>

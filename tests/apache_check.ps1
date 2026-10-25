@@ -143,6 +143,36 @@ try {
     $denied = & curl.exe -s -o NUL -w '%{http_code}' -b $jar "http://127.0.0.1:$Port/ub-hms/admin/users.php"
     Record ($denied -eq '403') 'APA-023' 'Role-based access works through Apache: a doctor is refused the user accounts page (403)'
 
+    # the public website through Apache
+    $pubBad = @()
+    foreach ($pg in 'welcome', 'services', 'about', 'contact', 'register', 'privacy', 'terms', 'cookies', 'accessibility') {
+        if ((Status "/ub-hms/$pg.php") -ne '200') { $pubBad += $pg }
+    }
+    Record ($pubBad.Count -eq 0) 'APA-024' ('The nine public pages are served by Apache' + $(if ($pubBad.Count) { ' (not 200: ' + ($pubBad -join ', ') + ')' } else { '' }))
+    $rootRedirect = (& curl.exe -s -o NUL -w '%{http_code} %{redirect_url}' "http://127.0.0.1:$Port/ub-hms/")
+    Record ($rootRedirect -match '^303 .*/ub-hms/welcome\.php$') 'APA-025' "The site address opens the welcome page for a visitor who is not signed in ($rootRedirect)"
+    $imgBad = @()
+    foreach ($f in 'welcome-hero.jpg', 'welcome-laptop-dashboard.webp', 'welcome-phone.webp', 'pattern-plus.svg', 'site/nurse-portrait.webp', 'site/nairobi-kicc.webp', 'site/laptop-billing.webp') {
+        $hh = (& curl.exe -s -D - -o NUL "http://127.0.0.1:$Port/ub-hms/assets/img/$f") -join "`n"
+        $ct = [regex]::Match($hh, '(?im)^Content-Type:\s*([^\r\n]+)').Groups[1].Value
+        if (-not (($hh -match ' 200 ') -and ($ct -match '^image/'))) { $imgBad += "$f ($ct)" }
+    }
+    Record ($imgBad.Count -eq 0) 'APA-026' ('Images, including .webp, are served with an image content type' + $(if ($imgBad.Count) { ': ' + ($imgBad -join '; ') } else { '' }))
+    Record ((Status '/ub-hms/assets/css/site.css') -eq '200' -and (Status '/ub-hms/assets/js/site.js') -eq '200') 'APA-027' 'The website stylesheet and script are served'
+    Record ((Status '/ub-hms/database/migrations/2026-10-24_public_requests.sql') -eq '403') 'APA-028' 'The database migration file is refused (403)'
+    $reqDenied = & curl.exe -s -o NUL -w '%{http_code}' -b $jar "http://127.0.0.1:$Port/ub-hms/admin/requests.php"
+    Record ($reqDenied -eq '403') 'APA-029' 'A doctor is refused the administrator page for access requests (403)'
+
+    # the signed-in shell and dashboards through Apache
+    $anonBad = @()
+    foreach ($pg in 'profile', 'settings') { if ((Status "/ub-hms/$pg.php") -ne '303') { $anonBad += $pg } }
+    Record ($anonBad.Count -eq 0) 'APA-030' ('Profile and settings send a visitor who is not signed in to the sign-in page' + $(if ($anonBad.Count) { ' (not 303: ' + ($anonBad -join ', ') + ')' } else { '' }))
+    Record ((Status '/ub-hms/assets/css/dash.css') -eq '200' -and (Status '/ub-hms/assets/js/dash.js') -eq '200') 'APA-031' 'The dashboard stylesheet and script are served'
+    $dashPage = (& curl.exe -s -b $jar "http://127.0.0.1:$Port/ub-hms/index.php") -join "`n"
+    Record (($dashPage -match 'class="app-top"') -and ($dashPage -match 'class="sidebar"') -and ($dashPage -match 'class="kpi-grid') -and ($dashPage -match 'name="_csrf"')) 'APA-032' 'A signed-in doctor gets the new header, sidebar and dashboard through Apache, with the sign-out token'
+    $profilePage = (& curl.exe -s -b $jar "http://127.0.0.1:$Port/ub-hms/profile.php") -join "`n"
+    Record (($profilePage -match 'Your recent activity') -and ($profilePage -match 'Doctor / Clinical Officer')) 'APA-033' 'A signed-in doctor can open their own profile through Apache'
+
     if ($Perf) {
         $ab = Join-Path $XamppDir 'apache\bin\ab.exe'
         if (-not (Test-Path $ab)) { throw "ab.exe not found at $ab" }

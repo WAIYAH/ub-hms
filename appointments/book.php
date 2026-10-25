@@ -37,7 +37,7 @@ page_start('Book an appointment', 'book');
             <button class="btn" type="submit">Search</button>
         </form>
         <?php if ($q !== ''): ?>
-            <div class="table-wrap"><table class="data"><tbody>
+            <div class="table-wrap" tabindex="0" role="group" aria-label="Table: scroll sideways if it does not fit"><table class="data"><tbody>
             <?php foreach ($found as $p): ?>
                 <tr><td><span class="op-number"><?= e($p['op_number']) ?></span></td><td><?= e(patient_full_name($p)) ?></td><td><?= e(age_label($p['date_of_birth'])) ?></td>
                     <td><a class="btn btn-small" href="<?= e(url('appointments/book.php', ['patient_id' => $p['id']])) ?>">Choose</a></td></tr>

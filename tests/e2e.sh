@@ -631,8 +631,331 @@ sec_sprint5() {
   chk "Opening the audit trail is itself recorded in the audit trail" 'get admin admin/audit.php | grep -q "Opened the audit trail"'
 }
 
+# =====================================================================
+# PUBLIC WEBSITE: welcome, services, about, contact, request access and the legal pages
+# =====================================================================
+sec_public() {
+  echo; echo "== Public website: pages, forms, access requests and contact messages"
+  local r h n=299
+  chk() { n=$((n+1)); check "E2E-$n" "$@"; }
+  local pages=(welcome.php services.php about.php contact.php register.php privacy.php terms.php cookies.php accessibility.php)
+
+  # --- every public page opens for a visitor who is not signed in ---
+  local bad="" p
+  for p in "${pages[@]}"; do
+    h=$(get anon "$p")
+    [[ "$(code anon "$p")" == 200 && "$h" == *"Skip to content"* && "$h" == *"<title>"*"UB-HMS</title>"* && "$h" == *'<main id="main"'* && "$h" == *"</footer>"* ]] || bad="$bad $p"
+  done
+  chk "All nine public pages open without signing in, with a title, a skip link, a main area and a footer" '[ -z "$bad" ]' || echo "      problem pages:$bad"
+
+  bad=""
+  for p in "${pages[@]}"; do
+    h=$(get anon "$p")
+    [ "$(echo "$h" | grep -o '<h1' | wc -l)" = 1 ] || bad="$bad $p"
+  done
+  chk "Every public page has exactly one main heading" '[ -z "$bad" ]' || echo "      problem pages:$bad"
+
+  bad=""
+  for p in "${pages[@]}"; do
+    h=$(get anon "$p")
+    if echo "$h" | grep -Eq '<script>|<script [^>]*[^>]>[^<]|[[:space:]]on(click|load|error|submit|mouseover)=|[[:space:]]style="'; then bad="$bad $p"; fi
+  done
+  chk "No public page has inline scripts, event handlers or style attributes (compatible with the strict CSP)" '[ -z "$bad" ]' || echo "      problem pages:$bad"
+
+  bad=""
+  for p in "${pages[@]}"; do
+    h=$(get anon "$p")
+    echo "$h" | grep -oE '(src|href)="https?://[^"]+"' | grep -vE 'pexels\.com|odpc\.go\.ke|www\.nngroup' | grep -q . && bad="$bad $p"
+    echo "$h" | grep -oE '(src|href)="[^"]*(fonts\.googleapis|cdn\.|unpkg|jsdelivr|googletagmanager|google-analytics)[^"]*"' | grep -q . && bad="$bad $p"
+  done
+  chk "No public page loads a font, script or image from another website, and none uses an analytics service" '[ -z "$bad" ]' || echo "      problem pages:$bad"
+
+  r=$(curl -s -o /dev/null -w '%{http_code} %{redirect_url}' "$B/")
+  chk "The site address itself opens the welcome page for a visitor who is not signed in" '[[ "$r" == 303* && "$r" == *welcome.php ]]'
+  r=$(curl -s -o /dev/null -w '%{http_code} %{redirect_url}' "$B/index.php")
+  chk "index.php still sends a visitor who is not signed in to the sign-in page" '[[ "$r" == 303* && "$r" == *login.php* ]]'
+  r=$(code rec welcome.php); h=$(curl -s -o /dev/null -w '%{redirect_url}' -b "$J/rec" "$B/welcome.php")
+  chk "A signed-in user who opens the welcome page is sent on to the dashboard" '[ "$r" = 303 ] && [[ "$h" == *index.php ]]'
+  h=$(curl -s -o /dev/null -w '%{redirect_url}' -b "$J/rec" "$B/register.php")
+  chk "A signed-in user who opens the request-access page is sent on to the dashboard" '[[ "$h" == *index.php ]]'
+
+  h=$(get anon welcome.php)
+  chk "The header offers Services, About, Contact, Legal, Sign in and Request access, and the footer lists the legal pages" '[[ "$h" == *"services.php"* && "$h" == *"about.php"* && "$h" == *"contact.php"* && "$h" == *"login.php"* && "$h" == *"register.php"* && "$h" == *"privacy.php"* && "$h" == *"terms.php"* && "$h" == *"cookies.php"* && "$h" == *"accessibility.php"* ]]'
+  h=$(get anon services.php)
+  chk "The header marks the page you are on (Services)" '[[ "$h" == *"is-current"* && "$h" == *"aria-current=\"page\""* ]]'
+
+  # The only cookie is the session cookie, and it carries the protections the cookie notice promises.
+  h=$(curl -s -D - -o /dev/null "$B/welcome.php" | tr -d '\r')
+  chk "The welcome page sets one cookie only, and it is HttpOnly and SameSite=Strict" '[ "$(echo "$h" | grep -ic "^set-cookie:")" = 1 ] && [[ "$h" == *HttpOnly* && "$h" == *SameSite=Strict* ]]'
+  h=$(get anon cookies.php)
+  chk "The cookie notice names the cookie the system really sets" '[[ "$h" == *"UBHMSSESSID"* ]]'
+
+  # --- request access: validation ---
+  local t
+  r=$(form anon register.php register.php --data-urlencode "full_name=Al" --data-urlencode "email=nope" --data-urlencode "department=" --data-urlencode "requested_role=admin" --data-urlencode "supervisor=" )
+  h=$(get anon register.php)
+  chk "An incomplete request is sent back with every problem listed and nothing stored" '[[ "$r" == 303* && "$h" == *"Please check the form"* && "$h" == *"Enter your full name"* && "$h" == *"valid email address"* && "$h" == *"Choose your department"* && "$h" == *"Choose the role you need"* && "$h" == *"supervisor"* && "$h" == *"read the privacy policy"* ]]'
+  chk "The form remembers what the person typed after an error" '[[ "$h" == *'"'"'value="nope"'"'"'* || "$h" == *"value=\"nope\""* ]]'
+  h=$(get admin admin/requests.php)
+  chk "A refused request is not stored" '[[ "$h" != *"nope"* ]]'
+  r=$(form anon register.php register.php --data-urlencode "full_name=Mercy Njeri" --data-urlencode "email=mercy@example.com" --data-urlencode "department=Pharmacy" --data-urlencode "requested_role=admin" --data-urlencode "supervisor=Mr Otieno" --data-urlencode "consent=1")
+  h=$(get anon register.php)
+  chk "The System Administrator role cannot be requested from the public form" '[[ "$h" == *"Choose the role you need"* ]]'
+
+  # --- request access: a good request ---
+  local users_before; users_before=$(get admin admin/users.php | grep -c '<tr>')
+  local xss='<script>alert(7)</script>'
+  r=$(form anon register.php register.php --data-urlencode "full_name=Mercy Njeri" --data-urlencode "email=Mercy@Example.com" --data-urlencode "phone=0722 111 222" --data-urlencode "department=Pharmacy" --data-urlencode "requested_role=pharmacist" --data-urlencode "staff_number=UB/P/0033" --data-urlencode "supervisor=Mr Otieno" --data-urlencode "message=$xss Starting Monday" --data-urlencode "consent=1")
+  h=$(get anon register.php)
+  chk "A good request is accepted and the person is given a reference number" '[[ "$r" == 303* && "$h" == *"Your request has been sent"* && "$h" =~ AR-[0-9]{4}-[0-9]{6} ]]'
+  local ref; ref=$(echo "$h" | grep -oE 'AR-[0-9]{4}-[0-9]{6}' | head -1)
+  h=$(get anon register.php)
+  chk "The confirmation is shown once and then the empty form returns" '[[ "$h" != *"Your request has been sent"* && "$h" == *"Staff access request"* ]]'
+  h=$(get admin admin/users.php)
+  chk "Sending a request does not create an account" '[ "$(echo "$h" | grep -c "<tr>")" = "$users_before" ] && [[ "$h" != *"Mercy Njeri"* ]]'
+  r=$(form anon register.php register.php --data-urlencode "full_name=Mercy Njeri" --data-urlencode "email=mercy@example.com" --data-urlencode "department=Pharmacy" --data-urlencode "requested_role=pharmacist" --data-urlencode "supervisor=Mr Otieno" --data-urlencode "consent=1")
+  h=$(get anon register.php)
+  chk "A second request while the first is waiting is refused" '[[ "$h" == *"already waiting for the administrator"* ]]'
+
+  # --- the trap field, the security token and the hourly limit ---
+  r=$(form anon register.php register.php --data-urlencode "website=http://spam.example" --data-urlencode "full_name=Robot Robot" --data-urlencode "email=robot@example.com" --data-urlencode "department=Pharmacy" --data-urlencode "requested_role=nurse" --data-urlencode "supervisor=Bot Bot" --data-urlencode "consent=1")
+  h=$(get admin admin/requests.php)
+  chk "A form filled in by a robot (the hidden field) looks successful but stores nothing" '[[ "$r" == 303* && "$h" != *"robot@example.com"* && "$h" != *"Robot Robot"* ]]'
+  r=$(post anon register.php --data-urlencode "full_name=No Token" --data-urlencode "email=notoken@example.com")
+  chk "A request sent without the security token is refused (419)" '[[ "$r" == 419* ]]'
+  r=$(post anon register.php --data-urlencode "_csrf=wrong" --data-urlencode "full_name=Wrong Token")
+  chk "A request sent with a wrong security token is refused (419)" '[[ "$r" == 419* ]]'
+  r=$(code anon "register.php?x=1"); h=$(curl -s -X POST -o /dev/null -w '%{http_code}' "$B/contact.php")
+  chk "Posting to a public form without a session is refused" '[ "$h" = 405 ] || [ "$h" = 419 ]'
+
+  # --- contact page ---
+  r=$(form anon contact.php contact.php --data-urlencode "full_name=Peter Mwangi" --data-urlencode "email=peter@example.com" --data-urlencode "topic=Spam" --data-urlencode "message=hi")
+  h=$(get anon contact.php)
+  chk "An incomplete message is sent back with the problems listed" '[[ "$h" == *"Please check the form"* && "$h" == *"what your message is about"* && "$h" == *"at least 10 characters"* && "$h" == *"contains no patient information"* ]]'
+  r=$(form anon contact.php contact.php --data-urlencode "full_name=Peter Mwangi" --data-urlencode "email=peter@example.com" --data-urlencode "topic=Technical support" --data-urlencode "message=<img src=x onerror=alert(1)> Which browsers are supported?" --data-urlencode "consent=1")
+  h=$(get anon contact.php)
+  chk "A good message is accepted with a reference number (MSG-)" '[[ "$r" == 303* && "$h" == *"your message is on its way"* && "$h" =~ MSG-[0-9]{4}-[0-9]{6} ]]'
+  h=$(get anon "contact.php?topic=Data%20protection%20request")
+  chk "A link from the footer pre-selects the topic on the contact form" '[[ "$h" == *"selected>Data protection request"* ]]'
+
+  # --- administrator: reading and handling requests ---
+  h=$(get admin admin/requests.php)
+  chk "The administrator sees the request and the message with the details the person gave" '[[ "$h" == *"Mercy Njeri"* && "$h" == *"UB/P/0033"* && "$h" == *"Mr Otieno"* && "$h" == *"Pharmacist"* && "$h" == *"peter@example.com"* && "$h" == *"Technical support"* ]]'
+  chk "Text typed into the public forms is shown as harmless text, never as code" '[[ "$h" == *"&lt;script&gt;alert(7)&lt;/script&gt;"* && "$h" != *"<script>alert(7)"* && "$h" == *"&lt;img src=x onerror=alert(1)&gt;"* && "$h" != *"<img src=x"* ]]'
+  h=$(get admin index.php)
+  chk "The administrator dashboard shows how many new requests and messages are waiting" '[[ "$h" == *"New access requests and messages"* ]]'
+  h=$(get admin admin/requests.php?kind=contact)
+  chk "The list can be filtered to contact messages only" '[[ "$h" == *"peter@example.com"* && "$h" != *"UB/P/0033"* ]]'
+  local reqid; reqid=$(php_eval x 'echo db_value("SELECT id FROM public_requests WHERE reference = ?", ["'"$ref"'"]);')
+  h=$(get admin "admin/user.php?from_request=$reqid")
+  chk "Create account from a request fills in the name, a suggested username and the role, and shows where it came from" '[[ "$h" == *"From access request"* && "$h" == *"value=\"Mercy Njeri\""* && "$h" == *"value=\"m.njeri\""* && "$h" == *"value=\"pharmacist\" selected"* ]] || [[ "$h" == *"From access request"* && "$h" == *"m.njeri"* && "$h" == *"Mercy Njeri"* ]]'
+  r=$(form admin "admin/user.php?from_request=$reqid" "admin/user.php" --data-urlencode "from_request=$reqid" --data-urlencode "full_name=Mercy Njeri" --data-urlencode "username=m.njeri" --data-urlencode "role=pharmacist" --data-urlencode "phone=0722 111 222")
+  h=$(get admin "admin/requests.php?q=$ref")
+  chk "Creating the account from the request marks the request as done and records which account was made" '[[ "$r" == 303* && "$h" == *"Done"* && "$h" == *"Account created: m.njeri"* ]]'
+  h=$(get admin admin/users.php)
+  chk "The new account now exists" '[[ "$h" == *"Mercy Njeri"* && "$h" == *"m.njeri"* ]]'
+  r=$(form admin admin/requests.php admin/requests.php --data-urlencode "id=$reqid" --data-urlencode "status=declined" --data-urlencode "note=Test change")
+  h=$(get admin admin/audit.php)
+  chk "Changing a request's status is recorded in the audit trail" '[[ "$r" == 303* && "$h" == *"marked declined"* && "$h" == *"public_request"* ]]'
+  r=$(form admin admin/requests.php admin/requests.php --data-urlencode "id=$reqid" --data-urlencode "status=wizard")
+  h=$(get admin admin/requests.php)
+  chk "An unknown status is refused" '[[ "$h" == *"Choose a status"* ]]'
+
+  # --- who may open the administrator's request list ---
+  local denied="" role want got
+  for role in manager:mgr receptionist:rec nurse:nurse doctor:doc lab:lab pharmacist:pharm cashier:cash; do
+    got=$(code "${role##*:}" admin/requests.php)
+    [ "$got" = 403 ] || denied="$denied ${role%%:*}(got $got)"
+  done
+  chk "Only the administrator can open the requests page; the other seven roles are refused (403)" '[ -z "$denied" ]' || echo "      not refused:$denied"
+  r=$(curl -s -o /dev/null -w '%{http_code}' "$B/admin/requests.php")
+  chk "A visitor who is not signed in cannot open the requests page" '[ "$r" = 303 ]'
+  h=$(get admin admin/health.php)
+  chk "The system health page expects the 23rd table and finds it" '[[ "$h" == *"23 tables present"* ]]'
+
+  # --- the hourly limit (last, because it uses up this computer's allowance) ---
+  local i
+  for i in 1 2 3 4; do
+    form anon contact.php contact.php --data-urlencode "full_name=Limit Tester$i" --data-urlencode "email=limit$i@example.com" --data-urlencode "topic=General question" --data-urlencode "message=Message number $i for the limit test" --data-urlencode "consent=1" >/dev/null
+    get anon contact.php >/dev/null   # reading the page clears the thank-you card, as a person would
+  done
+  get anon contact.php >/dev/null
+  r=$(form anon contact.php contact.php --data-urlencode "full_name=Limit Tester6" --data-urlencode "email=limit6@example.com" --data-urlencode "topic=General question" --data-urlencode "message=This sixth message should be refused" --data-urlencode "consent=1")
+  h=$(get anon contact.php)
+  chk "The sixth message from one computer in an hour is refused with a polite explanation" '[[ "$h" == *"Too many messages were sent from this computer"* ]]'
+  h=$(get admin admin/requests.php?kind=contact)
+  chk "The refused message was not stored, and the five earlier ones were" '[[ "$h" != *"limit6@example.com"* && "$h" == *"limit4@example.com"* ]]'
+}
+
+# =====================================================================
+# DASHBOARDS: the application shell (header, sidebar, notifications, user menu), the eight role dashboards, profile and settings
+# =====================================================================
+sec_dashboards() {
+  echo; echo "== Dashboards: header, sidebar, notifications, eight role dashboards, profile and settings"
+  local r h n=349
+  chk() { n=$((n+1)); check "E2E-$n" "$@"; }
+  declare -A jar=( [admin]=admin [manager]=mgr [receptionist]=rec [nurse]=nurse [doctor]=doc [lab]=lab [pharmacist]=pharm [cashier]=cash )
+  local roles=(admin manager receptionist nurse doctor lab pharmacist cashier)
+  # a number shown on a card: kpi "<html>" "<label>"
+  kpi() { echo "$1" | grep -o "<div class=\"num\">[^<]*</div><div class=\"label\">$2" | head -1 | sed 's/<div class="num">//; s/<\/div>.*//'; }
+  local role bad
+
+  # --- every role gets a complete, clean dashboard ---
+  bad=""
+  for role in "${roles[@]}"; do
+    h=$(get "${jar[$role]}" index.php)
+    [[ "$(code "${jar[$role]}" index.php)" == 200 && "$h" =~ Good\ (morning|afternoon|evening),\  && "$h" == *'class="kpi-grid'* && "$h" == *'class="dash-grid"'* && "$h" == *'aria-label="Quick actions"'* ]] || bad="$bad $role"
+  done
+  chk "All eight roles get a dashboard with a greeting, coloured cards, panels and quick-action buttons" '[ -z "$bad" ]' || echo "      problem roles:$bad"
+
+  bad=""
+  for role in "${roles[@]}"; do
+    h=$(get "${jar[$role]}" index.php)
+    [ "$(echo "$h" | grep -o '<h1' | wc -l)" = 1 ] || bad="$bad $role"
+    echo "$h" | grep -Eq 'Warning:|Notice:|Fatal error|Deprecated:|Stack trace' && bad="$bad $role(php)"
+    echo "$h" | grep -Eq '<script>|<script [^>]*[^>]>[^<]|[[:space:]]on(click|load|error|submit|mouseover)=|[[:space:]]style="' && bad="$bad $role(inline)"
+  done
+  chk "Every dashboard has one main heading, no PHP messages, and no inline scripts, handlers or styles (compatible with the strict CSP)" '[ -z "$bad" ]' || echo "      problems:$bad"
+
+  # --- the application shell on every dashboard ---
+  bad=""
+  for role in "${roles[@]}"; do
+    h=$(get "${jar[$role]}" index.php)
+    [[ "$h" == *'class="app-top"'* && "$h" == *'class="sidebar"'* && "$h" == *"View profile"* && "$h" == *"Settings"* && "$h" == *"Change password"* && "$h" == *'class="dd-signout"'* && "$h" == *'name="_csrf"'* && "$h" == *'class="dd dd-notif"'* && "$h" == *'class="av av-'* && "$h" == *"Skip to content"* ]] || bad="$bad $role"
+  done
+  chk "Every signed-in page has the header with a notification bell and a user menu (profile, settings, change password, sign out) and the sidebar" '[ -z "$bad" ]' || echo "      problem roles:$bad"
+
+  h=$(get rec index.php)
+  chk "The sign-out button in the user menu is a protected form (POST with the security token), not a link" '[[ "$h" == *"<form method=\"post\" action=\""*"logout.php\" class=\"dd-signout\"><input type=\"hidden\" name=\"_csrf\""* && "$h" != *"href=\"/logout.php\""* ]]'
+  h=$(get rec index.php)
+  chk "Staff who may search patients get a search box in the header; the cashier and laboratory do not" '[[ "$h" == *"role=\"search\""* ]] && [[ "$(get cash index.php)" != *"role=\"search\""* && "$(get lab index.php)" != *"role=\"search\""* ]]'
+  h=$(get rec index.php)
+  chk "The quick-add menu offers only what the role can do (receptionist: register, book, check in)" '[[ "$h" == *"Register a patient"* && "$h" == *"Book an appointment"* && "$h" == *"Check in a patient"* && "$h" != *"Add a user account"* && "$h" != *"Receive stock"* ]]'
+  h=$(get admin index.php)
+  chk "The administrator's quick-add offers only adding a user" '[[ "$h" == *"Add a user account"* && "$h" != *"Register a patient"* ]]'
+
+  # --- the sidebar shows each role only its own pages, with an icon on each ---
+  h=$(get cash index.php)
+  chk "The cashier's sidebar lists invoices but no patient, clinic, laboratory or administration pages" '[[ "$h" == *"billing/index.php"* && "$h" != *"patients/index.php\" title"* && "$h" != *"lab/index.php"* && "$h" != *"admin/users.php"* ]]'
+  h=$(get admin index.php)
+  chk "The administrator's sidebar lists accounts, access requests, prices, audit trail and health but no clinical pages" '[[ "$h" == *"admin/users.php"* && "$h" == *"admin/requests.php"* && "$h" == *"admin/prices.php"* && "$h" == *"admin/audit.php"* && "$h" == *"admin/health.php"* && "$h" != *"visits/queue.php"* ]]'
+  h=$(get doc index.php)
+  chk "Every sidebar item has an icon, and the current page is marked for screen readers" '[ "$(echo "$h" | grep -o "class=\"nav-link" | wc -l)" = "$(echo "$h" | grep -o "class=\"nav-ic\"" | wc -l)" ] && [[ "$h" == *"aria-current=\"page\""* ]]'
+
+  # --- numbers on the cards match the database (checked with separate SQL) ---
+  local db patients
+  patients=$(php_eval x 'echo db_value("SELECT COUNT(*) FROM patients");')
+  h=$(get rec index.php)
+  chk "Receptionist: 'Patients registered' equals the number of patients in the database ($patients)" '[ "$(kpi "$h" "Patients registered")" = "$patients" ]'
+  db=$(php_eval x 'echo db_value("SELECT COUNT(*) FROM users WHERE is_active = 1");')
+  h=$(get admin index.php)
+  chk "Administrator: 'Active user accounts' equals the database ($db)" '[ "$(kpi "$h" "Active user accounts")" = "$db" ]'
+  db=$(php_eval x 'echo fmt_money((string) db_value("SELECT COALESCE(SUM(amount), 0) FROM payments WHERE DATE(paid_at) = ?", [app_today()]));')
+  h=$(get mgr index.php)
+  chk "Manager: 'Collected today' equals the payments taken today in the database ($db)" '[ "$(kpi "$h" "Collected today")" = "$db" ]'
+  db=$(php_eval x 'echo db_value("SELECT COUNT(*) FROM invoices WHERE status <> ?", ["Paid"]);')
+  h=$(get cash index.php)
+  chk "Cashier: 'Invoices waiting for payment' equals the unpaid invoices in the database ($db)" '[ "$(kpi "$h" "Invoices waiting for payment")" = "$db" ]'
+  db=$(php_eval x 'echo db_value("SELECT COUNT(*) FROM prescriptions WHERE status IN (?, ?)", ["Pending", "Partially dispensed"]);')
+  h=$(get pharm index.php)
+  chk "Pharmacist: 'Prescriptions waiting' equals the database ($db)" '[ "$(kpi "$h" "Prescriptions waiting")" = "$db" ]'
+  db=$(php_eval x 'echo db_value("SELECT COUNT(*) FROM lab_requests WHERE status = ?", ["Requested"]);')
+  h=$(get lab index.php)
+  chk "Laboratory: 'Tests waiting' equals the database ($db)" '[ "$(kpi "$h" "Tests waiting")" = "$db" ]'
+  local tw; tw=$(php_eval x 'echo db_value("SELECT COUNT(*) FROM visits v WHERE v.status = ? AND NOT EXISTS (SELECT 1 FROM triage t WHERE t.visit_id = v.id)", ["Open"]);')
+  h=$(get nurse index.php)
+  chk "Nurse: 'Waiting for triage' equals the database ($tw)" '[ "$(kpi "$h" "Waiting for triage")" = "$tw" ]'
+
+  # --- charts: drawn on the server, readable without seeing them ---
+  h=$(get mgr index.php)
+  chk "The manager's dashboard has charts drawn as SVG, each with a text summary and a hidden table of its numbers" '[[ "$h" == *"<svg class=\"chart-svg\""* && "$h" == *"<svg class=\"donut-svg\""* && "$h" == *"role=\"img\" aria-label=\"Money collected per day for the last 14 days\""* && "$h" == *"<div class=\"sr-only\"><table><caption>"* ]]'
+  chk "The manager's dashboard shows money, visits, payment methods, busiest doctors and tests" '[[ "$h" == *"Money collected, last 14 days"* && "$h" == *"Patients seen per day"* && "$h" == *"How patients pay"* && "$h" == *"Busiest doctors"* && "$h" == *"Most requested tests"* ]]'
+  h=$(get admin index.php)
+  chk "The administrator's dashboard shows sign-ins (successful and failed), accounts by role and latest activity" '[[ "$h" == *"Sign-ins, last 14 days"* && "$h" == *"Accounts by role"* && "$h" == *"Latest activity"* && "$h" == *">Failed<"* ]]'
+  h=$(get doc index.php)
+  chk "The doctor's dashboard is about the doctor's own work (consultations, diagnoses, queue, results)" '[[ "$h" == *"My consultations, last 14 days"* && "$h" == *"What I diagnose most"* && "$h" == *"Waiting for me"* && "$h" == *"Test results ready"* ]]'
+  h=$(get pharm index.php)
+  chk "The pharmacist's dashboard shows dispensing, stock status, most-dispensed medicines and the stock alerts" '[[ "$h" == *"Units dispensed, last 14 days"* && "$h" == *"Stock status"* && "$h" == *"Dispensed most"* && ( "$h" == *"Needs action now"* || "$h" == *"Reorder and use soon"* ) ]]'
+  h=$(get cash index.php)
+  chk "The cashier sees only their own collections, not the hospital's revenue" '[[ "$h" == *"Collected by me today"* && "$h" == *"Money I collected, last 14 days"* && "$h" != *"Revenue report"* && "$h" != *"Unpaid balances"* ]]'
+  h=$(get rec index.php)
+  chk "The receptionist's dashboard shows today's appointments, who is in the clinic, new patients and appointment outcomes" '[[ "$h" == *"Appointments today"* && "$h" == *"In the clinic now"* && "$h" == *"New patients, last 14 days"* && "$h" == *"How appointments ended"* ]]'
+
+  # --- no role sees another role's data on its dashboard ---
+  bad=""
+  for role in nurse doctor lab pharmacist cashier receptionist; do
+    h=$(get "${jar[$role]}" index.php)
+    [[ "$h" != *"Active user accounts"* && "$h" != *"Audit entries today"* && "$h" != *"Accounts by role"* ]] || bad="$bad $role"
+  done
+  for role in nurse lab receptionist doctor; do
+    h=$(get "${jar[$role]}" index.php)
+    [[ "$h" != *"Unpaid balances"* && "$h" != *"Collected today"* ]] || bad="$bad $role(money)"
+  done
+  chk "Clinical roles see no administrator or revenue figures on their dashboards" '[ -z "$bad" ]' || echo "      leaks:$bad"
+
+  # --- notifications ---
+  local N w
+  h=$(get nurse index.php)
+  N=$(echo "$h" | grep -o 'class="notif notif-' | wc -l)
+  if [ "$N" -gt 0 ]; then w="Notifications: $N need"; else w="Notifications: nothing needs attention"; fi
+  chk "The nurse's bell count matches the list inside it ($N) and says so in words" '[[ "$h" == *"$w"* ]]'
+  if [ "$tw" = 1 ]; then w="1 patient waiting for triage"; else w="$tw patients waiting for triage"; fi
+  if [ "$tw" -gt 0 ]; then chk "The nurse is notified of the patients waiting for triage ($tw), and the sidebar badge shows the same number" '[[ "$h" == *"$w"* && "$h" == *"class=\"nav-badge\">$tw<"* ]]'; else chk "With nobody waiting for triage the nurse has no triage notification" '[[ "$h" != *"waiting for triage"* ]]'; fi
+  h=$(get pharm index.php)
+  chk "The pharmacist is notified of medicines out of stock or low, and of batches expiring" '[[ "$h" == *"out of stock"* || "$h" == *"running low"* ]] && [[ "$h" == *"expiring soon"* || "$h" == *"expired"* ]]'
+  h=$(get admin index.php)
+  chk "The administrator is notified of new access requests and messages" '[[ "$h" == *"new access request"* && "$h" == *"admin/requests.php?status=new"* ]]'
+  chk "A notification links to the page where the work is done" '[[ "$(get pharm index.php)" == *"pharmacy/stock.php"* ]] && [[ "$(get mgr index.php)" == *"notif-body"* ]]'
+  h=$(get cash index.php)
+  chk "The cashier is told about invoices waiting for payment" '[[ "$h" == *"waiting for payment"* ]]'
+
+  # --- profile ---
+  r=$(curl -s -o /dev/null -w '%{http_code} %{redirect_url}' "$B/profile.php")
+  chk "A visitor who is not signed in cannot open the profile or settings page" '[[ "$r" == 303* && "$r" == *login.php* && "$(curl -s -o /dev/null -w "%{http_code}" "$B/settings.php")" == 303 ]]'
+  bad=""
+  for role in "${roles[@]}"; do
+    h=$(get "${jar[$role]}" profile.php)
+    [[ "$(code "${jar[$role]}" profile.php)" == 200 && "$h" == *"What your role can do"* && "$h" == *"Your recent activity"* && "$h" == *'class="av av-'* ]] || bad="$bad $role"
+  done
+  chk "All eight roles can open their own profile (details, what the role allows, recent activity)" '[ -z "$bad" ]' || echo "      problem roles:$bad"
+  h=$(get doc profile.php)
+  chk "A profile shows the person's own name and role and the permissions of that role, and nobody else's account" '[[ "$h" == *"Doctor / Clinical Officer"* && "$h" == *"Record consultations"* && "$h" != *"Create and manage user accounts"* && "$h" != *"Faith Achieng"* ]]'
+  h=$(get admin profile.php)
+  chk "The administrator's profile lists the administrator's permissions" '[[ "$h" == *"Create and manage user accounts"* && "$h" == *"Review staff access requests"* ]]'
+  code rec admin/users.php >/dev/null          # a refused page is recorded under the person's name
+  h=$(get rec profile.php)
+  chk "Recent activity shows the person's own latest actions in plain words, not codes" '[[ "$h" == *"A page was refused (no permission)"* && "$h" != *"access_denied"* && "$h" != *"csrf_rejected"* ]]'
+
+  # --- settings: a person can change only their own phone number ---
+  local before; before=$(php_eval x 'echo (string) db_value("SELECT phone FROM users WHERE username = ?", ["nurse1"]);')
+  r=$(form rec settings.php settings.php --data-urlencode "action=phone" --data-urlencode "phone=0722 555 666")
+  h=$(get rec profile.php)
+  chk "A person can change their own phone number, which is stored in one standard form" '[[ "$r" == 303* && "$h" == *"+254722555666"* ]]'
+  r=$(form rec settings.php settings.php --data-urlencode "action=phone" --data-urlencode "phone=12")
+  h=$(get rec settings.php)
+  chk "A wrong phone number is refused with a message, and the old number stays" '[[ "$h" == *"Kenyan mobile number"* && "$(get rec profile.php)" == *"+254722555666"* ]]'
+  r=$(form rec settings.php settings.php --data-urlencode "action=phone" --data-urlencode "phone=0733 111 000" --data-urlencode "id=1" --data-urlencode "user_id=1" --data-urlencode "username=nurse1")
+  local after; after=$(php_eval x 'echo (string) db_value("SELECT phone FROM users WHERE username = ?", ["nurse1"]);')
+  chk "Sending someone else's id with the form changes only the signed-in person's number" '[ "$before" = "$after" ] && [[ "$(get rec profile.php)" == *"+254733111000"* ]]'
+  h=$(get admin admin/audit.php)
+  chk "The change is in the audit trail, but the number itself is not" '[[ "$h" == *"Own phone number changed"* && "$h" != *"733111000"* && "$h" != *"722555666"* ]]'
+  r=$(form rec settings.php settings.php --data-urlencode "action=phone" --data-urlencode "phone=")
+  chk "A blank phone number removes it" '[[ "$r" == 303* && "$(get rec profile.php)" == *"Not given"* ]]'
+  r=$(post rec settings.php --data-urlencode "action=phone" --data-urlencode "phone=0700 000 000")
+  chk "Settings sent without the security token are refused (419)" '[[ "$r" == 419* ]]'
+  h=$(get rec settings.php)
+  chk "The display choices (shrink the menu, compact tables) are hidden until JavaScript can make them work" '[[ "$h" == *"data-prefs"* && "$h" == *"hidden"* ]] && [[ "$h" == *"data-pref=\"sb-collapsed\""* && "$h" == *"data-pref=\"dense\""* ]]'
+
+  # --- assets and speed ---
+  chk "The dashboard stylesheet and script are served" '[ "$(code anon assets/css/dash.css)" = 200 ] && [ "$(code anon assets/js/dash.js)" = 200 ]'
+  local t; t=$(curl -s -o /dev/null -w '%{time_total}' -b "$J/mgr" "$B/index.php")
+  chk "The manager's dashboard (the busiest) loads in under 3 seconds on the test database ($t s)" 'awk "BEGIN { exit !($t < 3) }"'
+  h=$(get doc patients/index.php)
+  chk "Older pages use the new header and sidebar too (patient search)" '[[ "$h" == *"class=\"app-top\""* && "$h" == *"class=\"sidebar\""* && "$h" == *"Search patients"* ]]'
+}
+
 # Later sprints add their own sec_* functions above this line.
-for fn in sec_sprint1 sec_sprint2 sec_sprint3 sec_sprint4 sec_sprint5; do
+for fn in sec_sprint1 sec_sprint2 sec_sprint3 sec_sprint4 sec_sprint5 sec_public sec_dashboards; do
   if declare -F "$fn" > /dev/null; then "$fn"; fi
 done
 

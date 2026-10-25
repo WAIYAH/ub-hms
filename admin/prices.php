@@ -41,11 +41,11 @@ page_start('Price list', 'prices');
 ?>
 <p class="muted">Prices apply to new charges. An invoice that has already received a payment keeps the prices it was agreed at. Every change is recorded in the audit trail. Medicine prices are set on the pharmacist's medicine list.</p>
 <h2>Services</h2>
-<div class="table-wrap"><table class="data"><thead><tr><th>Service</th><th colspan="3">Price</th></tr></thead><tbody>
+<div class="table-wrap" tabindex="0" role="group" aria-label="Table: scroll sideways if it does not fit"><table class="data"><thead><tr><th>Service</th><th colspan="3">Price</th></tr></thead><tbody>
 <?php foreach ($services as $s) { echo price_row('service', $s); } ?>
 </tbody></table></div>
 <h2>Laboratory tests</h2>
-<div class="table-wrap"><table class="data"><thead><tr><th>Test</th><th colspan="3">Price</th></tr></thead><tbody>
+<div class="table-wrap" tabindex="0" role="group" aria-label="Table: scroll sideways if it does not fit"><table class="data"><thead><tr><th>Test</th><th colspan="3">Price</th></tr></thead><tbody>
 <?php foreach ($tests as $t) { echo price_row('test', $t); } ?>
 </tbody></table></div>
 <?php page_end();

@@ -15,6 +15,19 @@ $values = $form['values'] ?: ($editing ? [
 ] : []);
 $errors = $form['errors'];
 
+// Coming from an access request: fill the form from it so the administrator only has to check and save.
+$fromId = $editing ? null : (get_int('from_request') ?? post_int('from_request'));
+$fromRequest = $fromId !== null ? get_public_request($fromId) : null;
+if ($fromRequest && $fromRequest['kind'] !== 'access') {
+    $fromRequest = null;
+}
+if (!$values && $fromRequest) {
+    $values = [
+        'full_name' => $fromRequest['full_name'], 'username' => suggest_username($fromRequest['full_name']),
+        'role' => (string) $fromRequest['requested_role'], 'phone' => (string) $fromRequest['phone'],
+    ];
+}
+
 if (is_post()) {
     require_post();
     $action = post_str('action', 20);
@@ -29,7 +42,7 @@ if (is_post()) {
     [$clean, $errs] = validate_user_input($_POST, $editing ? (int) $editing['id'] : null);
     if ($errs) {
         remember_form($clean, $errs);
-        redirect('admin/user.php', $editing ? ['id' => $editing['id']] : []);
+        redirect('admin/user.php', $editing ? ['id' => $editing['id']] : ($fromRequest ? ['from_request' => $fromRequest['id']] : []));
     }
     if ($editing) {
         $problem = update_user((int) $editing['id'], $clean, (int) $admin['id']);
@@ -42,6 +55,9 @@ if (is_post()) {
     }
     $temp = generate_temp_password();
     $newId = create_user($clean, $temp, (int) $admin['id']);
+    if ($fromRequest) {
+        set_public_request_status((int) $fromRequest['id'], 'done', 'Account created: ' . $clean['username'], (int) $admin['id']);
+    }
     flash('success', 'Account created for ' . $clean['username'] . '. One-time password: ' . $temp . ' (shown once; the user must change it at first sign-in).');
     redirect('admin/user.php', ['id' => $newId]);
 }
@@ -49,9 +65,16 @@ if (is_post()) {
 $f = ['values' => $values, 'errors' => $errors];
 page_start($editing ? 'Edit user' : 'Add user', 'users');
 ?>
+<?php if ($fromRequest): ?>
+<div class="flash flash-info">
+    <strong>From access request <?= e($fromRequest['reference']) ?></strong>: <?= e((string) $fromRequest['department']) ?>, supervisor <?= e((string) $fromRequest['supervisor']) ?><?= $fromRequest['staff_number'] ? ', staff number ' . e($fromRequest['staff_number']) : '' ?>, email <?= e($fromRequest['email']) ?>.
+    Check the person with their supervisor before you save. Saving marks the request as done.
+</div>
+<?php endif; ?>
 <div class="card">
     <?= error_summary($errors) ?>
     <?= form_open() ?>
+        <?php if ($fromRequest): ?><input type="hidden" name="from_request" value="<?= (int) $fromRequest['id'] ?>"><?php endif; ?>
         <div class="form-grid">
             <?= field($f, 'full_name', 'Full name', ['required' => true, 'maxlength' => 120, 'autocomplete' => 'off']) ?>
             <?= field($f, 'username', 'Username', ['required' => true, 'maxlength' => 40, 'autocomplete' => 'off', 'hint' => 'Lower-case letters, numbers, dots, dashes or underscores.']) ?>

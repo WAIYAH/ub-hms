@@ -58,6 +58,7 @@ function permission_catalogue(): array
         'reports.stock'       => 'View the stock report',
         'reports.lab'         => 'View the laboratory workload report',
         'users.manage'        => 'Create and manage user accounts',
+        'requests.manage'     => 'Review staff access requests and contact messages',
         'audit.view'          => 'View the audit trail',
         'settings.manage'     => 'Change service and test prices',
         'system.health'       => 'View system health and backup status',
@@ -68,7 +69,7 @@ function permission_catalogue(): array
 function permission_matrix(): array
 {
     return [
-        'admin' => ['users.manage', 'audit.view', 'settings.manage', 'system.health'],
+        'admin' => ['users.manage', 'requests.manage', 'audit.view', 'settings.manage', 'system.health'],
         'manager' => [
             'audit.view', 'reports.attendance', 'reports.revenue', 'reports.stock', 'reports.lab',
             'pharmacy.stock',

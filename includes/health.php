@@ -20,7 +20,7 @@ function system_health(): array
         $ms = (int) round((microtime(true) - $t0) * 1000);
         $add('Database connection', $ms > 500 ? 'warn' : 'ok', "Connected to $version in $ms ms");
         $tables = (int) db_value('SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE()');
-        $add('Database tables', $tables >= 22 ? 'ok' : 'fail', "$tables tables present (22 expected)");
+        $add('Database tables', $tables >= 23 ? 'ok' : 'fail', "$tables tables present (23 expected)");
         $size = (float) db_value('SELECT COALESCE(SUM(data_length + index_length), 0) FROM information_schema.tables WHERE table_schema = DATABASE()');
         $add('Database size', 'ok', number_format($size / 1048576, 1) . ' MB');
     } catch (Throwable $e) {

@@ -82,7 +82,7 @@ page_start('Import patients from a CSV file', 'import');
         <div class="flash flash-error" role="alert"><?= e($preview['error']) ?></div>
     <?php else: ?>
         <p><strong><?= (int) $preview['valid'] ?></strong> of <?= count($preview['rows']) ?> rows are ready to register.</p>
-        <div class="table-wrap">
+        <div class="table-wrap" tabindex="0" role="group" aria-label="Table: scroll sideways if it does not fit">
         <table class="data">
             <thead><tr><th>Line</th><th>Name</th><th>Date of birth</th><th>Status</th><th>Note</th></tr></thead>
             <tbody>

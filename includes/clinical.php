@@ -414,8 +414,8 @@ function render_patient_history(array $p, array $user): string
     if (!$visits) {
         return $out . '<p class="muted">No visits recorded yet.</p></div>';
     }
-    $out .= '<div class="table-wrap"><table class="data"><thead><tr><th>Date</th><th>Doctor</th><th>Status</th>'
-        . ($clinical ? '<th>Diagnosis</th><th>Tests</th><th>Medicines</th>' : '<th>Reason</th>') . '<th></th></tr></thead><tbody>';
+    $out .= '<div class="table-wrap" tabindex="0" role="group" aria-label="Table: scroll sideways if it does not fit"><table class="data"><thead><tr><th>Date</th><th>Doctor</th><th>Status</th>'
+        . ($clinical ? '<th>Diagnosis</th><th>Tests</th><th>Medicines</th>' : '<th>Reason</th>') . '<th><span class="sr-only">Actions</span></th></tr></thead><tbody>';
     foreach ($visits as $v) {
         $out .= '<tr><td class="nowrap">' . e(fmt_datetime($v['visit_date'])) . '</td><td>' . e($v['doctor_name'] ?? '') . '</td><td>' . badge($v['status']) . '</td>';
         if ($clinical) {

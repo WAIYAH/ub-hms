@@ -189,3 +189,47 @@ function search_audit(array $f, int $limit, int $offset): array
     );
     return [$rows, $total];
 }
+
+/* ---------- A person's own profile and settings ---------- */
+
+/** A readable name for an audit action, for a person's own activity list. */
+function audit_action_label(string $action): string
+{
+    static $known = [
+        'login' => 'Signed in', 'logout' => 'Signed out', 'login_failed' => 'A wrong password was entered',
+        'password_change' => 'Changed your password', 'password_change_failed' => 'A password change was refused',
+        'session_expired' => 'Signed out automatically', 'create' => 'Created a record', 'update' => 'Changed a record',
+        'view' => 'Opened a record', 'payment' => 'Recorded a payment', 'dispense' => 'Dispensed medicines',
+        'access_denied' => 'A page was refused (no permission)', 'csrf_rejected' => 'A form was refused (wrong security token)',
+        'password_reset' => 'Password reset by the administrator', 'submit' => 'Sent a request or message',
+    ];
+    return $known[$action] ?? ucfirst(str_replace('_', ' ', $action));
+}
+
+/** The newest things a person did (and that happened to their account), newest first. */
+function user_recent_activity(int $userId, int $limit = 10): array
+{
+    return db_all(
+        'SELECT action, entity, details, ip_address, created_at FROM audit_log WHERE user_id = ? ORDER BY id DESC LIMIT ' . (int) $limit,
+        [$userId]
+    );
+}
+
+/**
+ * Let a person change their own mobile number, or clear it (an empty value). Returns ['ok' => bool, 'error' => ?string].
+ * The audit entry says that the number changed, not what it is.
+ */
+function update_own_phone(int $userId, string $raw): array
+{
+    $raw = clean_text($raw, 20);
+    $phone = null;
+    if ($raw !== '') {
+        $phone = normalize_phone($raw);
+        if ($phone === null) {
+            return ['ok' => false, 'error' => 'Enter a Kenyan mobile number such as 0712 345 678, or leave this blank to remove it.'];
+        }
+    }
+    db_exec('UPDATE users SET phone = ? WHERE id = ?', [$phone, $userId]);
+    audit('update', 'user', $userId, $phone === null ? 'Own phone number removed' : 'Own phone number changed', $userId);
+    return ['ok' => true, 'error' => null];
+}

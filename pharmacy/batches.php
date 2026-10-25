@@ -22,7 +22,7 @@ page_start($medicine ? 'Batches: ' . medicine_label($medicine) : 'Batches and ex
     <a class="btn btn-secondary" href="<?= e(url('pharmacy/batches.php', array_filter(['medicine_id' => $medicineId, 'all' => $showAll ? '' : '1']))) ?>"><?= $showAll ? 'Hide empty batches' : 'Show empty batches too' ?></a>
     <?php if (user_can('pharmacy.manage')): ?><a class="btn" href="<?= e(url('pharmacy/receive.php', array_filter(['medicine_id' => $medicineId]))) ?>">Receive stock</a><?php endif; ?>
 </p>
-<div class="table-wrap">
+<div class="table-wrap" tabindex="0" role="group" aria-label="Table: scroll sideways if it does not fit">
 <table class="data">
     <thead><tr><th>Medicine</th><th>Batch</th><th>Expiry</th><th>State</th><th class="num">On shelf</th><th>Received</th><?php if (user_can('pharmacy.manage')): ?><th>Adjust</th><?php endif; ?></tr></thead>
     <tbody>
@@ -54,7 +54,7 @@ page_start($medicine ? 'Batches: ' . medicine_label($medicine) : 'Batches and ex
 </div>
 <?php if ($medicine): ?>
 <h2>Stock movements</h2>
-<div class="table-wrap">
+<div class="table-wrap" tabindex="0" role="group" aria-label="Table: scroll sideways if it does not fit">
 <table class="data">
     <thead><tr><th>When</th><th>Type</th><th>Batch</th><th class="num">Change</th><th>Reference</th><th>By</th></tr></thead>
     <tbody>

@@ -42,7 +42,7 @@ page_start('Check in a patient', 'checkin');
             <button class="btn" type="submit">Search</button>
         </form>
         <?php if ($q !== ''): ?>
-            <div class="table-wrap"><table class="data"><tbody>
+            <div class="table-wrap" tabindex="0" role="group" aria-label="Table: scroll sideways if it does not fit"><table class="data"><tbody>
             <?php foreach ($found as $p): ?>
                 <tr><td><span class="op-number"><?= e($p['op_number']) ?></span></td><td><?= e(patient_full_name($p)) ?></td><td><?= e(age_label($p['date_of_birth'])) ?></td>
                     <td><a class="btn btn-small" href="<?= e(url('visits/checkin.php', ['patient_id' => $p['id']])) ?>">Choose</a></td></tr>
@@ -54,8 +54,8 @@ page_start('Check in a patient', 'checkin');
     <div class="card">
         <h2>Booked for today, not yet checked in</h2>
         <?php if (!$todayList): ?><p class="muted">No waiting appointments.</p><?php else: ?>
-        <div class="table-wrap"><table class="data">
-            <thead><tr><th>Time</th><th>Patient</th><th>Doctor</th><th></th></tr></thead><tbody>
+        <div class="table-wrap" tabindex="0" role="group" aria-label="Table: scroll sideways if it does not fit"><table class="data">
+            <thead><tr><th>Time</th><th>Patient</th><th>Doctor</th><th><span class="sr-only">Actions</span></th></tr></thead><tbody>
             <?php foreach ($todayList as $a): ?>
                 <tr><td><?= e(fmt_time($a['start_time'])) ?></td><td><span class="op-number"><?= e($a['op_number']) ?></span> <?= e(patient_full_name($a)) ?></td><td><?= e($a['doctor_name']) ?></td>
                     <td><a class="btn btn-small" href="<?= e(url('visits/checkin.php', ['patient_id' => $a['patient_id'], 'appointment_id' => $a['id']])) ?>">Check in</a></td></tr>

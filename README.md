@@ -44,7 +44,7 @@ All data in the demonstration database is synthetic (made up). No real patient i
    This creates the database `uhai_bora_hms`, loads [database/schema.sql](database/schema.sql), creates the
    first administrator and (because of `--demo`) loads synthetic demonstration data. Leave out `--demo`
    for a real installation. The installer refuses to run over an existing database unless you add `--force`.
-4. Browse to <http://localhost/ub-hms/> and sign in.
+4. Browse to <http://localhost/ub-hms/>. The welcome page explains the system; choose **Staff sign in** (or go to `login.php`) to sign in.
 
 If the database is not on the default settings, create `config/config.local.php` containing only the values
 you want to change (for example `<?php return ['db' => ['port' => '3307']];`), or set the environment variables
@@ -83,6 +83,62 @@ before the system holds real information.
 
 The administrator account is the one you created during installation.
 
+## Public website
+
+Visitors who are not signed in see a public website before the sign-in page. It has a header with a services menu, a comprehensive footer and nine pages. They show no patient data and need no database queries, except the two forms.
+
+| Page | File | What it is |
+| --- | --- | --- |
+| Home | `welcome.php` | What UB-HMS does, the six modules, a patient visit, the eight roles, security and questions |
+| Services | `services.php` | Each module in detail, with a jump menu |
+| About | `about.php` | Purpose, principles, the people, where the project stands, questions and photo credits |
+| Contact | `contact.php` | Hospital details and a message form |
+| Request access | `register.php` | How staff ask for an account (see below) |
+| Legal | `privacy.php`, `terms.php`, `cookies.php`, `accessibility.php` | Privacy policy, terms of use, cookie notice, accessibility statement |
+
+The site address itself (for example `http://localhost/ub-hms/`) opens the home page for a visitor who is not signed in. A saved link such as `index.php` or `patients/` still goes straight to the sign-in page, and a signed-in user who opens a public page is sent to the dashboard.
+
+**Request access does not create an account.** A hospital system must not let anyone create an account for themselves, so the form only sends a request. The System Administrator sees it under **Access requests**, checks the person with their supervisor, and uses **Create account**, which fills in the form from the request. The form never asks for a password, and the administrator role cannot be requested. The contact form and the request form are protected by the security token, a hidden trap field for robots, and a limit of five requests per computer per hour (`site.form_limit`). Nothing is sent by email; messages wait in the administrator's list.
+
+**Set the hospital's own details** before live use. The telephone number, email address and address on the public pages are placeholders. Put the real values in `config/config.local.php`:
+
+```php
+<?php return ['site' => ['address' => '...', 'phone' => '+254 ...', 'email' => '...', 'privacy_email' => '...']];
+```
+
+**Existing databases** need one new table (`public_requests`). A fresh install already has it. For a database that was installed earlier, run this once (it is safe to run again):
+
+```
+C:\xampp\mysql\bin\mysql.exe -u root uhai_bora_hms < database\migrations\2026-10-24_public_requests.sql
+```
+
+The legal pages were written for a diploma project and have not been reviewed by a lawyer; the hospital must review them before live use. The photographs are free stock images from Pexels and are credited on the About page.
+
+## Dashboards, header and sidebar
+
+Every signed-in page has the same shell:
+
+- **Header:** menu button, patient search (for roles that may search), a **Quick add (+)** menu, a **notification bell** with a count, and a **user menu** (View profile, Settings, Change password, Sign out). The menus are native `<details>` elements, so they work without JavaScript; Sign out stays a POST form with the security token.
+- **Sidebar:** an icon on every item, grouped headings, the current page marked, and small badges for work waiting. It shrinks to icons (the choice is remembered in the browser) and becomes a drawer on a phone.
+- **Notifications** are live alerts read from the records (patients waiting for triage, medicines out of stock, locked accounts, new access requests and so on). They are not stored messages, so there is nothing to mark as read: an alert goes away when the work is done. Each role sees only what it can act on.
+
+Each of the eight roles has its own dashboard (greeting, coloured quick-action buttons, coloured KPI cards, charts and short live lists). The charts are drawn on the server as SVG, because the content security policy forbids scripts and outside libraries; each chart has a text summary and a hidden table of its numbers for screen readers.
+
+| Role | Charts | Lists |
+| --- | --- | --- |
+| System Administrator | Sign-ins (successful and failed), activity, accounts by role | Latest audit entries |
+| Hospital Manager | Money collected, revenue by kind, visits, payment methods | Busiest doctors, most requested tests, stock alerts |
+| Receptionist / Records | New patients, how appointments ended | Today's appointments, who is in the clinic |
+| Nurse | Triage done per day, where patients are now | Waiting for triage |
+| Doctor / Clinical Officer | My consultations, what I diagnose most | Waiting for me, test results ready |
+| Laboratory Technologist | Requested and completed, most requested tests | Worklist, oldest first |
+| Pharmacist | Units dispensed, stock status, dispensed most | Prescriptions waiting, stock alerts |
+| Cashier / Billing Clerk | My collections, my payment methods | Invoices waiting for payment |
+
+**Profile** (`profile.php`) shows a person's own details, what their role allows and their last ten actions. **Settings** (`settings.php`) lets a person change only their own phone number (the audit trail records that it changed, not the number), links to the password page, and offers two display choices saved in the browser (menu shrunk to icons, compact tables). Names, usernames and roles can be changed only by the System Administrator.
+
+Dashboard code: `includes/dashboard.php` (cards and the eight role dashboards), `includes/analytics.php` (the queries behind the charts), `includes/charts.php` (SVG charts), `includes/notifications.php` (alerts and sidebar badges), `includes/shell.php` (header and sidebar), and `assets/css/dash.css`, `assets/js/dash.js`. No database change was needed. On the 20,040-patient test database every dashboard loads in under 0.5 seconds.
+
 ## Tests
 
 ```
@@ -97,11 +153,12 @@ unit-test runner refuses to run against the live database name. Results are writ
 
 | Path | Purpose |
 | --- | --- |
-| `index.php`, `login.php`, `logout.php`, `password.php` | Dashboard and account pages |
+| `welcome.php` | Public welcome page (what the system does; no patient data, no database queries) |
+| `index.php`, `login.php`, `logout.php`, `password.php`, `profile.php`, `settings.php` | Dashboard and account pages |
 | `patients/`, `appointments/`, `visits/`, `lab/`, `pharmacy/`, `billing/`, `reports/`, `admin/` | One folder per area of work; every page starts by requiring a permission |
-| `includes/` | Bootstrap, database access (PDO), authentication and permissions, CSRF, audit, layout, and one file of business rules per module |
-| `database/` | `schema.sql`, `install.php`, `demo_data.php` |
-| `assets/` | Stylesheet, small script, icon (no external fonts, scripts or trackers) |
+| `includes/` | Bootstrap, database access (PDO), authentication and permissions, CSRF, audit, layout, the public website shell (`site.php`), public requests (`requests.php`), the signed-in shell (`shell.php`), dashboards (`dashboard.php`, `analytics.php`, `charts.php`, `notifications.php`), and one file of business rules per module |
+| `database/` | `schema.sql`, `install.php`, `demo_data.php`, and `migrations/` for databases installed earlier |
+| `assets/` | Stylesheets (`app.css` for the system, `dash.css` for the signed-in shell and dashboards, `site.css` for the public website and sign-in page), small scripts, images and icons (no external fonts, scripts or trackers) |
 | `tests/` | `run_tests.php` and `unit/*_test.php`, `e2e.sh` |
 | `docs/` | Gap analysis, defect log, security review and the dissertation chapters in `docs/chapters/` |
 

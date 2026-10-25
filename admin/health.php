@@ -21,7 +21,7 @@ page_start('System health', 'health');
 <div class="flash flash-<?= $worst === 'ok' ? 'success' : ($worst === 'warn' ? 'warning' : 'error') ?>" role="status">
     Overall: <strong><?= e($labels[$worst]) ?></strong>
 </div>
-<div class="table-wrap">
+<div class="table-wrap" tabindex="0" role="group" aria-label="Table: scroll sideways if it does not fit">
 <table class="data">
     <thead><tr><th>Check</th><th>Result</th><th>Detail</th></tr></thead>
     <tbody>
@@ -32,7 +32,7 @@ page_start('System health', 'health');
 </table>
 </div>
 <h2>Records held</h2>
-<div class="table-wrap">
+<div class="table-wrap" tabindex="0" role="group" aria-label="Table: scroll sideways if it does not fit">
 <table class="data">
     <thead><tr><th>Table</th><th class="num">Rows</th></tr></thead>
     <tbody><?php foreach ($counts as $t => $n): ?><tr><td><?= e($t) ?></td><td class="num"><?= number_format($n) ?></td></tr><?php endforeach; ?></tbody>

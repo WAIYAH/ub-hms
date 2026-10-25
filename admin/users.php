@@ -45,7 +45,7 @@ page_start('User accounts', 'users');
     <a class="btn" href="<?= e(url('admin/user.php')) ?>">Add user</a>
 </form>
 
-<div class="table-wrap">
+<div class="table-wrap" tabindex="0" role="group" aria-label="Table: scroll sideways if it does not fit">
 <table class="data">
     <thead><tr><th>Name</th><th>Username</th><th>Role</th><th>Status</th><th>Last sign-in</th><th>Actions</th></tr></thead>
     <tbody>

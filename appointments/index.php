@@ -41,7 +41,7 @@ page_start('Appointment diary', 'appointments');
     <?php if ($date !== app_today()): ?> &nbsp; <a href="<?= e(url('appointments/index.php', $q(['date' => app_today()]))) ?>">Today</a><?php endif; ?>
 </p>
 
-<div class="table-wrap">
+<div class="table-wrap" tabindex="0" role="group" aria-label="Table: scroll sideways if it does not fit">
 <table class="data">
     <thead><tr><th>Time</th><th>Patient</th><th>Doctor</th><th>Reason</th><th>Status</th><th>Actions</th></tr></thead>
     <tbody>
