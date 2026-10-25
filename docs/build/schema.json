@@ -1,5 +1,5 @@
 {
-    "database": "uhai_bora_hms",
+    "database": "uhai_bora_hms_perf",
     "server": "10.4.32-MariaDB",
     "tables": {
         "appointments": {
@@ -592,6 +592,561 @@
                 }
             ],
             "checks": []
+        },
+        "data_requests": {
+            "engine": "InnoDB",
+            "collation": "utf8mb4_unicode_ci",
+            "columns": [
+                {
+                    "name": "id",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "PRI",
+                    "dflt": null,
+                    "extra": "auto_increment",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "reference",
+                    "type": "varchar(20)",
+                    "nullable": "YES",
+                    "ckey": "UNI",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": 20,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "patient_id",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "MUL",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "kind",
+                    "type": "enum('Export','Erasure')",
+                    "nullable": "NO",
+                    "ckey": "MUL",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": 7,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "requester_name",
+                    "type": "varchar(120)",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": 120,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "requester_relation",
+                    "type": "varchar(40)",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": 40,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "identity_checked",
+                    "type": "tinyint(1)",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": "0",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 3,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "identity_note",
+                    "type": "varchar(255)",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": 255,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "reason",
+                    "type": "varchar(255)",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": 255,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "status",
+                    "type": "enum('Open','Completed','Refused','Cancelled')",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": "'Open'",
+                    "extra": "",
+                    "maxlen": 9,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "decision_note",
+                    "type": "varchar(255)",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": 255,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "created_by",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "MUL",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "created_at",
+                    "type": "datetime",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": "current_timestamp()",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "decided_by",
+                    "type": "int(10) unsigned",
+                    "nullable": "YES",
+                    "ckey": "MUL",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "decided_at",
+                    "type": "datetime",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                }
+            ],
+            "foreign_keys": [
+                {
+                    "col": "created_by",
+                    "ref_table": "users",
+                    "ref_col": "id",
+                    "delete_rule": "RESTRICT",
+                    "cname": "fk_dr_creator"
+                },
+                {
+                    "col": "decided_by",
+                    "ref_table": "users",
+                    "ref_col": "id",
+                    "delete_rule": "RESTRICT",
+                    "cname": "fk_dr_decider"
+                },
+                {
+                    "col": "patient_id",
+                    "ref_table": "patients",
+                    "ref_col": "id",
+                    "delete_rule": "RESTRICT",
+                    "cname": "fk_dr_patient"
+                }
+            ],
+            "indexes": [
+                {
+                    "name": "fk_dr_creator",
+                    "unique": false,
+                    "columns": [
+                        "created_by"
+                    ]
+                },
+                {
+                    "name": "fk_dr_decider",
+                    "unique": false,
+                    "columns": [
+                        "decided_by"
+                    ]
+                },
+                {
+                    "name": "fk_dr_patient",
+                    "unique": false,
+                    "columns": [
+                        "patient_id"
+                    ]
+                },
+                {
+                    "name": "ix_dr_status",
+                    "unique": false,
+                    "columns": [
+                        "kind",
+                        "status",
+                        "created_at"
+                    ]
+                },
+                {
+                    "name": "PRIMARY",
+                    "unique": true,
+                    "columns": [
+                        "id"
+                    ]
+                },
+                {
+                    "name": "uq_dr_reference",
+                    "unique": true,
+                    "columns": [
+                        "reference"
+                    ]
+                }
+            ],
+            "checks": [
+                {
+                    "name": "chk_dr_identity",
+                    "clause": "`identity_checked` = 1"
+                },
+                {
+                    "name": "chk_dr_two_person",
+                    "clause": "`status` in ('Open','Cancelled') or `decided_by` is null or `decided_by` <> `created_by`"
+                }
+            ]
+        },
+        "doctor_leave": {
+            "engine": "InnoDB",
+            "collation": "utf8mb4_unicode_ci",
+            "columns": [
+                {
+                    "name": "id",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "PRI",
+                    "dflt": null,
+                    "extra": "auto_increment",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "doctor_id",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "MUL",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "start_date",
+                    "type": "date",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "end_date",
+                    "type": "date",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "type",
+                    "type": "enum('Annual leave','Sick leave','Training','Other')",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": "'Annual leave'",
+                    "extra": "",
+                    "maxlen": 12,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "reason",
+                    "type": "varchar(255)",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": 255,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "created_by",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "MUL",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "created_at",
+                    "type": "datetime",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": "current_timestamp()",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                }
+            ],
+            "foreign_keys": [
+                {
+                    "col": "doctor_id",
+                    "ref_table": "users",
+                    "ref_col": "id",
+                    "delete_rule": "RESTRICT",
+                    "cname": "fk_leave_doctor"
+                },
+                {
+                    "col": "created_by",
+                    "ref_table": "users",
+                    "ref_col": "id",
+                    "delete_rule": "RESTRICT",
+                    "cname": "fk_leave_user"
+                }
+            ],
+            "indexes": [
+                {
+                    "name": "fk_leave_user",
+                    "unique": false,
+                    "columns": [
+                        "created_by"
+                    ]
+                },
+                {
+                    "name": "ix_leave_doctor",
+                    "unique": false,
+                    "columns": [
+                        "doctor_id",
+                        "start_date",
+                        "end_date"
+                    ]
+                },
+                {
+                    "name": "PRIMARY",
+                    "unique": true,
+                    "columns": [
+                        "id"
+                    ]
+                }
+            ],
+            "checks": [
+                {
+                    "name": "chk_leave_dates",
+                    "clause": "`end_date` >= `start_date`"
+                }
+            ]
+        },
+        "doctor_schedules": {
+            "engine": "InnoDB",
+            "collation": "utf8mb4_unicode_ci",
+            "columns": [
+                {
+                    "name": "id",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "PRI",
+                    "dflt": null,
+                    "extra": "auto_increment",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "doctor_id",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "MUL",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "weekday",
+                    "type": "tinyint(3) unsigned",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 3,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "start_time",
+                    "type": "time",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "end_time",
+                    "type": "time",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "created_by",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "MUL",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "created_at",
+                    "type": "datetime",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": "current_timestamp()",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                }
+            ],
+            "foreign_keys": [
+                {
+                    "col": "doctor_id",
+                    "ref_table": "users",
+                    "ref_col": "id",
+                    "delete_rule": "RESTRICT",
+                    "cname": "fk_sched_doctor"
+                },
+                {
+                    "col": "created_by",
+                    "ref_table": "users",
+                    "ref_col": "id",
+                    "delete_rule": "RESTRICT",
+                    "cname": "fk_sched_user"
+                }
+            ],
+            "indexes": [
+                {
+                    "name": "fk_sched_user",
+                    "unique": false,
+                    "columns": [
+                        "created_by"
+                    ]
+                },
+                {
+                    "name": "PRIMARY",
+                    "unique": true,
+                    "columns": [
+                        "id"
+                    ]
+                },
+                {
+                    "name": "uq_sched_block",
+                    "unique": true,
+                    "columns": [
+                        "doctor_id",
+                        "weekday",
+                        "start_time"
+                    ]
+                }
+            ],
+            "checks": [
+                {
+                    "name": "chk_sched_day",
+                    "clause": "`weekday` between 1 and 7"
+                },
+                {
+                    "name": "chk_sched_times",
+                    "clause": "`start_time` < `end_time`"
+                }
+            ]
         },
         "icd10_codes": {
             "engine": "InnoDB",
@@ -1761,9 +2316,40 @@
                     "prec": null,
                     "scale": null,
                     "genexpr": null
+                },
+                {
+                    "name": "erased_at",
+                    "type": "datetime",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "erased_by",
+                    "type": "int(10) unsigned",
+                    "nullable": "YES",
+                    "ckey": "MUL",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
                 }
             ],
             "foreign_keys": [
+                {
+                    "col": "erased_by",
+                    "ref_table": "users",
+                    "ref_col": "id",
+                    "delete_rule": "RESTRICT",
+                    "cname": "fk_patients_eraser"
+                },
                 {
                     "col": "registered_by",
                     "ref_table": "users",
@@ -1773,6 +2359,13 @@
                 }
             ],
             "indexes": [
+                {
+                    "name": "fk_patients_eraser",
+                    "unique": false,
+                    "columns": [
+                        "erased_by"
+                    ]
+                },
                 {
                     "name": "fk_patients_user",
                     "unique": false,
@@ -1841,6 +2434,30 @@
                     "nullable": "NO",
                     "ckey": "MUL",
                     "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "kind",
+                    "type": "enum('Payment','Refund')",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": "'Payment'",
+                    "extra": "",
+                    "maxlen": 7,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "refund_of",
+                    "type": "int(10) unsigned",
+                    "nullable": "YES",
+                    "ckey": "MUL",
+                    "dflt": "NULL",
                     "extra": "",
                     "maxlen": null,
                     "prec": 10,
@@ -1917,6 +2534,13 @@
                     "cname": "fk_pay_invoice"
                 },
                 {
+                    "col": "refund_of",
+                    "ref_table": "payments",
+                    "ref_col": "id",
+                    "delete_rule": "RESTRICT",
+                    "cname": "fk_pay_refund_of"
+                },
+                {
                     "col": "received_by",
                     "ref_table": "users",
                     "ref_col": "id",
@@ -1930,6 +2554,13 @@
                     "unique": false,
                     "columns": [
                         "invoice_id"
+                    ]
+                },
+                {
+                    "name": "fk_pay_refund_of",
+                    "unique": false,
+                    "columns": [
+                        "refund_of"
                     ]
                 },
                 {
@@ -1956,8 +2587,8 @@
             ],
             "checks": [
                 {
-                    "name": "chk_pay_amount",
-                    "clause": "`amount` > 0"
+                    "name": "chk_pay_kind",
+                    "clause": "`kind` = 'Payment' and `amount` > 0 and `refund_of` is null or `kind` = 'Refund' and `amount` < 0 and `refund_of` is not null"
                 }
             ]
         },
@@ -2218,6 +2849,576 @@
                 {
                     "name": "chk_rxi_qty",
                     "clause": "`quantity` > 0 and `dispensed_qty` <= `quantity`"
+                }
+            ]
+        },
+        "public_requests": {
+            "engine": "InnoDB",
+            "collation": "utf8mb4_unicode_ci",
+            "columns": [
+                {
+                    "name": "id",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "PRI",
+                    "dflt": null,
+                    "extra": "auto_increment",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "kind",
+                    "type": "enum('access','contact')",
+                    "nullable": "NO",
+                    "ckey": "MUL",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": 7,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "reference",
+                    "type": "varchar(20)",
+                    "nullable": "YES",
+                    "ckey": "UNI",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": 20,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "full_name",
+                    "type": "varchar(120)",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": 120,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "email",
+                    "type": "varchar(160)",
+                    "nullable": "NO",
+                    "ckey": "MUL",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": 160,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "phone",
+                    "type": "varchar(15)",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": 15,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "department",
+                    "type": "varchar(80)",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": 80,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "requested_role",
+                    "type": "varchar(30)",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": 30,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "staff_number",
+                    "type": "varchar(40)",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": 40,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "supervisor",
+                    "type": "varchar(120)",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": 120,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "topic",
+                    "type": "varchar(40)",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": 40,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "message",
+                    "type": "text",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": 65535,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "status",
+                    "type": "enum('new','in_progress','done','declined')",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": "'new'",
+                    "extra": "",
+                    "maxlen": 11,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "admin_note",
+                    "type": "varchar(255)",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": 255,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "handled_by",
+                    "type": "int(10) unsigned",
+                    "nullable": "YES",
+                    "ckey": "MUL",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "handled_at",
+                    "type": "datetime",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "ip_address",
+                    "type": "varchar(45)",
+                    "nullable": "YES",
+                    "ckey": "MUL",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": 45,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "created_at",
+                    "type": "datetime",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": "current_timestamp()",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                }
+            ],
+            "foreign_keys": [
+                {
+                    "col": "handled_by",
+                    "ref_table": "users",
+                    "ref_col": "id",
+                    "delete_rule": "RESTRICT",
+                    "cname": "fk_pr_handler"
+                }
+            ],
+            "indexes": [
+                {
+                    "name": "fk_pr_handler",
+                    "unique": false,
+                    "columns": [
+                        "handled_by"
+                    ]
+                },
+                {
+                    "name": "ix_pr_email",
+                    "unique": false,
+                    "columns": [
+                        "email",
+                        "kind",
+                        "status"
+                    ]
+                },
+                {
+                    "name": "ix_pr_ip",
+                    "unique": false,
+                    "columns": [
+                        "ip_address",
+                        "kind",
+                        "created_at"
+                    ]
+                },
+                {
+                    "name": "ix_pr_kind_status",
+                    "unique": false,
+                    "columns": [
+                        "kind",
+                        "status",
+                        "created_at"
+                    ]
+                },
+                {
+                    "name": "PRIMARY",
+                    "unique": true,
+                    "columns": [
+                        "id"
+                    ]
+                },
+                {
+                    "name": "uq_pr_reference",
+                    "unique": true,
+                    "columns": [
+                        "reference"
+                    ]
+                }
+            ],
+            "checks": []
+        },
+        "refund_requests": {
+            "engine": "InnoDB",
+            "collation": "utf8mb4_unicode_ci",
+            "columns": [
+                {
+                    "name": "id",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "PRI",
+                    "dflt": null,
+                    "extra": "auto_increment",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "reference",
+                    "type": "varchar(20)",
+                    "nullable": "YES",
+                    "ckey": "UNI",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": 20,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "payment_id",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "MUL",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "invoice_id",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "MUL",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "amount",
+                    "type": "decimal(12,2)",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 12,
+                    "scale": 2,
+                    "genexpr": null
+                },
+                {
+                    "name": "reason",
+                    "type": "varchar(255)",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": 255,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "refund_reference",
+                    "type": "varchar(40)",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": 40,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "status",
+                    "type": "enum('Pending','Approved','Rejected','Cancelled')",
+                    "nullable": "NO",
+                    "ckey": "MUL",
+                    "dflt": "'Pending'",
+                    "extra": "",
+                    "maxlen": 9,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "requested_by",
+                    "type": "int(10) unsigned",
+                    "nullable": "NO",
+                    "ckey": "MUL",
+                    "dflt": null,
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "requested_at",
+                    "type": "datetime",
+                    "nullable": "NO",
+                    "ckey": "",
+                    "dflt": "current_timestamp()",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "decided_by",
+                    "type": "int(10) unsigned",
+                    "nullable": "YES",
+                    "ckey": "MUL",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                },
+                {
+                    "name": "decided_at",
+                    "type": "datetime",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "decision_note",
+                    "type": "varchar(255)",
+                    "nullable": "YES",
+                    "ckey": "",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": 255,
+                    "prec": null,
+                    "scale": null,
+                    "genexpr": null
+                },
+                {
+                    "name": "refund_payment_id",
+                    "type": "int(10) unsigned",
+                    "nullable": "YES",
+                    "ckey": "UNI",
+                    "dflt": "NULL",
+                    "extra": "",
+                    "maxlen": null,
+                    "prec": 10,
+                    "scale": 0,
+                    "genexpr": null
+                }
+            ],
+            "foreign_keys": [
+                {
+                    "col": "decided_by",
+                    "ref_table": "users",
+                    "ref_col": "id",
+                    "delete_rule": "RESTRICT",
+                    "cname": "fk_rr_decider"
+                },
+                {
+                    "col": "invoice_id",
+                    "ref_table": "invoices",
+                    "ref_col": "id",
+                    "delete_rule": "RESTRICT",
+                    "cname": "fk_rr_invoice"
+                },
+                {
+                    "col": "payment_id",
+                    "ref_table": "payments",
+                    "ref_col": "id",
+                    "delete_rule": "RESTRICT",
+                    "cname": "fk_rr_payment"
+                },
+                {
+                    "col": "refund_payment_id",
+                    "ref_table": "payments",
+                    "ref_col": "id",
+                    "delete_rule": "RESTRICT",
+                    "cname": "fk_rr_refund"
+                },
+                {
+                    "col": "requested_by",
+                    "ref_table": "users",
+                    "ref_col": "id",
+                    "delete_rule": "RESTRICT",
+                    "cname": "fk_rr_requester"
+                }
+            ],
+            "indexes": [
+                {
+                    "name": "fk_rr_decider",
+                    "unique": false,
+                    "columns": [
+                        "decided_by"
+                    ]
+                },
+                {
+                    "name": "fk_rr_invoice",
+                    "unique": false,
+                    "columns": [
+                        "invoice_id"
+                    ]
+                },
+                {
+                    "name": "fk_rr_payment",
+                    "unique": false,
+                    "columns": [
+                        "payment_id"
+                    ]
+                },
+                {
+                    "name": "fk_rr_requester",
+                    "unique": false,
+                    "columns": [
+                        "requested_by"
+                    ]
+                },
+                {
+                    "name": "ix_rr_status",
+                    "unique": false,
+                    "columns": [
+                        "status",
+                        "requested_at"
+                    ]
+                },
+                {
+                    "name": "PRIMARY",
+                    "unique": true,
+                    "columns": [
+                        "id"
+                    ]
+                },
+                {
+                    "name": "uq_rr_reference",
+                    "unique": true,
+                    "columns": [
+                        "reference"
+                    ]
+                },
+                {
+                    "name": "uq_rr_refund_payment",
+                    "unique": true,
+                    "columns": [
+                        "refund_payment_id"
+                    ]
+                }
+            ],
+            "checks": [
+                {
+                    "name": "chk_rr_amount",
+                    "clause": "`amount` > 0"
+                },
+                {
+                    "name": "chk_rr_decided",
+                    "clause": "`status` = 'Pending' or `decided_by` is not null and `decided_at` is not null"
+                },
+                {
+                    "name": "chk_rr_approved",
+                    "clause": "`status` <> 'Approved' or `refund_payment_id` is not null"
+                },
+                {
+                    "name": "chk_rr_two_person",
+                    "clause": "`status` = 'Cancelled' or `decided_by` is null or `decided_by` <> `requested_by`"
                 }
             ]
         },

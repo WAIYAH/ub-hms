@@ -1,6 +1,7 @@
 {
     "admin": [
         "users.manage",
+        "requests.manage",
         "audit.view",
         "settings.manage",
         "system.health"
@@ -11,7 +12,12 @@
         "reports.revenue",
         "reports.stock",
         "reports.lab",
-        "pharmacy.stock"
+        "pharmacy.stock",
+        "schedules.manage",
+        "refunds.view",
+        "refunds.approve",
+        "patients.erase.approve",
+        "privacy.view"
     ],
     "receptionist": [
         "patients.view",
@@ -22,7 +28,10 @@
         "appointments.book",
         "appointments.update",
         "visits.checkin",
-        "visits.view"
+        "visits.view",
+        "patients.export",
+        "patients.erase.request",
+        "privacy.view"
     ],
     "nurse": [
         "patients.view",
@@ -53,6 +62,8 @@
     ],
     "cashier": [
         "billing.view",
-        "billing.pay"
+        "billing.pay",
+        "refunds.view",
+        "refunds.request"
     ]
 }

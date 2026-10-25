@@ -22,4 +22,18 @@ PASS  APA-020  The session cookie is HttpOnly and SameSite=Strict
 PASS  APA-021  A .git folder would not be served (403/404)
 PASS  APA-022  A demonstration doctor can sign in and open the dashboard through Apache
 PASS  APA-023  Role-based access works through Apache: a doctor is refused the user accounts page (403)
-Totals: 23 run, 23 passed, 0 failed
+PASS  APA-024  The nine public pages are served by Apache
+PASS  APA-025  The site address opens the welcome page for a visitor who is not signed in (303 http://127.0.0.1:8090/ub-hms/welcome.php)
+PASS  APA-026  Images, including .webp, are served with an image content type
+PASS  APA-027  The website stylesheet and script are served
+PASS  APA-028  The database migration file is refused (403)
+PASS  APA-029  A doctor is refused the administrator page for access requests (403)
+PASS  APA-030  Profile and settings send a visitor who is not signed in to the sign-in page
+PASS  APA-031  The dashboard stylesheet and script are served
+PASS  APA-032  A signed-in doctor gets the new header, sidebar and dashboard through Apache, with the sign-out token
+PASS  APA-033  A signed-in doctor can open their own profile through Apache
+PASS  APA-034  The schedule, refund and patient-data pages (and the JSON download) send a visitor who is not signed in to the sign-in page
+PASS  APA-035  The schedules, refunds and data-rights migration file is refused (403)
+PASS  APA-036  A doctor is refused the schedule, refund, privacy and patient-data pages, and the JSON download (403)
+PASS  APA-037  A signed-in doctor sees their own working hours and leave on their profile through Apache
+Totals: 37 run, 37 passed, 0 failed

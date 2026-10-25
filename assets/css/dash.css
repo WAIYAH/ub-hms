@@ -41,7 +41,7 @@ body.app { background: linear-gradient(180deg, #f4f8f7 0%, #edf3f2 100%); }
 .top-brand:hover { color: var(--brand-dark); }
 .top-brand .brand-mark { width: 38px; height: 38px; border-radius: 11px; font-size: 1.45rem; color: #fff; background: linear-gradient(135deg, #14998b, #07423d); box-shadow: 0 4px 12px rgba(11, 107, 99, .35); }
 .top-brand-text { display: flex; flex-direction: column; line-height: 1.1; }
-.top-brand-text strong { font-size: 1.15rem; letter-spacing: .03em; }
+.top-brand-text strong { font-size: 1.15rem; letter-spacing: .03em; white-space: nowrap; }
 .top-brand-text small { font-size: .72rem; color: var(--muted); white-space: nowrap; }
 .top-btn { position: relative; display: inline-grid; place-items: center; flex: none; width: 42px; height: 42px; padding: 0; border: 0; border-radius: 12px; background: transparent; color: var(--ink); cursor: pointer; list-style: none; transition: background .15s, color .15s; }
 .top-btn::-webkit-details-marker { display: none; }

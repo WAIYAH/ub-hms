@@ -16,12 +16,12 @@ PRE = '''
 '''
 
 MODULES = {
-    'erd_m1': ('Module 1: patient registration and appointments', ['patients', 'op_sequences', 'appointments'], ['users']),
+    'erd_m1': ('Module 1: patient registration, appointments and data requests', ['patients', 'op_sequences', 'appointments', 'data_requests'], ['users']),
     'erd_m2': ('Module 2: clinical consultation', ['visits', 'triage', 'consultations', 'visit_services', 'services', 'icd10_codes'], ['patients', 'appointments', 'users']),
     'erd_m3': ('Module 3: laboratory management', ['lab_tests', 'lab_requests'], ['visits', 'users']),
     'erd_m4': ('Module 4: pharmacy and inventory', ['medicines', 'medicine_batches', 'prescriptions', 'prescription_items', 'stock_movements'], ['visits', 'users']),
-    'erd_m5': ('Module 5: billing', ['invoices', 'invoice_items', 'payments'], ['visits', 'users']),
-    'erd_m6': ('Module 6: user management and security', ['roles', 'users', 'audit_log'], []),
+    'erd_m5': ('Module 5: billing and refunds', ['invoices', 'invoice_items', 'payments', 'refund_requests'], ['visits', 'users']),
+    'erd_m6': ('Module 6: user management and security', ['roles', 'users', 'audit_log', 'public_requests', 'doctor_schedules', 'doctor_leave'], []),
 }
 
 
@@ -70,7 +70,8 @@ def table_node(name, info, full=True):
 def module_diagram(key):
     title, tables, stubs = MODULES[key]
     schema = load()
-    lines = [f'digraph {key} {{' + PRE + '  rankdir=LR; nodesep=0.45; ranksep=0.9;']
+    direction = 'TB' if key == 'erd_m6' else 'LR'  # module 6 is drawn top to bottom so that it stays wide, not tall
+    lines = [f'digraph {key} {{' + PRE + f'  rankdir={direction}; nodesep=0.45; ranksep=0.9;']
     shown = set(tables) | set(stubs)
     for t in tables:
         lines.append(table_node(t, schema[t], True))
@@ -97,6 +98,8 @@ CONCEPTUAL = [
     ('visits', 'prescriptions', 'gets'), ('prescriptions', 'prescription_items', 'lists'), ('medicines', 'prescription_items', 'is'),
     ('medicines', 'medicine_batches', 'is held in'), ('medicine_batches', 'stock_movements', 'changes by'), ('medicines', 'stock_movements', 'moves'),
     ('visits', 'invoices', 'is billed on'), ('invoices', 'invoice_items', 'has'), ('invoices', 'payments', 'is paid by'),
+    ('payments', 'refund_requests', 'is reversed through'), ('users', 'doctor_schedules', 'works to'), ('users', 'doctor_leave', 'takes'),
+    ('patients', 'data_requests', 'is the subject of'), ('users', 'public_requests', 'handles'),
 ]
 
 LABELS = {
@@ -104,7 +107,8 @@ LABELS = {
     'triage': 'Triage record', 'consultations': 'Consultation', 'visit_services': 'Visit service', 'services': 'Service', 'icd10_codes': 'ICD-10 code',
     'lab_requests': 'Laboratory request', 'lab_tests': 'Laboratory test', 'prescriptions': 'Prescription', 'prescription_items': 'Prescription item',
     'medicines': 'Medicine', 'medicine_batches': 'Medicine batch', 'stock_movements': 'Stock movement', 'invoices': 'Invoice', 'invoice_items': 'Invoice item',
-    'payments': 'Payment',
+    'payments': 'Payment', 'refund_requests': 'Refund request', 'doctor_schedules': 'Doctor hours', 'doctor_leave': 'Doctor leave',
+    'data_requests': 'Data request', 'public_requests': 'Public request',
 }
 
 

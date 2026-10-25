@@ -1,11 +1,11 @@
 {
-    "run_at": "2026-10-24 11:16:19",
+    "run_at": "2026-10-25 09:50:35",
     "php": "8.2.12",
     "database": "uhai_bora_hms_test",
-    "total": 167,
-    "passed": 167,
+    "total": 272,
+    "passed": 272,
     "failed": 0,
-    "seconds": 175.72,
+    "seconds": 338.48,
     "results": [
         {
             "id": "UT-COR-001",
@@ -77,7 +77,7 @@
             "name": "generated temporary passwords always satisfy the policy",
             "status": "PASS",
             "message": "",
-            "ms": 1
+            "ms": 0
         },
         {
             "id": "UT-COR-010",
@@ -117,7 +117,7 @@
             "name": "db_tx rolls back every change when something fails",
             "status": "PASS",
             "message": "",
-            "ms": 68
+            "ms": 67
         },
         {
             "id": "UT-COR-015",
@@ -125,7 +125,7 @@
             "name": "prepared statements keep SQL injection text as plain data",
             "status": "PASS",
             "message": "",
-            "ms": 96
+            "ms": 173
         },
         {
             "id": "UT-AUT-001",
@@ -133,7 +133,7 @@
             "name": "correct username and password signs in and records the time",
             "status": "PASS",
             "message": "",
-            "ms": 87
+            "ms": 67
         },
         {
             "id": "UT-AUT-002",
@@ -141,7 +141,7 @@
             "name": "username is case-insensitive but the password is not",
             "status": "PASS",
             "message": "",
-            "ms": 133
+            "ms": 184
         },
         {
             "id": "UT-AUT-003",
@@ -149,7 +149,7 @@
             "name": "wrong password and unknown username give the same message",
             "status": "PASS",
             "message": "",
-            "ms": 288
+            "ms": 407
         },
         {
             "id": "UT-AUT-004",
@@ -157,7 +157,7 @@
             "name": "an account locks after five wrong passwords, even for the right password",
             "status": "PASS",
             "message": "",
-            "ms": 408
+            "ms": 775
         },
         {
             "id": "UT-AUT-005",
@@ -165,7 +165,7 @@
             "name": "unlocking restores access and a good sign-in resets the failure counter",
             "status": "PASS",
             "message": "",
-            "ms": 819
+            "ms": 598
         },
         {
             "id": "UT-AUT-006",
@@ -173,7 +173,7 @@
             "name": "a deactivated account cannot sign in",
             "status": "PASS",
             "message": "",
-            "ms": 66
+            "ms": 89
         },
         {
             "id": "UT-AUT-007",
@@ -181,7 +181,7 @@
             "name": "too many failures from one computer blocks that computer",
             "status": "PASS",
             "message": "",
-            "ms": 3230
+            "ms": 4402
         },
         {
             "id": "UT-AUT-008",
@@ -189,7 +189,7 @@
             "name": "every failed and successful attempt can be traced in the audit trail",
             "status": "PASS",
             "message": "",
-            "ms": 233
+            "ms": 301
         },
         {
             "id": "UT-AUT-009",
@@ -197,7 +197,7 @@
             "name": "passwords are stored hashed, never as plain text",
             "status": "PASS",
             "message": "",
-            "ms": 35
+            "ms": 38
         },
         {
             "id": "UT-AUT-010",
@@ -205,7 +205,7 @@
             "name": "start_user_session stores the user and issues a fresh CSRF token",
             "status": "PASS",
             "message": "",
-            "ms": 33
+            "ms": 57
         },
         {
             "id": "UT-AUT-011",
@@ -221,7 +221,7 @@
             "name": "set_user_password replaces the old password and can force a change",
             "status": "PASS",
             "message": "",
-            "ms": 155
+            "ms": 187
         },
         {
             "id": "UT-PAT-001",
@@ -229,7 +229,7 @@
             "name": "registration issues a unique outpatient number in the form OPyy-nnnnn",
             "status": "PASS",
             "message": "",
-            "ms": 165
+            "ms": 90
         },
         {
             "id": "UT-PAT-002",
@@ -237,7 +237,7 @@
             "name": "outpatient numbers run in sequence and are never reused",
             "status": "PASS",
             "message": "",
-            "ms": 189
+            "ms": 349
         },
         {
             "id": "UT-PAT-003",
@@ -245,7 +245,7 @@
             "name": "the serial restarts each year",
             "status": "PASS",
             "message": "",
-            "ms": 497
+            "ms": 265
         },
         {
             "id": "UT-PAT-004",
@@ -253,7 +253,7 @@
             "name": "a failed registration does not use up an outpatient number",
             "status": "PASS",
             "message": "",
-            "ms": 55
+            "ms": 178
         },
         {
             "id": "UT-PAT-005",
@@ -261,7 +261,7 @@
             "name": "required fields are checked",
             "status": "PASS",
             "message": "",
-            "ms": 34
+            "ms": 33
         },
         {
             "id": "UT-PAT-006",
@@ -269,7 +269,7 @@
             "name": "future and impossible dates of birth are refused",
             "status": "PASS",
             "message": "",
-            "ms": 99
+            "ms": 55
         },
         {
             "id": "UT-PAT-007",
@@ -277,7 +277,7 @@
             "name": "phone numbers are validated and stored in one format",
             "status": "PASS",
             "message": "",
-            "ms": 67
+            "ms": 101
         },
         {
             "id": "UT-PAT-008",
@@ -285,7 +285,7 @@
             "name": "names reject digits and symbols but accept apostrophes and hyphens",
             "status": "PASS",
             "message": "",
-            "ms": 165
+            "ms": 66
         },
         {
             "id": "UT-PAT-009",
@@ -293,7 +293,7 @@
             "name": "the same ID number cannot be registered twice",
             "status": "PASS",
             "message": "",
-            "ms": 67
+            "ms": 103
         },
         {
             "id": "UT-PAT-010",
@@ -301,7 +301,7 @@
             "name": "same name and date of birth is flagged and needs confirmation",
             "status": "PASS",
             "message": "",
-            "ms": 110
+            "ms": 111
         },
         {
             "id": "UT-PAT-011",
@@ -309,7 +309,7 @@
             "name": "a patient can have no ID number (children) without clashing with other children",
             "status": "PASS",
             "message": "",
-            "ms": 110
+            "ms": 398
         },
         {
             "id": "UT-PAT-012",
@@ -317,7 +317,7 @@
             "name": "registering writes an audit entry without health details",
             "status": "PASS",
             "message": "",
-            "ms": 67
+            "ms": 79
         },
         {
             "id": "UT-PAT-013",
@@ -325,7 +325,7 @@
             "name": "correcting details keeps the outpatient number and logs the field names only",
             "status": "PASS",
             "message": "",
-            "ms": 301
+            "ms": 135
         },
         {
             "id": "UT-PAT-014",
@@ -333,7 +333,7 @@
             "name": "a correction cannot take another patient's ID number",
             "status": "PASS",
             "message": "",
-            "ms": 136
+            "ms": 122
         },
         {
             "id": "UT-PAT-015",
@@ -341,7 +341,7 @@
             "name": "search finds patients by outpatient number, name, ID number and phone",
             "status": "PASS",
             "message": "",
-            "ms": 233
+            "ms": 114
         },
         {
             "id": "UT-PAT-016",
@@ -349,7 +349,7 @@
             "name": "search treats % and _ as ordinary characters",
             "status": "PASS",
             "message": "",
-            "ms": 70
+            "ms": 80
         },
         {
             "id": "UT-PAT-017",
@@ -357,7 +357,7 @@
             "name": "search is paged",
             "status": "PASS",
             "message": "",
-            "ms": 558
+            "ms": 367
         },
         {
             "id": "UT-PAT-018",
@@ -373,7 +373,7 @@
             "name": "CSV import registers only the valid rows and logs it",
             "status": "PASS",
             "message": "",
-            "ms": 179
+            "ms": 91
         },
         {
             "id": "UT-PAT-020",
@@ -381,7 +381,7 @@
             "name": "a CSV without the required columns is rejected",
             "status": "PASS",
             "message": "",
-            "ms": 12
+            "ms": 5
         },
         {
             "id": "UT-USR-001",
@@ -389,7 +389,7 @@
             "name": "an account is created with a one-time password that must be changed",
             "status": "PASS",
             "message": "",
-            "ms": 100
+            "ms": 155
         },
         {
             "id": "UT-USR-002",
@@ -405,7 +405,7 @@
             "name": "usernames must be unique",
             "status": "PASS",
             "message": "",
-            "ms": 71
+            "ms": 25
         },
         {
             "id": "UT-USR-004",
@@ -413,7 +413,7 @@
             "name": "the last active administrator cannot be deactivated or demoted",
             "status": "PASS",
             "message": "",
-            "ms": 188
+            "ms": 387
         },
         {
             "id": "UT-USR-005",
@@ -421,7 +421,7 @@
             "name": "an administrator cannot deactivate their own account",
             "status": "PASS",
             "message": "",
-            "ms": 133
+            "ms": 100
         },
         {
             "id": "UT-USR-006",
@@ -429,7 +429,7 @@
             "name": "deactivating an account stops sign-in and reactivating restores it",
             "status": "PASS",
             "message": "",
-            "ms": 299
+            "ms": 410
         },
         {
             "id": "UT-USR-007",
@@ -437,7 +437,7 @@
             "name": "a password reset invalidates the old password and forces a new one",
             "status": "PASS",
             "message": "",
-            "ms": 301
+            "ms": 345
         },
         {
             "id": "UT-USR-008",
@@ -445,7 +445,7 @@
             "name": "account management is recorded in the audit trail",
             "status": "PASS",
             "message": "",
-            "ms": 134
+            "ms": 211
         },
         {
             "id": "UT-USR-009",
@@ -453,7 +453,7 @@
             "name": "list_users filters by name and role; list_doctors returns only active doctors",
             "status": "PASS",
             "message": "",
-            "ms": 103
+            "ms": 147
         },
         {
             "id": "UT-USR-010",
@@ -461,7 +461,7 @@
             "name": "the audit trail can be filtered by user, action and date",
             "status": "PASS",
             "message": "",
-            "ms": 449
+            "ms": 192
         },
         {
             "id": "UT-APT-001",
@@ -485,7 +485,7 @@
             "name": "a valid booking is saved as Booked with its end time and an audit entry",
             "status": "PASS",
             "message": "",
-            "ms": 201
+            "ms": 210
         },
         {
             "id": "UT-APT-004",
@@ -493,7 +493,7 @@
             "name": "the same doctor cannot be booked twice for the same slot",
             "status": "PASS",
             "message": "",
-            "ms": 211
+            "ms": 216
         },
         {
             "id": "UT-APT-005",
@@ -501,7 +501,7 @@
             "name": "different doctors may be booked at the same time, and the same doctor at other times",
             "status": "PASS",
             "message": "",
-            "ms": 740
+            "ms": 730
         },
         {
             "id": "UT-APT-006",
@@ -509,7 +509,7 @@
             "name": "a patient cannot hold two appointments at the same time",
             "status": "PASS",
             "message": "",
-            "ms": 167
+            "ms": 205
         },
         {
             "id": "UT-APT-007",
@@ -517,7 +517,7 @@
             "name": "past dates and times that have already passed today are refused",
             "status": "PASS",
             "message": "",
-            "ms": 199
+            "ms": 177
         },
         {
             "id": "UT-APT-008",
@@ -525,7 +525,7 @@
             "name": "times off the slot grid or outside clinic hours are refused",
             "status": "PASS",
             "message": "",
-            "ms": 103
+            "ms": 124
         },
         {
             "id": "UT-APT-009",
@@ -533,7 +533,7 @@
             "name": "closed days and dates too far ahead are refused",
             "status": "PASS",
             "message": "",
-            "ms": 114
+            "ms": 134
         },
         {
             "id": "UT-APT-010",
@@ -541,7 +541,7 @@
             "name": "only registered patients and active doctors can be booked",
             "status": "PASS",
             "message": "",
-            "ms": 170
+            "ms": 208
         },
         {
             "id": "UT-APT-011",
@@ -549,7 +549,7 @@
             "name": "a cancelled appointment releases its slot for someone else",
             "status": "PASS",
             "message": "",
-            "ms": 520
+            "ms": 299
         },
         {
             "id": "UT-APT-012",
@@ -557,7 +557,7 @@
             "name": "missed only after the time has passed; cancelled only before it",
             "status": "PASS",
             "message": "",
-            "ms": 322
+            "ms": 608
         },
         {
             "id": "UT-APT-013",
@@ -565,7 +565,7 @@
             "name": "only a Booked appointment can change status",
             "status": "PASS",
             "message": "",
-            "ms": 201
+            "ms": 258
         },
         {
             "id": "UT-APT-014",
@@ -573,7 +573,7 @@
             "name": "the database itself refuses a double booking even if the application check is bypassed",
             "status": "PASS",
             "message": "",
-            "ms": 652
+            "ms": 485
         },
         {
             "id": "UT-APT-015",
@@ -581,7 +581,7 @@
             "name": "overdue booked appointments become Missed; future ones and attended ones are left alone",
             "status": "PASS",
             "message": "",
-            "ms": 291
+            "ms": 450
         },
         {
             "id": "UT-APT-016",
@@ -589,7 +589,7 @@
             "name": "doctor_day_slots reports free, taken and past slots",
             "status": "PASS",
             "message": "",
-            "ms": 145
+            "ms": 162
         },
         {
             "id": "UT-APT-017",
@@ -597,7 +597,7 @@
             "name": "the diary filters by date, doctor and status in time order",
             "status": "PASS",
             "message": "",
-            "ms": 778
+            "ms": 794
         },
         {
             "id": "UT-APT-018",
@@ -605,7 +605,7 @@
             "name": "two bookings racing for one slot: exactly one succeeds",
             "status": "PASS",
             "message": "",
-            "ms": 166
+            "ms": 171
         },
         {
             "id": "UT-VIS-001",
@@ -613,7 +613,7 @@
             "name": "checking in from an appointment marks it Attended and assigns the doctor",
             "status": "PASS",
             "message": "",
-            "ms": 402
+            "ms": 346
         },
         {
             "id": "UT-VIS-002",
@@ -621,7 +621,7 @@
             "name": "a walk-in can be checked in with or without a preferred doctor",
             "status": "PASS",
             "message": "",
-            "ms": 691
+            "ms": 344
         },
         {
             "id": "UT-VIS-003",
@@ -629,7 +629,7 @@
             "name": "a patient cannot have two open visits",
             "status": "PASS",
             "message": "",
-            "ms": 155
+            "ms": 165
         },
         {
             "id": "UT-VIS-004",
@@ -637,7 +637,7 @@
             "name": "check-in refuses another patient's, a cancelled, or a future appointment",
             "status": "PASS",
             "message": "",
-            "ms": 563
+            "ms": 1206
         },
         {
             "id": "UT-VIS-005",
@@ -645,7 +645,7 @@
             "name": "queues show each stage; a doctor sees own and unassigned patients only",
             "status": "PASS",
             "message": "",
-            "ms": 1164
+            "ms": 1399
         },
         {
             "id": "UT-TRI-001",
@@ -653,7 +653,7 @@
             "name": "valid vital signs are saved and move the patient to the doctor queue",
             "status": "PASS",
             "message": "",
-            "ms": 268
+            "ms": 246
         },
         {
             "id": "UT-TRI-002",
@@ -661,7 +661,7 @@
             "name": "implausible or non-numeric vital signs are refused with a message for each field",
             "status": "PASS",
             "message": "",
-            "ms": 388
+            "ms": 212
         },
         {
             "id": "UT-TRI-003",
@@ -669,7 +669,7 @@
             "name": "blood pressure needs both values with the upper higher than the lower",
             "status": "PASS",
             "message": "",
-            "ms": 229
+            "ms": 616
         },
         {
             "id": "UT-TRI-004",
@@ -677,7 +677,7 @@
             "name": "an empty triage form is refused but a note alone is enough",
             "status": "PASS",
             "message": "",
-            "ms": 233
+            "ms": 273
         },
         {
             "id": "UT-TRI-005",
@@ -685,7 +685,7 @@
             "name": "correcting triage updates the same record and is audited",
             "status": "PASS",
             "message": "",
-            "ms": 761
+            "ms": 370
         },
         {
             "id": "UT-TRI-006",
@@ -693,7 +693,7 @@
             "name": "triage cannot be recorded on a closed visit",
             "status": "PASS",
             "message": "",
-            "ms": 444
+            "ms": 334
         },
         {
             "id": "UT-CON-001",
@@ -701,7 +701,7 @@
             "name": "a consultation is saved, assigns the doctor, moves the stage and is audited",
             "status": "PASS",
             "message": "",
-            "ms": 388
+            "ms": 686
         },
         {
             "id": "UT-CON-002",
@@ -709,7 +709,7 @@
             "name": "complaint, diagnosis and consultation type are required; ICD-10 is optional but validated",
             "status": "PASS",
             "message": "",
-            "ms": 266
+            "ms": 371
         },
         {
             "id": "UT-CON-003",
@@ -717,7 +717,7 @@
             "name": "only the doctor who recorded a consultation can change it",
             "status": "PASS",
             "message": "",
-            "ms": 277
+            "ms": 437
         },
         {
             "id": "UT-CON-004",
@@ -725,7 +725,7 @@
             "name": "a visit can be closed only after a consultation, and a closed visit is locked",
             "status": "PASS",
             "message": "",
-            "ms": 553
+            "ms": 443
         },
         {
             "id": "UT-CON-005",
@@ -733,7 +733,7 @@
             "name": "procedures are recorded with quantity checks and listed",
             "status": "PASS",
             "message": "",
-            "ms": 315
+            "ms": 858
         },
         {
             "id": "UT-CON-006",
@@ -741,7 +741,7 @@
             "name": "earlier visits are listed newest first and exclude the current visit",
             "status": "PASS",
             "message": "",
-            "ms": 652
+            "ms": 826
         },
         {
             "id": "UT-CON-007",
@@ -749,7 +749,7 @@
             "name": "the visit history shows diagnoses to doctors but not to other roles",
             "status": "PASS",
             "message": "",
-            "ms": 292
+            "ms": 290
         },
         {
             "id": "UT-CON-008",
@@ -757,7 +757,7 @@
             "name": "ICD-10 lookup finds codes by code or by words",
             "status": "PASS",
             "message": "",
-            "ms": 161
+            "ms": 152
         },
         {
             "id": "UT-CON-009",
@@ -765,7 +765,7 @@
             "name": "the dashboard counts waiting patients for nurses and doctors",
             "status": "PASS",
             "message": "",
-            "ms": 202
+            "ms": 253
         },
         {
             "id": "UT-LAB-001",
@@ -773,7 +773,7 @@
             "name": "tests are requested by the doctor and linked to the visit and the doctor",
             "status": "PASS",
             "message": "",
-            "ms": 652
+            "ms": 1251
         },
         {
             "id": "UT-LAB-002",
@@ -781,7 +781,7 @@
             "name": "tests need an open visit with a consultation and at least one test",
             "status": "PASS",
             "message": "",
-            "ms": 350
+            "ms": 516
         },
         {
             "id": "UT-LAB-003",
@@ -789,7 +789,7 @@
             "name": "a pending test cannot be requested twice but can be repeated after it is completed",
             "status": "PASS",
             "message": "",
-            "ms": 388
+            "ms": 835
         },
         {
             "id": "UT-LAB-004",
@@ -797,7 +797,7 @@
             "name": "an unknown test in the list stops the whole request (nothing half-saved)",
             "status": "PASS",
             "message": "",
-            "ms": 340
+            "ms": 1209
         },
         {
             "id": "UT-LAB-005",
@@ -805,7 +805,7 @@
             "name": "the worklist shows open requests oldest first with patient and requesting doctor",
             "status": "PASS",
             "message": "",
-            "ms": 583
+            "ms": 901
         },
         {
             "id": "UT-LAB-006",
@@ -813,7 +813,7 @@
             "name": "the laboratory starts a test and enters the result, which is recorded with who and when",
             "status": "PASS",
             "message": "",
-            "ms": 366
+            "ms": 790
         },
         {
             "id": "UT-LAB-007",
@@ -821,7 +821,7 @@
             "name": "a result can be entered without starting, but not empty and not for a cancelled request",
             "status": "PASS",
             "message": "",
-            "ms": 366
+            "ms": 482
         },
         {
             "id": "UT-LAB-008",
@@ -829,7 +829,7 @@
             "name": "the result returns to the doctor who requested the test, not to other doctors",
             "status": "PASS",
             "message": "",
-            "ms": 439
+            "ms": 891
         },
         {
             "id": "UT-LAB-009",
@@ -837,7 +837,7 @@
             "name": "only the requesting doctor can cancel, and only before the laboratory starts",
             "status": "PASS",
             "message": "",
-            "ms": 940
+            "ms": 1084
         },
         {
             "id": "UT-LAB-010",
@@ -845,7 +845,7 @@
             "name": "a corrected result is audited as an amendment and the audit trail holds no result text",
             "status": "PASS",
             "message": "",
-            "ms": 747
+            "ms": 711
         },
         {
             "id": "UT-LAB-011",
@@ -853,7 +853,7 @@
             "name": "the visit history shows tests with their results to a doctor",
             "status": "PASS",
             "message": "",
-            "ms": 545
+            "ms": 855
         },
         {
             "id": "UT-LAB-012",
@@ -861,7 +861,7 @@
             "name": "the dashboard shows waiting tests to the laboratory and ready results to the doctor",
             "status": "PASS",
             "message": "",
-            "ms": 354
+            "ms": 962
         },
         {
             "id": "UT-PHA-001",
@@ -869,7 +869,7 @@
             "name": "medicine details are validated and the same medicine cannot be listed twice",
             "status": "PASS",
             "message": "",
-            "ms": 277
+            "ms": 590
         },
         {
             "id": "UT-PHA-002",
@@ -877,7 +877,7 @@
             "name": "receiving stock creates a batch, a ledger entry and an audit record",
             "status": "PASS",
             "message": "",
-            "ms": 168
+            "ms": 188
         },
         {
             "id": "UT-PHA-003",
@@ -885,7 +885,7 @@
             "name": "stock that is already expired or has bad details is refused at receipt",
             "status": "PASS",
             "message": "",
-            "ms": 165
+            "ms": 181
         },
         {
             "id": "UT-PHA-004",
@@ -893,7 +893,7 @@
             "name": "receiving more of an existing batch adds to it only when the expiry date matches",
             "status": "PASS",
             "message": "",
-            "ms": 204
+            "ms": 307
         },
         {
             "id": "UT-PHA-005",
@@ -901,7 +901,7 @@
             "name": "usable stock ignores expired batches and status is OK, Low or Out against the reorder level",
             "status": "PASS",
             "message": "",
-            "ms": 227
+            "ms": 234
         },
         {
             "id": "UT-PHA-006",
@@ -917,7 +917,7 @@
             "name": "alerts list low stock, out of stock, expiring and expired batches",
             "status": "PASS",
             "message": "",
-            "ms": 883
+            "ms": 912
         },
         {
             "id": "UT-PHA-008",
@@ -925,7 +925,7 @@
             "name": "stock adjustments need a reason, cannot go below zero and are recorded in the ledger",
             "status": "PASS",
             "message": "",
-            "ms": 335
+            "ms": 232
         },
         {
             "id": "UT-PHA-009",
@@ -933,7 +933,7 @@
             "name": "prescribing needs an open consulted visit and complete, valid lines",
             "status": "PASS",
             "message": "",
-            "ms": 798
+            "ms": 984
         },
         {
             "id": "UT-PHA-010",
@@ -941,7 +941,7 @@
             "name": "prescribing is refused before the consultation is recorded",
             "status": "PASS",
             "message": "",
-            "ms": 1042
+            "ms": 593
         },
         {
             "id": "UT-PHA-011",
@@ -949,7 +949,7 @@
             "name": "a recorded allergy that matches the medicine name produces a reminder",
             "status": "PASS",
             "message": "",
-            "ms": 1326
+            "ms": 1518
         },
         {
             "id": "UT-PHA-012",
@@ -957,7 +957,7 @@
             "name": "dispensing deducts stock, updates the prescription and writes the ledger",
             "status": "PASS",
             "message": "",
-            "ms": 824
+            "ms": 1145
         },
         {
             "id": "UT-PHA-013",
@@ -965,7 +965,7 @@
             "name": "stock is taken from the earliest-expiring batch first and can span batches",
             "status": "PASS",
             "message": "",
-            "ms": 981
+            "ms": 1616
         },
         {
             "id": "UT-PHA-014",
@@ -973,7 +973,7 @@
             "name": "expired stock is never dispensed even when it is the only stock",
             "status": "PASS",
             "message": "",
-            "ms": 995
+            "ms": 1141
         },
         {
             "id": "UT-PHA-015",
@@ -981,7 +981,7 @@
             "name": "a partial dispense leaves the rest on the prescription until it is completed",
             "status": "PASS",
             "message": "",
-            "ms": 1320
+            "ms": 1187
         },
         {
             "id": "UT-PHA-016",
@@ -989,7 +989,7 @@
             "name": "dispensing several medicines is all-or-nothing",
             "status": "PASS",
             "message": "",
-            "ms": 1165
+            "ms": 1306
         },
         {
             "id": "UT-PHA-017",
@@ -997,7 +997,7 @@
             "name": "dispensing needs at least one quantity",
             "status": "PASS",
             "message": "",
-            "ms": 1155
+            "ms": 571
         },
         {
             "id": "UT-PHA-018",
@@ -1005,7 +1005,7 @@
             "name": "the stock ledger always agrees with the batch balances",
             "status": "PASS",
             "message": "",
-            "ms": 1727
+            "ms": 1407
         },
         {
             "id": "UT-PHA-019",
@@ -1013,7 +1013,7 @@
             "name": "the database refuses a negative batch balance even if the application is bypassed",
             "status": "PASS",
             "message": "",
-            "ms": 335
+            "ms": 278
         },
         {
             "id": "UT-PHA-020",
@@ -1021,7 +1021,7 @@
             "name": "the pharmacy queue lists the oldest prescription first",
             "status": "PASS",
             "message": "",
-            "ms": 1173
+            "ms": 1417
         },
         {
             "id": "UT-PHA-021",
@@ -1029,7 +1029,7 @@
             "name": "editing a medicine is audited with the fields that changed and the price movement",
             "status": "PASS",
             "message": "",
-            "ms": 266
+            "ms": 245
         },
         {
             "id": "UT-BIL-001",
@@ -1037,7 +1037,7 @@
             "name": "the first recorded service creates the invoice automatically with the consultation fee",
             "status": "PASS",
             "message": "",
-            "ms": 313
+            "ms": 246
         },
         {
             "id": "UT-BIL-002",
@@ -1045,7 +1045,7 @@
             "name": "no invoice exists until something billable has been recorded",
             "status": "PASS",
             "message": "",
-            "ms": 206
+            "ms": 327
         },
         {
             "id": "UT-BIL-003",
@@ -1053,7 +1053,7 @@
             "name": "laboratory tests are added to the invoice at the test price and removed if cancelled",
             "status": "PASS",
             "message": "",
-            "ms": 731
+            "ms": 643
         },
         {
             "id": "UT-BIL-004",
@@ -1061,7 +1061,7 @@
             "name": "dispensed medicines are charged by the quantity actually given",
             "status": "PASS",
             "message": "",
-            "ms": 881
+            "ms": 719
         },
         {
             "id": "UT-BIL-005",
@@ -1069,7 +1069,7 @@
             "name": "procedures are charged by quantity",
             "status": "PASS",
             "message": "",
-            "ms": 1207
+            "ms": 1144
         },
         {
             "id": "UT-BIL-006",
@@ -1077,7 +1077,7 @@
             "name": "syncing again never duplicates a charge",
             "status": "PASS",
             "message": "",
-            "ms": 442
+            "ms": 553
         },
         {
             "id": "UT-BIL-007",
@@ -1085,7 +1085,7 @@
             "name": "a full journey produces one itemised invoice with the right total",
             "status": "PASS",
             "message": "",
-            "ms": 1893
+            "ms": 2149
         },
         {
             "id": "UT-BIL-008",
@@ -1093,7 +1093,7 @@
             "name": "partial then full payment moves the invoice from Unpaid to Partially paid to Paid",
             "status": "PASS",
             "message": "",
-            "ms": 535
+            "ms": 888
         },
         {
             "id": "UT-BIL-009",
@@ -1101,7 +1101,7 @@
             "name": "a payment can never exceed the balance and the amount must be a valid sum of money",
             "status": "PASS",
             "message": "",
-            "ms": 819
+            "ms": 1022
         },
         {
             "id": "UT-BIL-010",
@@ -1109,7 +1109,7 @@
             "name": "each payment method is accepted with the right reference",
             "status": "PASS",
             "message": "",
-            "ms": 606
+            "ms": 517
         },
         {
             "id": "UT-BIL-011",
@@ -1117,7 +1117,7 @@
             "name": "references are required where the method needs them and an M-Pesa code cannot be used twice",
             "status": "PASS",
             "message": "",
-            "ms": 392
+            "ms": 412
         },
         {
             "id": "UT-BIL-012",
@@ -1125,7 +1125,7 @@
             "name": "a charge added after payment raises the balance and reopens the invoice",
             "status": "PASS",
             "message": "",
-            "ms": 356
+            "ms": 893
         },
         {
             "id": "UT-BIL-013",
@@ -1133,7 +1133,7 @@
             "name": "a charge cannot be removed if the invoice would then be over-paid",
             "status": "PASS",
             "message": "",
-            "ms": 968
+            "ms": 1605
         },
         {
             "id": "UT-BIL-014",
@@ -1141,7 +1141,7 @@
             "name": "before payment a price change updates the line; after payment the agreed price is kept",
             "status": "PASS",
             "message": "",
-            "ms": 436
+            "ms": 513
         },
         {
             "id": "UT-BIL-015",
@@ -1149,7 +1149,7 @@
             "name": "money is calculated exactly with no rounding drift",
             "status": "PASS",
             "message": "",
-            "ms": 1548
+            "ms": 936
         },
         {
             "id": "UT-BIL-016",
@@ -1157,7 +1157,7 @@
             "name": "payments are audited with amount and method and receipts have a number",
             "status": "PASS",
             "message": "",
-            "ms": 1499
+            "ms": 493
         },
         {
             "id": "UT-BIL-017",
@@ -1165,7 +1165,7 @@
             "name": "the invoice list filters by status, balance, text and date",
             "status": "PASS",
             "message": "",
-            "ms": 778
+            "ms": 1240
         },
         {
             "id": "UT-BIL-018",
@@ -1173,7 +1173,7 @@
             "name": "collections for a day are totalled by method and by cashier",
             "status": "PASS",
             "message": "",
-            "ms": 1015
+            "ms": 965
         },
         {
             "id": "UT-BIL-019",
@@ -1181,7 +1181,7 @@
             "name": "the database refuses a payment of zero or less and a second invoice for one visit",
             "status": "PASS",
             "message": "",
-            "ms": 630
+            "ms": 464
         },
         {
             "id": "UT-BIL-020",
@@ -1189,7 +1189,7 @@
             "name": "the cashier dashboard shows invoices waiting and money collected",
             "status": "PASS",
             "message": "",
-            "ms": 477
+            "ms": 295
         },
         {
             "id": "UT-REP-001",
@@ -1205,7 +1205,7 @@
             "name": "the attendance report counts appointments by outcome, visits, walk-ins and new patients",
             "status": "PASS",
             "message": "",
-            "ms": 1326
+            "ms": 1381
         },
         {
             "id": "UT-REP-003",
@@ -1213,7 +1213,7 @@
             "name": "an empty period gives zeros and no attendance rate",
             "status": "PASS",
             "message": "",
-            "ms": 4
+            "ms": 12
         },
         {
             "id": "UT-REP-004",
@@ -1221,7 +1221,7 @@
             "name": "the revenue report separates billed from collected, by method and by type of service",
             "status": "PASS",
             "message": "",
-            "ms": 1711
+            "ms": 1548
         },
         {
             "id": "UT-REP-005",
@@ -1229,7 +1229,7 @@
             "name": "the stock report shows movements in the period, stock value and alerts",
             "status": "PASS",
             "message": "",
-            "ms": 2401
+            "ms": 1059
         },
         {
             "id": "UT-REP-006",
@@ -1237,7 +1237,7 @@
             "name": "the laboratory report counts requests, completions, abnormal results and time taken",
             "status": "PASS",
             "message": "",
-            "ms": 1591
+            "ms": 1297
         },
         {
             "id": "UT-REP-007",
@@ -1261,7 +1261,7 @@
             "name": "one patient passes through all six modules and every hand-over carries the right data",
             "status": "PASS",
             "message": "",
-            "ms": 1751
+            "ms": 2168
         },
         {
             "id": "UT-INT-002",
@@ -1269,7 +1269,7 @@
             "name": "every important action in the journey left an audit entry by the person who did it",
             "status": "PASS",
             "message": "",
-            "ms": 1976
+            "ms": 3163
         },
         {
             "id": "UT-INT-003",
@@ -1277,7 +1277,7 @@
             "name": "the stock ledger, invoices and payments all reconcile after the journey",
             "status": "PASS",
             "message": "",
-            "ms": 2712
+            "ms": 1920
         },
         {
             "id": "UT-INT-004",
@@ -1285,7 +1285,7 @@
             "name": "the integrity check actually detects corrupted records",
             "status": "PASS",
             "message": "",
-            "ms": 2022
+            "ms": 3040
         },
         {
             "id": "UT-INT-005",
@@ -1293,7 +1293,7 @@
             "name": "records cannot be deleted out from under the data that refers to them",
             "status": "PASS",
             "message": "",
-            "ms": 2120
+            "ms": 2676
         },
         {
             "id": "UT-INT-006",
@@ -1301,7 +1301,7 @@
             "name": "every table has a primary key and every foreign key column is indexed",
             "status": "PASS",
             "message": "",
-            "ms": 1628
+            "ms": 183
         },
         {
             "id": "UT-INT-007",
@@ -1317,7 +1317,7 @@
             "name": "internal folders are shielded from the web and the default configuration holds no secrets",
             "status": "PASS",
             "message": "",
-            "ms": 17
+            "ms": 4
         },
         {
             "id": "UT-INT-009",
@@ -1325,7 +1325,7 @@
             "name": "no page can change data from a plain GET: every state-changing page requires a POST with a token",
             "status": "PASS",
             "message": "",
-            "ms": 6
+            "ms": 3
         },
         {
             "id": "UT-INT-010",
@@ -1333,7 +1333,7 @@
             "name": "the health page checks run and report a sound database",
             "status": "PASS",
             "message": "",
-            "ms": 19
+            "ms": 27
         },
         {
             "id": "UT-INT-011",
@@ -1341,7 +1341,847 @@
             "name": "a second doctor cannot read results for another doctor's tests but can still see the patient history",
             "status": "PASS",
             "message": "",
-            "ms": 1346
+            "ms": 2447
+        },
+        {
+            "id": "UT-PUB-001",
+            "suite": "Public website: access requests, contact messages and pages",
+            "name": "a complete access request is accepted and cleaned",
+            "status": "PASS",
+            "message": "",
+            "ms": 30
+        },
+        {
+            "id": "UT-PUB-002",
+            "suite": "Public website: access requests, contact messages and pages",
+            "name": "an access request is refused when something is missing or wrong",
+            "status": "PASS",
+            "message": "",
+            "ms": 0
+        },
+        {
+            "id": "UT-PUB-003",
+            "suite": "Public website: access requests, contact messages and pages",
+            "name": "nobody can ask for the administrator role from a public page",
+            "status": "PASS",
+            "message": "",
+            "ms": 1
+        },
+        {
+            "id": "UT-PUB-004",
+            "suite": "Public website: access requests, contact messages and pages",
+            "name": "an email address with a line break (header injection) is refused",
+            "status": "PASS",
+            "message": "",
+            "ms": 0
+        },
+        {
+            "id": "UT-PUB-005",
+            "suite": "Public website: access requests, contact messages and pages",
+            "name": "a stored access request has a reference, starts as new and creates no account",
+            "status": "PASS",
+            "message": "",
+            "ms": 148
+        },
+        {
+            "id": "UT-PUB-006",
+            "suite": "Public website: access requests, contact messages and pages",
+            "name": "submitting a request is audited by reference, never with the message text",
+            "status": "PASS",
+            "message": "",
+            "ms": 35
+        },
+        {
+            "id": "UT-PUB-007",
+            "suite": "Public website: access requests, contact messages and pages",
+            "name": "one waiting request per email address; a new one is allowed after the first is dealt with",
+            "status": "PASS",
+            "message": "",
+            "ms": 260
+        },
+        {
+            "id": "UT-PUB-008",
+            "suite": "Public website: access requests, contact messages and pages",
+            "name": "one computer can send only a few requests an hour",
+            "status": "PASS",
+            "message": "",
+            "ms": 189
+        },
+        {
+            "id": "UT-PUB-009",
+            "suite": "Public website: access requests, contact messages and pages",
+            "name": "a contact message needs a topic, a real message and the confirmation",
+            "status": "PASS",
+            "message": "",
+            "ms": 0
+        },
+        {
+            "id": "UT-PUB-010",
+            "suite": "Public website: access requests, contact messages and pages",
+            "name": "only the administrator may handle requests, and every change is audited",
+            "status": "PASS",
+            "message": "",
+            "ms": 172
+        },
+        {
+            "id": "UT-PUB-011",
+            "suite": "Public website: access requests, contact messages and pages",
+            "name": "requests can be listed and searched by type, status and text",
+            "status": "PASS",
+            "message": "",
+            "ms": 74
+        },
+        {
+            "id": "UT-PUB-012",
+            "suite": "Public website: access requests, contact messages and pages",
+            "name": "a suggested username comes from the name and avoids names already taken",
+            "status": "PASS",
+            "message": "",
+            "ms": 74
+        },
+        {
+            "id": "UT-PUB-013",
+            "suite": "Public website: access requests, contact messages and pages",
+            "name": "the opening hours sentence follows the clinic settings",
+            "status": "PASS",
+            "message": "",
+            "ms": 0
+        },
+        {
+            "id": "UT-PUB-014",
+            "suite": "Public website: access requests, contact messages and pages",
+            "name": "every link in the header and footer leads to a page that exists",
+            "status": "PASS",
+            "message": "",
+            "ms": 3
+        },
+        {
+            "id": "UT-PUB-015",
+            "suite": "Public website: access requests, contact messages and pages",
+            "name": "the header marks the current page and offers sign-in and request access",
+            "status": "PASS",
+            "message": "",
+            "ms": 0
+        },
+        {
+            "id": "UT-PUB-016",
+            "suite": "Public website: access requests, contact messages and pages",
+            "name": "the legal pages, the photo credits and the icons used on the public pages all exist",
+            "status": "PASS",
+            "message": "",
+            "ms": 2
+        },
+        {
+            "id": "UT-PUB-017",
+            "suite": "Public website: access requests, contact messages and pages",
+            "name": "every image the public pages use is present in the assets folder",
+            "status": "PASS",
+            "message": "",
+            "ms": 6
+        },
+        {
+            "id": "UT-DSH-001",
+            "suite": "Dashboards: charts, analytics, notifications and the application shell",
+            "name": "axis scales end on a tidy number and whole-number charts never get fractional gridlines",
+            "status": "PASS",
+            "message": "",
+            "ms": 0
+        },
+        {
+            "id": "UT-DSH-002",
+            "suite": "Dashboards: charts, analytics, notifications and the application shell",
+            "name": "axis labels are short and exact",
+            "status": "PASS",
+            "message": "",
+            "ms": 0
+        },
+        {
+            "id": "UT-DSH-003",
+            "suite": "Dashboards: charts, analytics, notifications and the application shell",
+            "name": "a bar chart draws each value in proportion, skips zeros and carries its numbers as text",
+            "status": "PASS",
+            "message": "",
+            "ms": 0
+        },
+        {
+            "id": "UT-DSH-004",
+            "suite": "Dashboards: charts, analytics, notifications and the application shell",
+            "name": "a chart with no activity says so, and an empty one shows a calm message",
+            "status": "PASS",
+            "message": "",
+            "ms": 0
+        },
+        {
+            "id": "UT-DSH-005",
+            "suite": "Dashboards: charts, analytics, notifications and the application shell",
+            "name": "long date axes thin their labels so they never collide",
+            "status": "PASS",
+            "message": "",
+            "ms": 0
+        },
+        {
+            "id": "UT-DSH-006",
+            "suite": "Dashboards: charts, analytics, notifications and the application shell",
+            "name": "a line chart stays inside its frame and each chart gets its own gradient id",
+            "status": "PASS",
+            "message": "",
+            "ms": 1
+        },
+        {
+            "id": "UT-DSH-007",
+            "suite": "Dashboards: charts, analytics, notifications and the application shell",
+            "name": "a ring chart gives each slice its share, ignores empty slices and shows the legend values",
+            "status": "PASS",
+            "message": "",
+            "ms": 0
+        },
+        {
+            "id": "UT-DSH-008",
+            "suite": "Dashboards: charts, analytics, notifications and the application shell",
+            "name": "a bar list scales to the largest value and shows notes",
+            "status": "PASS",
+            "message": "",
+            "ms": 0
+        },
+        {
+            "id": "UT-DSH-009",
+            "suite": "Dashboards: charts, analytics, notifications and the application shell",
+            "name": "text from the records is escaped in every chart (no markup can get in)",
+            "status": "PASS",
+            "message": "",
+            "ms": 0
+        },
+        {
+            "id": "UT-DSH-010",
+            "suite": "Dashboards: charts, analytics, notifications and the application shell",
+            "name": "a small trend line needs at least two numbers and some movement",
+            "status": "PASS",
+            "message": "",
+            "ms": 0
+        },
+        {
+            "id": "UT-DSH-011",
+            "suite": "Dashboards: charts, analytics, notifications and the application shell",
+            "name": "the day list runs oldest to newest and ends on the chosen day",
+            "status": "PASS",
+            "message": "",
+            "ms": 0
+        },
+        {
+            "id": "UT-DSH-012",
+            "suite": "Dashboards: charts, analytics, notifications and the application shell",
+            "name": "records are counted on the day they happened, including the last second of a day",
+            "status": "PASS",
+            "message": "",
+            "ms": 400
+        },
+        {
+            "id": "UT-DSH-013",
+            "suite": "Dashboards: charts, analytics, notifications and the application shell",
+            "name": "visits, triage and consultations per day, for one doctor or for everyone",
+            "status": "PASS",
+            "message": "",
+            "ms": 635
+        },
+        {
+            "id": "UT-DSH-014",
+            "suite": "Dashboards: charts, analytics, notifications and the application shell",
+            "name": "laboratory requests and results are counted separately, and cancelled requests are not counted",
+            "status": "PASS",
+            "message": "",
+            "ms": 1976
+        },
+        {
+            "id": "UT-DSH-015",
+            "suite": "Dashboards: charts, analytics, notifications and the application shell",
+            "name": "money collected and units dispensed per day, and the cashier's own share",
+            "status": "PASS",
+            "message": "",
+            "ms": 3351
+        },
+        {
+            "id": "UT-DSH-016",
+            "suite": "Dashboards: charts, analytics, notifications and the application shell",
+            "name": "sign-ins and audit entries per day",
+            "status": "PASS",
+            "message": "",
+            "ms": 189
+        },
+        {
+            "id": "UT-DSH-017",
+            "suite": "Dashboards: charts, analytics, notifications and the application shell",
+            "name": "appointment outcomes, top diagnoses and doctor rankings",
+            "status": "PASS",
+            "message": "",
+            "ms": 1569
+        },
+        {
+            "id": "UT-DSH-018",
+            "suite": "Dashboards: charts, analytics, notifications and the application shell",
+            "name": "stock status counts active medicines, and accounts by role leave out switched-off people",
+            "status": "PASS",
+            "message": "",
+            "ms": 428
+        },
+        {
+            "id": "UT-DSH-019",
+            "suite": "Dashboards: charts, analytics, notifications and the application shell",
+            "name": "the short lists show only what is still to do, oldest first",
+            "status": "PASS",
+            "message": "",
+            "ms": 2527
+        },
+        {
+            "id": "UT-DSH-020",
+            "suite": "Dashboards: charts, analytics, notifications and the application shell",
+            "name": "waiting time, greeting, first name and initials are worked out sensibly",
+            "status": "PASS",
+            "message": "",
+            "ms": 0
+        },
+        {
+            "id": "UT-DSH-021",
+            "suite": "Dashboards: charts, analytics, notifications and the application shell",
+            "name": "notifications are listed most urgent first, with correct wording and links",
+            "status": "PASS",
+            "message": "",
+            "ms": 3
+        },
+        {
+            "id": "UT-DSH-022",
+            "suite": "Dashboards: charts, analytics, notifications and the application shell",
+            "name": "each role is told only about the work it can act on",
+            "status": "PASS",
+            "message": "",
+            "ms": 972
+        },
+        {
+            "id": "UT-DSH-023",
+            "suite": "Dashboards: charts, analytics, notifications and the application shell",
+            "name": "the counts follow the real records, and badges leave out zeros and add the stock numbers together",
+            "status": "PASS",
+            "message": "",
+            "ms": 239
+        },
+        {
+            "id": "UT-DSH-024",
+            "suite": "Dashboards: charts, analytics, notifications and the application shell",
+            "name": "a card keeps the number and label markup, picks its icon and colour, and reflects its state",
+            "status": "PASS",
+            "message": "",
+            "ms": 0
+        },
+        {
+            "id": "UT-DSH-025",
+            "suite": "Dashboards: charts, analytics, notifications and the application shell",
+            "name": "every role gets a complete dashboard with its own numbers and none of another role's",
+            "status": "PASS",
+            "message": "",
+            "ms": 362
+        },
+        {
+            "id": "UT-DSH-026",
+            "suite": "Dashboards: charts, analytics, notifications and the application shell",
+            "name": "the quick-action buttons are limited to what the role may do and lead to real pages",
+            "status": "PASS",
+            "message": "",
+            "ms": 768
+        },
+        {
+            "id": "UT-DSH-027",
+            "suite": "Dashboards: charts, analytics, notifications and the application shell",
+            "name": "the header offers the right things to each person and the sign-out stays a protected form",
+            "status": "PASS",
+            "message": "",
+            "ms": 140
+        },
+        {
+            "id": "UT-DSH-028",
+            "suite": "Dashboards: charts, analytics, notifications and the application shell",
+            "name": "the bell shows how many things need attention and says so in words",
+            "status": "PASS",
+            "message": "",
+            "ms": 320
+        },
+        {
+            "id": "UT-DSH-029",
+            "suite": "Dashboards: charts, analytics, notifications and the application shell",
+            "name": "the sidebar shows only permitted pages, marks the current one and carries badges with a text alternative",
+            "status": "PASS",
+            "message": "",
+            "ms": 128
+        },
+        {
+            "id": "UT-DSH-030",
+            "suite": "Dashboards: charts, analytics, notifications and the application shell",
+            "name": "names are escaped in the avatar and the header",
+            "status": "PASS",
+            "message": "",
+            "ms": 38
+        },
+        {
+            "id": "UT-DSH-031",
+            "suite": "Dashboards: charts, analytics, notifications and the application shell",
+            "name": "a person can change or remove only their own phone number, and the audit trail does not record the number",
+            "status": "PASS",
+            "message": "",
+            "ms": 588
+        },
+        {
+            "id": "UT-DSH-032",
+            "suite": "Dashboards: charts, analytics, notifications and the application shell",
+            "name": "a person's activity list shows only their own entries, newest first, in plain words",
+            "status": "PASS",
+            "message": "",
+            "ms": 152
+        },
+        {
+            "id": "UT-DSH-033",
+            "suite": "Dashboards: charts, analytics, notifications and the application shell",
+            "name": "results ready lists a doctor's completed tests on open visits only, newest first",
+            "status": "PASS",
+            "message": "",
+            "ms": 1382
+        },
+        {
+            "id": "UT-DSH-034",
+            "suite": "Dashboards: charts, analytics, notifications and the application shell",
+            "name": "unpaid invoices are listed oldest first, and a part-paid invoice is still unpaid",
+            "status": "PASS",
+            "message": "",
+            "ms": 2058
+        },
+        {
+            "id": "UT-SCH-001",
+            "suite": "Module 1: doctor schedules and leave",
+            "name": "schedule times are the clinic slot boundaries, 08:00 to 17:00 in twenty-minute steps",
+            "status": "PASS",
+            "message": "",
+            "ms": 0
+        },
+        {
+            "id": "UT-SCH-002",
+            "suite": "Module 1: doctor schedules and leave",
+            "name": "a doctor with no schedule keeps the clinic opening hours, so nothing changes for existing doctors",
+            "status": "PASS",
+            "message": "",
+            "ms": 241
+        },
+        {
+            "id": "UT-SCH-003",
+            "suite": "Module 1: doctor schedules and leave",
+            "name": "saving the weekly hours stores the blocks, replaces the old ones and is audited",
+            "status": "PASS",
+            "message": "",
+            "ms": 294
+        },
+        {
+            "id": "UT-SCH-004",
+            "suite": "Module 1: doctor schedules and leave",
+            "name": "a bad schedule is refused with a message on the day, and the saved hours are left alone",
+            "status": "PASS",
+            "message": "",
+            "ms": 476
+        },
+        {
+            "id": "UT-SCH-005",
+            "suite": "Module 1: doctor schedules and leave",
+            "name": "a slot outside the hours of the doctor cannot be booked, one inside can",
+            "status": "PASS",
+            "message": "",
+            "ms": 399
+        },
+        {
+            "id": "UT-SCH-006",
+            "suite": "Module 1: doctor schedules and leave",
+            "name": "a day the doctor does not work is refused with a clear message",
+            "status": "PASS",
+            "message": "",
+            "ms": 214
+        },
+        {
+            "id": "UT-SCH-007",
+            "suite": "Module 1: doctor schedules and leave",
+            "name": "leave blocks booking, switches every slot off, and the message does not say why the doctor is away",
+            "status": "PASS",
+            "message": "",
+            "ms": 500
+        },
+        {
+            "id": "UT-SCH-008",
+            "suite": "Module 1: doctor schedules and leave",
+            "name": "leave is checked: dates, type, overlaps and the length of the period",
+            "status": "PASS",
+            "message": "",
+            "ms": 520
+        },
+        {
+            "id": "UT-SCH-009",
+            "suite": "Module 1: doctor schedules and leave",
+            "name": "leave can be removed until it has ended, and removal opens the days again",
+            "status": "PASS",
+            "message": "",
+            "ms": 684
+        },
+        {
+            "id": "UT-SCH-010",
+            "suite": "Module 1: doctor schedules and leave",
+            "name": "appointments already booked are never changed, but they are listed as conflicts until they are moved",
+            "status": "PASS",
+            "message": "",
+            "ms": 1141
+        },
+        {
+            "id": "UT-SCH-011",
+            "suite": "Module 1: doctor schedules and leave",
+            "name": "a booking made before the hours changed still shows as taken, and past or attended appointments are not conflicts",
+            "status": "PASS",
+            "message": "",
+            "ms": 255
+        },
+        {
+            "id": "UT-SCH-012",
+            "suite": "Module 1: doctor schedules and leave",
+            "name": "a walk-in cannot be given to a doctor who is away today, but blank or an appointment check-in still works",
+            "status": "PASS",
+            "message": "",
+            "ms": 231
+        },
+        {
+            "id": "UT-SCH-013",
+            "suite": "Module 1: doctor schedules and leave",
+            "name": "removing the personal schedule returns the doctor to clinic hours",
+            "status": "PASS",
+            "message": "",
+            "ms": 294
+        },
+        {
+            "id": "UT-SCH-014",
+            "suite": "Module 1: doctor schedules and leave",
+            "name": "the overview lists every active doctor with hours, leave today and the appointments to move",
+            "status": "PASS",
+            "message": "",
+            "ms": 672
+        },
+        {
+            "id": "UT-SCH-015",
+            "suite": "Module 1: doctor schedules and leave",
+            "name": "the database refuses nonsense schedules and leave even if the application were bypassed",
+            "status": "PASS",
+            "message": "",
+            "ms": 255
+        },
+        {
+            "id": "UT-SCH-016",
+            "suite": "Module 1: doctor schedules and leave",
+            "name": "only the Hospital Manager manages schedules; receptionists are alerted to conflicts and doctors only see their own hours",
+            "status": "PASS",
+            "message": "",
+            "ms": 692
+        },
+        {
+            "id": "UT-RFD-001",
+            "suite": "Module 5: refunds",
+            "name": "the payments ledger accepts a refund only as a negative line that points at a payment",
+            "status": "PASS",
+            "message": "",
+            "ms": 1206
+        },
+        {
+            "id": "UT-RFD-002",
+            "suite": "Module 5: refunds",
+            "name": "asking for a refund creates a pending request only: no money moves and the invoice does not change",
+            "status": "PASS",
+            "message": "",
+            "ms": 1373
+        },
+        {
+            "id": "UT-RFD-003",
+            "suite": "Module 5: refunds",
+            "name": "a refund request is checked: amount, reason and reference",
+            "status": "PASS",
+            "message": "",
+            "ms": 408
+        },
+        {
+            "id": "UT-RFD-004",
+            "suite": "Module 5: refunds",
+            "name": "requests that are still waiting reserve their amount, so the same money cannot be asked for twice",
+            "status": "PASS",
+            "message": "",
+            "ms": 1165
+        },
+        {
+            "id": "UT-RFD-005",
+            "suite": "Module 5: refunds",
+            "name": "approving writes a negative refund line against the payment and lowers what the invoice has received",
+            "status": "PASS",
+            "message": "",
+            "ms": 484
+        },
+        {
+            "id": "UT-RFD-006",
+            "suite": "Module 5: refunds",
+            "name": "a refund of the whole payment leaves the invoice unpaid, and part refunds can follow one another",
+            "status": "PASS",
+            "message": "",
+            "ms": 1081
+        },
+        {
+            "id": "UT-RFD-007",
+            "suite": "Module 5: refunds",
+            "name": "nobody can decide a refund they asked for, in the application or in the database",
+            "status": "PASS",
+            "message": "",
+            "ms": 691
+        },
+        {
+            "id": "UT-RFD-008",
+            "suite": "Module 5: refunds",
+            "name": "a rejection needs a reason and leaves the money record untouched; a decision cannot be made twice",
+            "status": "PASS",
+            "message": "",
+            "ms": 1088
+        },
+        {
+            "id": "UT-RFD-009",
+            "suite": "Module 5: refunds",
+            "name": "only the cashier who asked can withdraw a waiting request",
+            "status": "PASS",
+            "message": "",
+            "ms": 1021
+        },
+        {
+            "id": "UT-RFD-010",
+            "suite": "Module 5: refunds",
+            "name": "a request that is no longer covered by the payment cannot be approved",
+            "status": "PASS",
+            "message": "",
+            "ms": 761
+        },
+        {
+            "id": "UT-RFD-011",
+            "suite": "Module 5: refunds",
+            "name": "a refund voucher is numbered REF and a payment receipt RCT, and a refunded M-Pesa code does not block a new payment",
+            "status": "PASS",
+            "message": "",
+            "ms": 1593
+        },
+        {
+            "id": "UT-RFD-012",
+            "suite": "Module 5: refunds",
+            "name": "collections for the day are net of refunds and count payments and refunds separately",
+            "status": "PASS",
+            "message": "",
+            "ms": 731
+        },
+        {
+            "id": "UT-RFD-013",
+            "suite": "Module 5: refunds",
+            "name": "the revenue report shows collected net of refunds and the refunded amount by day and method",
+            "status": "PASS",
+            "message": "",
+            "ms": 534
+        },
+        {
+            "id": "UT-RFD-014",
+            "suite": "Module 5: refunds",
+            "name": "the daily chart shows net collections and never a negative bar",
+            "status": "PASS",
+            "message": "",
+            "ms": 987
+        },
+        {
+            "id": "UT-RFD-015",
+            "suite": "Module 5: refunds",
+            "name": "a charge can be removed after the money for it has been refunded",
+            "status": "PASS",
+            "message": "",
+            "ms": 549
+        },
+        {
+            "id": "UT-RFD-016",
+            "suite": "Module 5: refunds",
+            "name": "the integrity check notices a refund with no approved request, an oversized refund, or one on the wrong invoice",
+            "status": "PASS",
+            "message": "",
+            "ms": 1927
+        },
+        {
+            "id": "UT-RFD-017",
+            "suite": "Module 5: refunds",
+            "name": "cashiers ask and see, the manager decides and sees, and nobody else is involved in refunds",
+            "status": "PASS",
+            "message": "",
+            "ms": 0
+        },
+        {
+            "id": "UT-RFD-018",
+            "suite": "Module 5: refunds",
+            "name": "the refund list carries invoice numbers and amounts but never a patient name, and can be searched",
+            "status": "PASS",
+            "message": "",
+            "ms": 881
+        },
+        {
+            "id": "UT-RFD-019",
+            "suite": "Module 5: refunds",
+            "name": "the manager is told how many refunds wait, and the count and badge clear once they are decided",
+            "status": "PASS",
+            "message": "",
+            "ms": 854
+        },
+        {
+            "id": "UT-PRV-001",
+            "suite": "Module 6: patient data rights (copy and erasure)",
+            "name": "a request needs the name of the person, who they are, a ticked identity check and how it was checked",
+            "status": "PASS",
+            "message": "",
+            "ms": 314
+        },
+        {
+            "id": "UT-PRV-002",
+            "suite": "Module 6: patient data rights (copy and erasure)",
+            "name": "a copy request is completed at once, numbered, and audited without the name or the identity note",
+            "status": "PASS",
+            "message": "",
+            "ms": 157
+        },
+        {
+            "id": "UT-PRV-003",
+            "suite": "Module 6: patient data rights (copy and erasure)",
+            "name": "the copy holds everything about the patient: details, appointments, visits, tests, medicines, invoices, payments and requests",
+            "status": "PASS",
+            "message": "",
+            "ms": 2929
+        },
+        {
+            "id": "UT-PRV-004",
+            "suite": "Module 6: patient data rights (copy and erasure)",
+            "name": "the copy of one patient never contains another patient",
+            "status": "PASS",
+            "message": "",
+            "ms": 3681
+        },
+        {
+            "id": "UT-PRV-005",
+            "suite": "Module 6: patient data rights (copy and erasure)",
+            "name": "the printed copy shows the record and escapes everything it prints",
+            "status": "PASS",
+            "message": "",
+            "ms": 3064
+        },
+        {
+            "id": "UT-PRV-006",
+            "suite": "Module 6: patient data rights (copy and erasure)",
+            "name": "an erasure request stays open for the manager, and only one can be open for a patient at a time",
+            "status": "PASS",
+            "message": "",
+            "ms": 265
+        },
+        {
+            "id": "UT-PRV-007",
+            "suite": "Module 6: patient data rights (copy and erasure)",
+            "name": "a record cannot be erased while there is an open visit, a booked appointment, money owed, a waiting refund or a retention period",
+            "status": "PASS",
+            "message": "",
+            "ms": 1360
+        },
+        {
+            "id": "UT-PRV-008",
+            "suite": "Module 6: patient data rights (copy and erasure)",
+            "name": "the manager decides: a refusal needs a reason, the person who recorded it cannot decide it, and a blocked record is not erased",
+            "status": "PASS",
+            "message": "",
+            "ms": 2512
+        },
+        {
+            "id": "UT-PRV-009",
+            "suite": "Module 6: patient data rights (copy and erasure)",
+            "name": "approving anonymises the patient and the free text, keeps the coded data and every money line, and is audited",
+            "status": "PASS",
+            "message": "",
+            "ms": 2643
+        },
+        {
+            "id": "UT-PRV-010",
+            "suite": "Module 6: patient data rights (copy and erasure)",
+            "name": "an erased record can no longer be changed, booked, checked in, copied or erased again",
+            "status": "PASS",
+            "message": "",
+            "ms": 2791
+        },
+        {
+            "id": "UT-PRV-011",
+            "suite": "Module 6: patient data rights (copy and erasure)",
+            "name": "a refused request leaves the patient exactly as they were, and a new request can follow",
+            "status": "PASS",
+            "message": "",
+            "ms": 2499
+        },
+        {
+            "id": "UT-PRV-012",
+            "suite": "Module 6: patient data rights (copy and erasure)",
+            "name": "only the person who recorded an erasure request can withdraw it, and only while it is open",
+            "status": "PASS",
+            "message": "",
+            "ms": 747
+        },
+        {
+            "id": "UT-PRV-013",
+            "suite": "Module 6: patient data rights (copy and erasure)",
+            "name": "erasing one patient changes nothing for anyone else",
+            "status": "PASS",
+            "message": "",
+            "ms": 2757
+        },
+        {
+            "id": "UT-PRV-014",
+            "suite": "Module 6: patient data rights (copy and erasure)",
+            "name": "a patient with no visits, no appointments and no invoices is erased cleanly",
+            "status": "PASS",
+            "message": "",
+            "ms": 314
+        },
+        {
+            "id": "UT-PRV-015",
+            "suite": "Module 6: patient data rights (copy and erasure)",
+            "name": "erasing a record also blanks the free text of its refund requests and keeps their amounts",
+            "status": "PASS",
+            "message": "",
+            "ms": 3440
+        },
+        {
+            "id": "UT-PRV-016",
+            "suite": "Module 6: patient data rights (copy and erasure)",
+            "name": "the database refuses a data request with no identity check or one decided by the person who recorded it",
+            "status": "PASS",
+            "message": "",
+            "ms": 133
+        },
+        {
+            "id": "UT-PRV-017",
+            "suite": "Module 6: patient data rights (copy and erasure)",
+            "name": "Records asks for copies and erasures, the manager decides erasures, and nobody else is involved",
+            "status": "PASS",
+            "message": "",
+            "ms": 0
+        },
+        {
+            "id": "UT-PRV-018",
+            "suite": "Module 6: patient data rights (copy and erasure)",
+            "name": "the manager is told how many erasures wait; Records is not asked to decide",
+            "status": "PASS",
+            "message": "",
+            "ms": 248
+        },
+        {
+            "id": "UT-PRV-019",
+            "suite": "Module 6: patient data rights (copy and erasure)",
+            "name": "requests can be listed and filtered, open ones first",
+            "status": "PASS",
+            "message": "",
+            "ms": 258
         }
     ]
 }
